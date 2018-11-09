@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{DFABEDBB-6E62-4D28-9761-9B35CABA33A0}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Caasiope.Protocol</RootNamespace>
+    <AssemblyName>Caasiope.Protocol</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="HashLib">
+      <HintPath>..\References\HashLib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ByteStream.cs" />
+    <Compile Include="Formats\EncryptedPrivateKeyFormat.cs" />
+    <Compile Include="Formats\MnemonicPrivateKeyFormat.cs" />
+    <Compile Include="Types\HashLockAccount.cs" />
+    <Compile Include="Types\MultiSignatureAccount.cs" />
+    <Compile Include="Types\MultiSignatureAddress.cs" />
+    <Compile Include="Types\MultiSignatureSigner.cs" />
+    <Compile Include="Types\Signature.cs" />
+    <Compile Include="Types\SignatureByte.cs" />
+    <Compile Include="Types\SignedTransaction.cs" />
+    <Compile Include="Types\TimeLockAccount.cs" />
+    <Compile Include="Compression\Zipper.cs" />
+    <Compile Include="Validators\Transactions\AddressRequiredSignature.cs" />
+    <Compile Include="Validators\LedgerValidationEngine.cs" />
+    <Compile Include="Validators\Transactions\HashLockRequiredSignature.cs" />
+    <Compile Include="Validators\Transactions\MultiAddressRequiredSignature.cs" />
+    <Compile Include="Validators\Transactions\TimeLockRequiredSignature.cs" />
+    <Compile Include="Validators\TransactionValidationEngine.cs" />
+    <Compile Include="Types\AccountBalanceFull.cs" />
+    <Compile Include="Types\Network.cs" />
+    <Compile Include="Types\Signed.cs" />
+    <Compile Include="Formats\Address32Format.cs" />
+    <Compile Include="Formats\Bech32.cs" />
+    <Compile Include="Formats\SignatureFormat.cs" />
+    <Compile Include="MerkleTrees\LedgerMerkleRoot.cs" />
+    <Compile Include="Types\Block.cs" />
+    <Compile Include="Types\Issuer.cs" />
+    <Compile Include="Types\Ledger.cs" />
+    <Compile Include="Types\PrivateKeyNotWallet.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SignatureEngine.cs" />
+    <Compile Include="Types\Account.cs" />
+    <Compile Include="Types\Address.cs" />
+    <Compile Include="Types\Amount.cs" />
+    <Compile Include="Types\Currency.cs" />
+    <Compile Include="Types\Key.cs" />
+    <Compile Include="Types\PrivateKey.cs" />
+    <Compile Include="Types\PublicKey.cs" />
+    <Compile Include="Types\SignedNewLedger.cs" />
+    <Compile Include="Types\LedgerStateChange.cs" />
+    <Compile Include="Types\Transaction.cs" />
+    <Compile Include="Types\Validator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\helios-common\Helios.Common\Helios.Common\Helios.Common.csproj">
+      <Project>{7487A6DB-300E-482A-888F-50AFF822DF69}</Project>
+      <Name>Helios.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.NBitcoin\Caasiope.NBitcoin.csproj">
+      <Project>{b2126aff-be69-4718-ad1c-edf7be31720a}</Project>
+      <Name>Caasiope.NBitcoin</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

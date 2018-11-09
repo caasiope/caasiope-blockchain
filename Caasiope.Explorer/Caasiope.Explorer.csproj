@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{19AB2F3A-DAB6-41C9-8C26-1B0B48414FA6}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Caasiope.Explorer</RootNamespace>
+    <AssemblyName>Caasiope.Explorer</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="websocket-sharp, Version=1.0.2.59611, Culture=neutral, PublicKeyToken=5660b08a1845a91e, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSocketSharp.1.0.3-rc11\lib\websocket-sharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BlockchainExplorer.cs" />
+    <Compile Include="Dispatcher.cs" />
+    <Compile Include="ExplorerConnectionService.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WebSocketServer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="NLog.config">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\helios-common\Helios.Common\Helios.Common\Helios.Common.csproj">
+      <Project>{7487A6DB-300E-482A-888F-50AFF822DF69}</Project>
+      <Name>Helios.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\helios-common\Helios.Common\Helios.JSON\Helios.JSON.csproj">
+      <Project>{B6468947-630D-4EE1-AACD-C8BB1E4BD935}</Project>
+      <Name>Helios.JSON</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\helios-common\Helios.Common\Helios.WebSocket\Helios.WebSocket.csproj">
+      <Project>{b55ec68a-0511-486c-bf6f-e5c9cdfb2a9e}</Project>
+      <Name>Helios.WebSocket</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.NBitcoin\Caasiope.NBitcoin.csproj">
+      <Project>{B2126AFF-BE69-4718-AD1C-EDF7BE31720A}</Project>
+      <Name>Caasiope.NBitcoin</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.Database\Caasiope.Database.csproj">
+      <Project>{3CBF406A-2CBC-43FD-85B7-62EC085A8B18}</Project>
+      <Name>Caasiope.Database</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.Explorer.JSON.API\Caasiope.Explorer.JSON.API.csproj">
+      <Project>{5ffde23e-dae8-4f33-8f8f-2f8e21b89951}</Project>
+      <Name>Caasiope.Explorer.JSON.API</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.JSON.API\Caasiope.JSON.API.csproj">
+      <Project>{0E900070-10B6-4A28-8A4B-A34E559FC373}</Project>
+      <Name>Caasiope.JSON.API</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.Log\Caasiope.Log.csproj">
+      <Project>{FFBEAAF4-F3A2-45FC-BB5D-58E7E84FD6B9}</Project>
+      <Name>Caasiope.Log</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.Node\Caasiope.Node.csproj">
+      <Project>{1B8B43CE-4853-4F43-A4F5-94E0B292B28D}</Project>
+      <Name>Caasiope.Node</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.Protocol\Caasiope.Protocol.csproj">
+      <Project>{DFABEDBB-6E62-4D28-9761-9B35CABA33A0}</Project>
+      <Name>Caasiope.Protocol</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="config\vice\explorer_server.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\zodiac\explorer_server.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>powershell -ExecutionPolicy ByPass -File "$(ProjectDir)..\pre-build-scripts\InjectGitVersion.ps1" "$(ProjectDir)"</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>powershell -ExecutionPolicy ByPass -File "$(ProjectDir)..\pre-build-scripts\InjectGitVersion.ps1" "$(ProjectDir)." "revert"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

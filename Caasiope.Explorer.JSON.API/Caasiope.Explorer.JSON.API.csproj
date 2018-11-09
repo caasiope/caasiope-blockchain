@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5FFDE23E-DAE8-4F33-8F8F-2F8E21B89951}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Caasiope.Explorer.JSON.API</RootNamespace>
+    <AssemblyName>Caasiope.Explorer.JSON.API</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BlockchainExplorerApi.cs" />
+    <Compile Include="Internals\HashLock.cs" />
+    <Compile Include="Internals\MultiSignature.cs" />
+    <Compile Include="Internals\SecretRevelation.cs" />
+    <Compile Include="Internals\Signature.cs" />
+    <Compile Include="Internals\TimeLock.cs" />
+    <Compile Include="Internals\TxDeclaration.cs" />
+    <Compile Include="Internals\TxInputOutput.cs" />
+    <Compile Include="TransactionConverter.cs" />
+    <Compile Include="Internals\Transaction.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RequestHelper.cs" />
+    <Compile Include="Requests\GetBalanceRequest.cs" />
+    <Compile Include="Requests\GetSignedLedgerRequest.cs" />
+    <Compile Include="Requests\GetTransactionHistoryRequest.cs" />
+    <Compile Include="Requests\GetTransactionRequest.cs" />
+    <Compile Include="Requests\SendTransactionRequest.cs" />
+    <Compile Include="ResponseHelper.cs" />
+    <Compile Include="Responses\GetBalanceResponse.cs" />
+    <Compile Include="Responses\GetSignedLedgerResponse.cs" />
+    <Compile Include="Responses\GetTransactionHistoryResponse.cs" />
+    <Compile Include="Responses\GetTransactionResponse.cs" />
+    <Compile Include="Responses\SendTransactionResponse.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\helios-common\Helios.Common\Helios.JSON\Helios.JSON.csproj">
+      <Project>{B6468947-630D-4EE1-AACD-C8BB1E4BD935}</Project>
+      <Name>Helios.JSON</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.NBitcoin\Caasiope.NBitcoin.csproj">
+      <Project>{b2126aff-be69-4718-ad1c-edf7be31720a}</Project>
+      <Name>Caasiope.NBitcoin</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.Protocol\Caasiope.Protocol.csproj">
+      <Project>{DFABEDBB-6E62-4D28-9761-9B35CABA33A0}</Project>
+      <Name>Caasiope.Protocol</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

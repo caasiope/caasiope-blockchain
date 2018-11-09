@@ -1,0 +1,9 @@
+﻿# Currency | Address
+# private key : "n6uPVvs4x8A80yt3yw/KTUSEZQpqsu0FM/gSm7EPmXs="
+BTC | qywradf3szdt33q7d9ccgjm4t4hgj0gdq9x7sxg7
+# private key : "msRuhiXplYumwhmC5n3MwELmiM6mnGrtvokiAiUsDiw="
+LTC | qyv0m69u5hxqemajf6xwt25ygqyzawuknavvqx2w
+# private key : "FrX1ynmsEZfTweWjUfdncl7MNAdyQcu3cx1LhXVDsEY=" Pub : "BGyvT3lDFFRjYK7cBYHgCtZLyfev0mk18rvtr/F+aW5jw5QDAWzS/U7NdnjjS7lr0t2GITGrVuIzDs1rwM14RiM="
+ETH | qyknk4qvkel47xdwpyyt03gn8kwn6v7y3mam9x4s
+# timelock : 0
+CAS | qsqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqxdpx0l

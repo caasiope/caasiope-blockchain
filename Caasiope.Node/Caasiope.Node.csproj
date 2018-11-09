@@ -1,0 +1,210 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{1B8B43CE-4853-4F43-A4F5-94E0B292B28D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Caasiope.Node</RootNamespace>
+    <AssemblyName>Caasiope.Node</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BlockchainNode.cs" />
+    <Compile Include="ConsoleCommands\Commands\GetAccountsCommand.cs" />
+    <Compile Include="ConsoleCommands\Commands\GetHashLocksCommand.cs" />
+    <Compile Include="ConsoleCommands\Commands\GetIssuersCommand.cs" />
+    <Compile Include="ConsoleCommands\Commands\GetMultiSignaturesCommand.cs" />
+    <Compile Include="ConsoleCommands\Commands\GetNodesCommand.cs" />
+    <Compile Include="ConsoleCommands\Commands\GetPeersCommand.cs" />
+    <Compile Include="ConsoleCommands\Commands\GetSelfEndpointsCommand.cs" />
+    <Compile Include="ConsoleCommands\Commands\GetTimeLocksCommand.cs" />
+    <Compile Include="ConsoleCommands\Commands\GetTrackingTransactionsCommand.cs" />
+    <Compile Include="ConsoleCommands\Commands\GetValidatorsCommand.cs" />
+    <Compile Include="ConsoleCommands\Commands\HelpCommand.cs" />
+    <Compile Include="ConsoleCommands\Commands\MacroCommand.cs" />
+    <Compile Include="ConsoleCommands\Commands\VersionCommand.cs" />
+    <Compile Include="ConsoleCommands\Commands\WipeNodeListCommand.cs" />
+    <Compile Include="InitialLedgerConfiguration.cs" />
+    <Compile Include="ConsoleCommands\InjectedConsoleCommand.cs" />
+    <Compile Include="Managers\AccountExtensions.cs" />
+    <Compile Include="Managers\DataTransformerManager.cs" />
+    <Compile Include="Managers\HashLockManager.cs" />
+    <Compile Include="Managers\TimeLockManager.cs" />
+    <Compile Include="NodeConfiguration.cs" />
+    <Compile Include="ConsoleCommands\NodeConsoleCommandProcessor.cs" />
+    <Compile Include="Processors\CommandProcessor.cs" />
+    <Compile Include="Processors\Commands\GetAccountCommand.cs" />
+    <Compile Include="Processors\Commands\GetTransactionsCommand.cs" />
+    <Compile Include="Processors\Commands\SendTransactionCommand.cs" />
+    <Compile Include="Processors\Commands\SetNextLedgerCommand.cs" />
+    <Compile Include="Processors\Commands\SignedNewLedgerCommand.cs" />
+    <Compile Include="Injector.cs" />
+    <Compile Include="Managers\CatchupManager.cs" />
+    <Compile Include="Managers\TransactionManager.cs" />
+    <Compile Include="Processors\LedgerCommandProcessor.cs" />
+    <Compile Include="Processors\LiveCommandProcessor.cs" />
+    <Compile Include="ResultCode.cs" />
+    <Compile Include="Connections\ConnectionChannel.cs" />
+    <Compile Include="Connections\ConnectionSession.cs" />
+    <Compile Include="Connections\P2PConnection.cs" />
+    <Compile Include="Managers\LedgerTransformationManager.cs" />
+    <Compile Include="Services\DataTransformationService.cs" />
+    <Compile Include="Services\LedgerService.cs" />
+    <Compile Include="Services\PersistenceManager.cs" />
+    <Compile Include="Trackers\TransactionTracker.cs" />
+    <Compile Include="Transformers\BlockTransformerService.cs" />
+    <Compile Include="Transformers\DataTransformerService.cs" />
+    <Compile Include="Transformers\DeclarationTransformerService.cs" />
+    <Compile Include="Transformers\TransactionDeclarationTransformerService.cs" />
+    <Compile Include="Transformers\HashLockTransformerService.cs" />
+    <Compile Include="Transformers\LedgerSignatureTransformerService.cs" />
+    <Compile Include="Transformers\AccountBalanceTransformerService.cs" />
+    <Compile Include="Transformers\MultiSignatureAccountTransformerService.cs" />
+    <Compile Include="Transformers\MultiSignatureSignerTransformerService.cs" />
+    <Compile Include="Transformers\SecretRevelationTransformerService.cs" />
+    <Compile Include="Transformers\TimeLockTransformerService.cs" />
+    <Compile Include="Transformers\TransactionMessageTransformerService.cs" />
+    <Compile Include="Transformers\TransactionSignatureTransformerService.cs" />
+    <Compile Include="Transformers\TransactionTransformerService.cs" />
+    <Compile Include="Transformers\TxInputOutputTransformerService.cs" />
+    <Compile Include="Validators\SignedLedgerValidator.cs" />
+    <Compile Include="ConsoleLogger.cs" />
+    <Compile Include="Managers\AccountManager.cs" />
+    <Compile Include="Managers\IssuerManager.cs" />
+    <Compile Include="Managers\LedgerManager.cs" />
+    <Compile Include="Managers\MultiSignatureManager.cs" />
+    <Compile Include="Managers\SignatureManager.cs" />
+    <Compile Include="Managers\SignedTransactionManager.cs" />
+    <Compile Include="Managers\ValidatorManager.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sagas\AccountTale.cs" />
+    <Compile Include="Sagas\FinalizeLedgerSaga.cs" />
+    <Compile Include="Sagas\IUpdateStateSaga.cs" />
+    <Compile Include="Sagas\UpdateStateSaga.cs" />
+    <Compile Include="RealNodeServiceFactory.cs" />
+    <Compile Include="ServiceManager.cs" />
+    <Compile Include="Services\ConnectionService.cs" />
+    <Compile Include="Services\DatabaseService.cs" />
+    <Compile Include="Connections\Dispatcher.cs" />
+    <Compile Include="Services\LiveService.cs" />
+    <Compile Include="Services\ThreadedService.cs" />
+    <Compile Include="Validators\TransactionValidator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="config\vice\initial.block">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="config\zodiac\initial.block">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\helios-common\Helios.Common\Helios.Common\Helios.Common.csproj">
+      <Project>{7487a6db-300e-482a-888f-50aff822df69}</Project>
+      <Name>Helios.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\helios-common\Helios.Common\Helios.JSON\Helios.JSON.csproj">
+      <Project>{b6468947-630d-4ee1-aacd-c8bb1e4bd935}</Project>
+      <Name>Helios.JSON</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.NBitcoin\Caasiope.NBitcoin.csproj">
+      <Project>{b2126aff-be69-4718-ad1c-edf7be31720a}</Project>
+      <Name>Caasiope.NBitcoin</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.Database\Caasiope.Database.csproj">
+      <Project>{3cbf406a-2cbc-43fd-85b7-62ec085a8b18}</Project>
+      <Name>Caasiope.Database</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.JSON.API\Caasiope.JSON.API.csproj">
+      <Project>{0e900070-10b6-4a28-8a4b-a34e559fc373}</Project>
+      <Name>Caasiope.JSON.API</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.JSON\Caasiope.JSON.csproj">
+      <Project>{70cff59f-d618-4110-8a26-124d905450a5}</Project>
+      <Name>Caasiope.JSON</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.Log\Caasiope.Log.csproj">
+      <Project>{ffbeaaf4-f3a2-45fc-bb5d-58e7e84fd6b9}</Project>
+      <Name>Caasiope.Log</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.P2P\Caasiope.P2P.csproj">
+      <Project>{C65F31D2-324D-4F68-ACD2-47BAE1D43A4E}</Project>
+      <Name>Caasiope.P2P</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.Protocol\Caasiope.Protocol.csproj">
+      <Project>{dfabedbb-6e62-4d28-9761-9b35caba33a0}</Project>
+      <Name>Caasiope.Protocol</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="config\network.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\vice\issuers.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\vice\nodes.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\vice\node_server.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\vice\validators.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\zodiac\issuers.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\zodiac\nodes.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\zodiac\node_server.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\zodiac\validators.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

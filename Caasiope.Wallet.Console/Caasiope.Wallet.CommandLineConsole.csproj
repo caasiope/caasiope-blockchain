@@ -1,0 +1,128 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{3B1BEC83-D639-41BC-BE74-8348FDF9A87E}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Caasiope.Wallet.CommandLineConsole</RootNamespace>
+    <AssemblyName>Caasiope.Wallet.CommandLineConsole</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="BouncyCastle.Crypto, Version=1.8.4.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
+      <HintPath>..\packages\BouncyCastle.1.8.4\lib\BouncyCastle.Crypto.dll</HintPath>
+    </Reference>
+    <Reference Include="HashLib, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\References\HashLib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Commands\AddDeclaration.cs" />
+    <Compile Include="Commands\AddInputOutputTransaction.cs" />
+    <Compile Include="Commands\AddInputTransaction.cs" />
+    <Compile Include="Commands\AddOutputTransaction.cs" />
+    <Compile Include="Commands\CreateAccountCommand.cs" />
+    <Compile Include="Commands\DecryptPrivateKeyCommand.cs" />
+    <Compile Include="Commands\EncryptPrivateKeyCommand.cs" />
+    <Compile Include="Commands\GenerateCertificateCommand.cs" />
+    <Compile Include="Commands\GeneratePrivateKeyCommand.cs" />
+    <Compile Include="Commands\GetSubmissionsCommand.cs" />
+    <Compile Include="Commands\HashTextCommand.cs" />
+    <Compile Include="Commands\InitializeWalletCommand.cs" />
+    <Compile Include="Commands\InjectedConsoleCommand.cs" />
+    <Compile Include="Commands\CreateSecretCommand.cs" />
+    <Compile Include="Commands\FinalizeTransaction.cs" />
+    <Compile Include="Commands\GetBalanceCommand.cs" />
+    <Compile Include="Commands\ImportHashLockCommand.cs" />
+    <Compile Include="Commands\ImportPrivateKeyCommand.cs" />
+    <Compile Include="Commands\ImportSecretRevelation.cs" />
+    <Compile Include="Commands\ImportTimeLock.cs" />
+    <Compile Include="Commands\InitializeTransaction.cs" />
+    <Compile Include="Commands\ListPrivateKeysCommand.cs" />
+    <Compile Include="Commands\LoadInstructionsCommand.cs" />
+    <Compile Include="Commands\Send2Command.cs" />
+    <Compile Include="Commands\SendCommand.cs" />
+    <Compile Include="Commands\SetActiveKeyCommand.cs" />
+    <Compile Include="Commands\SetDefaultFeesCommand.cs" />
+    <Compile Include="Commands\SetFeesCommand.cs" />
+    <Compile Include="Commands\SignHashCommand.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="NLog.config">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Caasiope.P2P\Caasiope.P2P.csproj">
+      <Project>{C65F31D2-324D-4F68-ACD2-47BAE1D43A4E}</Project>
+      <Name>Caasiope.P2P</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\helios-common\Helios.Common\Helios.Common\Helios.Common.csproj">
+      <Project>{7487A6DB-300E-482A-888F-50AFF822DF69}</Project>
+      <Name>Helios.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.NBitcoin\Caasiope.NBitcoin.csproj">
+      <Project>{B2126AFF-BE69-4718-AD1C-EDF7BE31720A}</Project>
+      <Name>Caasiope.NBitcoin</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.Node\Caasiope.Node.csproj">
+      <Project>{1B8B43CE-4853-4F43-A4F5-94E0B292B28D}</Project>
+      <Name>Caasiope.Node</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.Protocol\Caasiope.Protocol.csproj">
+      <Project>{DFABEDBB-6E62-4D28-9761-9B35CABA33A0}</Project>
+      <Name>Caasiope.Protocol</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.Wallet\Caasiope.Wallet.csproj">
+      <Project>{0CE71797-A2EA-46FF-881A-7620868D2FC7}</Project>
+      <Name>Caasiope.Wallet</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>powershell -ExecutionPolicy ByPass -File "$(ProjectDir)..\pre-build-scripts\InjectGitVersion.ps1" "$(ProjectDir)"</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>powershell -ExecutionPolicy ByPass -File "$(ProjectDir)..\pre-build-scripts\InjectGitVersion.ps1" "$(ProjectDir)." "revert"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

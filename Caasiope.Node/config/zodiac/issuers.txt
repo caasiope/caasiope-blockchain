@@ -1,0 +1,6 @@
+﻿# Currency | Address
+BTC | qys7g6qvh3954m7nstj3smfrym25shkayd7yaq49
+LTC | qy54klxjtft5zxr34tgymj9j77rhxlzmnzdhghn2
+ETH | qyuaj8sxzxnae3dygdf0u5ed347xevyvc0tqfpuu
+# timelock : 0
+CAS | qsqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqxdpx0l

@@ -1,0 +1,27 @@
+# Quorum : Number of signatures required for a ledger to be valid
+3
+# Validators public key
+# Alias : aries
+BLUff1LKJbwNguCQNmXRIFm50zoBARbjW5KQgqmHuCRY6o4nhbUWnIRf5IMdW5b0aR6gwQuHbX+VcLKjq9GY7Zo=
+# Alias : taurus
+BCXnZQZbYTW/gLgneDKt3bl4Ok778wofSW478KIeeUH9BwpDJTgiQvhYNswCvWFdsYfl+9ZHI+cfX7mdpRBvZtk=
+# Alias : gemini
+BEv/Ga9FYv6sykAmHoqw5GyjXX2QkwwNolI+z+I3zqYdgy0yIoES+yYpa9gB+gQJfMqG+kyWdMlPmRDG4escOv0=
+# Alias : cancer
+BN2IOKtsS/SfddqtzJQQ7P5JTspYdlC4aZXOgyRLkhdnl5mfaaSPNmb7yQHUHSla7dtArs8Rzc5MY0NiyUeNrIM=
+# Alias : leo
+BERoVHiH89BHFXSux/wkMOQOnEBzFZBDw5i6tp3VNFQmXXP7vqkrYF7RKESUX5fW2v4AI3qUWS9w7nN6dhN+NZA=
+# Alias : virgo
+BKqzUQoDsVStSA0RwCr+wVKO4Zd+r3Jgrci1aMou4A13cUqlkNET67R0IfAsVSD7pG7w5mevh0IBvYMSGb8smYs=
+# Alias : libra
+BKwQAABXFwcawyToiIBtRuJHeufFTAsVwvAepVD23vCxmz/AVqQXQQ24CSgA3uSoyhJPD5/xVMcS+Nn0CUzkCJ8=
+# Alias : scorpio
+BHifMlE+3xZ3B0rM6D7t5LY/S1EpBhqHjnbDoVzv9b5ZuQz2U+R+KvXvSQK6hWBnSm+SNv8ExXA+2chthMKiUcc=
+# Alias : sagittarius
+BGv+cRr5fnKAZVAo/ufu1Pw3tb5hp/fS7KJK1sxPaIebQVrk/N4ppWZdPaSIZtCqqSoD3vTZ9CuReHoVmfYmITk=
+# Alias : capricorn
+BBVCw4cJMXLkqr2Q96HojS82hfDOjp0NYU29zCNUV0k51ub2+HwIXDJzhGGp2wu4ZF0sL6fouPuqzpX2c864hus=
+# Alias : aquarius
+BF6IPw/vpgag2YBlozUzoixoXcMrDazQZCSgsdN96FhdiQwPvF+LL+hvo3EqHBdeFRfsiZFLYcz6ig8al6BkDPY=
+# Alias : pisces
+BAZm0F5S0vfoP6+haq0F5X6BB1J3H8Or+gxONxtt8wMkeSO0U6jNKJc19kTJKxINvef3U2WYZMoV7WlUEzmck9c=

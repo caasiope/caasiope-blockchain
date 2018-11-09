@@ -1,0 +1,6 @@
+# Quorum : Number of signatures required for a ledger to be valid
+1
+# Validators public key
+# Alias : envy
+# Private Key : AKiWI3xivi2tsMz1Sh/v+0WrJaM60t/3h/qcEfu6r1pH
+BCXsZumI7uromDbNDK3BwnQaKJpKNixQrssvZr9RjGO6A9eGH3ITmxT/FHfHWptoHIlxmEioRm6eIgJ3+ah+LtI=

@@ -1,0 +1,17 @@
+# Quorum : Number of signatures required for a ledger to be valid
+2
+# Validators public key
+# Alias : envy
+BCXsZumI7uromDbNDK3BwnQaKJpKNixQrssvZr9RjGO6A9eGH3ITmxT/FHfHWptoHIlxmEioRm6eIgJ3+ah+LtI=
+# Alias : gluttony
+BHPBsOZzIgPL9eF+sEXHckc7eYZYSW7+dHRPy/EBlllZQm0/MYLpQjfYG5J+srIiyfN90ps83HDalOjhbyQEtY4=
+# Alias : greed
+BH7ZaqLnWSjo+CAtgjmOBJJKjOw08CyMc8eEcEdSE3lj27Zrtw6p2cyNgXcgFQuRvS81us59IM7t0GolpZpBX1o=
+# Alias : lust
+BMp3qxxGtT/NLazTxFYvX+iPo+hwbmm+A74aCJ2KPRtufJZBx0Y/e8osA2K3AwdEteBxKtop9mqGpVsPbz6mizw=
+# Alias : pride
+BGoPhhzG99HBK9yz9CDCVI9D1cwBra90UiT4ddUJ62rD7I+P8bchLAPi4tHUUMEidZj1ruyEJNWwEuyv5dy+pTQ=
+# Alias : sloth
+BLS/ej/9gfg2mBpYLuoxY4gdbz2PErfolym2GfvR0fN2By5/LG3Hc0vrR4Z8crqkwwgBu/LZaw0NCwF381bZJEk=
+# Alias : wrath
+BNwM/VkcWqPriefC7xCdTJ+AYUuqYKhNvgkq19NbE/6y/HSw9Eid+WLYsU1SxQlRw6MIxFfhJerNpjAPoAJQgiQ=

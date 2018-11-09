@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{3CBF406A-2CBC-43FD-85B7-62EC085A8B18}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Caasiope.Database</RootNamespace>
+    <AssemblyName>Caasiope.Database</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Managers\ReadDatabaseManager.cs" />
+    <Compile Include="Managers\SqlTransactionManager.cs" />
+    <Compile Include="Managers\WipeDatabaseHelper.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\BalanceRepository.cs" />
+    <Compile Include="Repositories\BlockRepository.cs" />
+    <Compile Include="Repositories\DeclarationRepository.cs" />
+    <Compile Include="Repositories\TransactionDeclarationRepository.cs" />
+    <Compile Include="Repositories\Entities\BlockEntity.cs" />
+    <Compile Include="Repositories\Entities\AccountBalanceFull.cs" />
+    <Compile Include="Repositories\Entities\TransactionDeclarationEntity.cs" />
+    <Compile Include="Repositories\Entities\HashLockEntity.cs" />
+    <Compile Include="Repositories\Entities\SecretRevelationEntity.cs" />
+    <Compile Include="Repositories\Entities\TableLedgerHeight.cs" />
+    <Compile Include="Repositories\Entities\LedgerEntity.cs" />
+    <Compile Include="Repositories\Entities\MultiSignatureEntity.cs" />
+    <Compile Include="Repositories\Entities\SignedPaymentSimple.cs" />
+    <Compile Include="Repositories\Entities\LedgerStateChangeSimple.cs" />
+    <Compile Include="Repositories\Entities\TimeLockEntity.cs" />
+    <Compile Include="Repositories\Entities\TransactionMessageEntity.cs" />
+    <Compile Include="Repositories\Entities\TxInputOutputFull.cs" />
+    <Compile Include="Repositories\HashLockRepository.cs" />
+    <Compile Include="Repositories\SecretRevelationRepository.cs" />
+    <Compile Include="Repositories\TableLedgerHeightRepository.cs" />
+    <Compile Include="Repositories\LedgerRepository.cs" />
+    <Compile Include="Repositories\Entities\LedgerSignature.cs" />
+    <Compile Include="Repositories\LedgerSignatureRepository.cs" />
+    <Compile Include="Repositories\MultiSignatureAccountRepository.cs" />
+    <Compile Include="Repositories\MultiSignatureSignerRepository.cs" />
+    <Compile Include="Repositories\LedgerStateChangeRepository.cs" />
+    <Compile Include="Repositories\TimeLockRepository.cs" />
+    <Compile Include="Repositories\TransactionInputOutputRepository.cs" />
+    <Compile Include="Repositories\TransactionMessageRepository.cs" />
+    <Compile Include="Repositories\TransactionRepository.cs" />
+    <Compile Include="Repository.cs" />
+    <Compile Include="SqlTransaction.cs" />
+    <Compile Include="SqlTransactions\MultiSignatureSqlTransaction.cs" />
+    <Compile Include="Managers\RepositoryManager.cs" />
+    <Compile Include="SqlTransactions\SignedLedgerSqlTransaction.cs" />
+    <Compile Include="SqlTransactions\SignedTransactionSqlTransaction.cs" />
+    <Compile Include="Repositories\TransactionSignatureRepository.cs" />
+    <Compile Include="SqlTransactions\TransformerSqlTransaction.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\helios-common\Helios.Common\Helios.Common\Helios.Common.csproj">
+      <Project>{7487A6DB-300E-482A-888F-50AFF822DF69}</Project>
+      <Name>Helios.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.NBitcoin\Caasiope.NBitcoin.csproj">
+      <Project>{B2126AFF-BE69-4718-AD1C-EDF7BE31720A}</Project>
+      <Name>Caasiope.NBitcoin</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.Database.SQL\Caasiope.Database.SQL.csproj">
+      <Project>{25E8CA09-A44C-4A49-82EE-DA0DC37FF250}</Project>
+      <Name>Caasiope.Database.SQL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Caasiope.Protocol\Caasiope.Protocol.csproj">
+      <Project>{DFABEDBB-6E62-4D28-9761-9B35CABA33A0}</Project>
+      <Name>Caasiope.Protocol</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

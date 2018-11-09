@@ -1,0 +1,6 @@
+﻿# websocket server configuration
+Ip=
+Port=2030
+TLS_CERT=
+TLS_PWD=
+MaxConnectionNumber=666
