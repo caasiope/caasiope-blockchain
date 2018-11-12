@@ -15,4 +15,10 @@ namespace Caasiope.Explorer.JSON.API.Internals
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public TxInput Fees;
     }
+
+    public class HistoricalTransaction
+    {
+        public long Height;
+        public Transaction Transaction;
+    }
 }

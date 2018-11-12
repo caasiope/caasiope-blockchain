@@ -506,4 +506,16 @@ namespace Caasiope.Protocol.Types
             }
         }
     }
+
+    public class HistoricalTransaction
+    {
+        public readonly long LedgerHeight;
+        public readonly Transaction Transaction;
+
+        public HistoricalTransaction(long ledgerHeight, Transaction transaction)
+        {
+            LedgerHeight = ledgerHeight;
+            Transaction = transaction;
+        }
+    }
 }

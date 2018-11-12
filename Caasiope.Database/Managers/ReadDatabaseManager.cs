@@ -206,12 +206,12 @@ namespace Caasiope.Database.Managers
             return GetTransaction(simple);
         }
 
-        public List<Transaction> GetTransactionHistory(Address address, long? ledgerHeight)
+        public List<HistoricalTransaction> GetTransactionHistory(Address address, long? ledgerHeight)
         {
             var transactions = repositoryManager.GetRepository<TransactionRepository>();
             var inputs = repositoryManager.GetRepository<TransactionInputOutputRepository>().GetByAddress(address);
 
-            var list = new Dictionary<TransactionHash, Transaction>();
+            var list = new Dictionary<TransactionHash, HistoricalTransaction>();
             foreach (var input in inputs)
             {
                 var hash = input.TransactionHash;
@@ -220,7 +220,10 @@ namespace Caasiope.Database.Managers
                     var simple = transactions.GetByKey(hash);
 
                     if (ledgerHeight == null || simple.LedgerHeight > ledgerHeight)
-                        list.Add(hash, GetTransaction(simple));
+                    {
+
+                        list.Add(hash, new HistoricalTransaction(simple.LedgerHeight, GetTransaction(simple)));
+                    }
                 }
             }
             return list.Values.ToList();
