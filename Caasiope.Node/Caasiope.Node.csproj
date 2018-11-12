@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BlockchainNode.cs" />
+    <Compile Include="ConsoleCommands\Commands\AnalyzeAddressCommand.cs" />
     <Compile Include="ConsoleCommands\Commands\GetAccountsCommand.cs" />
     <Compile Include="ConsoleCommands\Commands\GetHashLocksCommand.cs" />
     <Compile Include="ConsoleCommands\Commands\GetIssuersCommand.cs" />
