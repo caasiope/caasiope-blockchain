@@ -22,7 +22,7 @@ namespace Caasiope.Wallet.CommandLineConsole.Commands
 
         protected override void ExecuteCommand(string[] args)
         {
-            var sender = WalletService.GetActiveKey().Data.Account.Address;
+            var sender = WalletService.GetActiveKey().Data.Address;
             var receiver = WalletService.GetAddress(receiverArgument.Value);
             var currency = Currency.FromSymbol(currencyArgument.Value);
             var amount = Amount.FromWholeDecimal(Convert.ToDecimal(amountArgument.Value));

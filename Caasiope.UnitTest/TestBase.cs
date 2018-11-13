@@ -154,7 +154,7 @@ namespace Caasiope.UnitTest
             foreach (var signer in signers)
                 Assert.IsTrue(signer.SignTransaction(signed, Network));
 
-            if (feePayer != null && feePayer.Account.Address != sender)
+            if (feePayer != null && feePayer.Address != sender)
                 Assert.IsTrue(feePayer.SignTransaction(signed, Network));
 
             return signed;

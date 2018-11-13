@@ -86,11 +86,11 @@ namespace Caasiope.Wallet.Services
         public bool ImportPrivateKey(string label, PrivateKeyNotWallet key)
         {
             var aliased = AliasManager.SetAlias(label, key);
-            var address = key.Account.Address.Encoded;
+            var address = key.Address.Encoded;
             if (wallets.ContainsKey(label))
                 return false;
             wallets.Add(address, aliased);
-            AddressListener.Listen(key.Account.Address);
+            AddressListener.Listen(key.Address);
             return true;
         }
 
@@ -205,7 +205,7 @@ namespace Caasiope.Wallet.Services
             var wallet = item.GetObject<PrivateKeyNotWallet>();
             if (wallet != null)
             {
-                return wallet.Account.Address;
+                return wallet.Address;
             }
 
             return null;

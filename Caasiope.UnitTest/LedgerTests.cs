@@ -38,7 +38,7 @@ namespace Caasiope.UnitTest
                 Assert.IsTrue(context.TryCreateNextLedger());
 
                 // get account updated
-                Assert.IsTrue(context.LiveService.AccountManager.TryGetAccount(receiver.Account.Address.Encoded, out var account));
+                Assert.IsTrue(context.LiveService.AccountManager.TryGetAccount(receiver.Address.Encoded, out var account));
                 Assert.IsTrue(account.Balances.First(b => b.Currency.Equals(Currency.BTC)).Amount == 10);
             }
         }

@@ -45,7 +45,7 @@ namespace Caasiope.Wallet.Managers
                 var active = WalletService.GetActiveKey();
                 if (active != null)
                 {
-                    Transaction.Fees = WalletService.CreateFeesInput(WalletService.GetActiveKey().Data.Account.Address);
+                    Transaction.Fees = WalletService.CreateFeesInput(WalletService.GetActiveKey().Data.Address);
                 }
             }
 

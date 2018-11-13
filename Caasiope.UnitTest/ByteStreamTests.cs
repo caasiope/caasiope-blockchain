@@ -74,7 +74,7 @@ namespace Caasiope.UnitTest
             var secret = Secret.GenerateSecret();
             var declarations = new List<TxDeclaration>()
             {
-                new MultiSignature(new []{account1.Account.Address, account2.Account.Address}, 2),
+                new MultiSignature(new []{account1.Address, account2.Address}, 2),
                 new HashLock(secret.ComputeSecretHash(SecretHashType.SHA3)),
                 new TimeLock(123),
                 new SecretRevelation(secret)

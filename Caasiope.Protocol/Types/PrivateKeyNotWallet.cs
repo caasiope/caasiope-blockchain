@@ -5,13 +5,13 @@
     {
         public readonly PrivateKey PrivateKey;
         public readonly PublicKey PublicKey;
-        public readonly Account Account;
+        public readonly Address Address;
 
         private PrivateKeyNotWallet(PrivateKey key)
         {
             PrivateKey = key;
             PublicKey = key.GetPublicKey();
-            Account = Account.FromAddress(PublicKey.GetAddress());
+            Address = PublicKey.GetAddress();
         }
 
         public static PrivateKeyNotWallet FromBase64(string key)
@@ -36,7 +36,7 @@
 
         public static implicit operator Address(PrivateKeyNotWallet currency)
         {
-            return currency.Account.Address;
+            return currency.Address;
         }
     }
 }
