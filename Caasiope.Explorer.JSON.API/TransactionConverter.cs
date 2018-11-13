@@ -104,6 +104,31 @@ namespace Caasiope.Explorer.JSON.API
                 Fees = transaction.Fees == null ? null : CreateInput(transaction.Fees)
             };
         }
+        
+        public static Internals.HistoricalTransaction GetHistoricalTransaction(HistoricalTransaction historical)
+        {
+            var transaction = historical?.Transaction;
+            if (transaction == null) return null;
+
+            var inputs = transaction.Inputs.Select(CreateInput).ToList();
+            var outputs = transaction.Outputs.Select(CreateOutput).ToList();
+            var declarations = transaction.Declarations.Select(CreateDeclaration).ToList();
+
+            return new Internals.HistoricalTransaction
+            {
+                Height = historical.LedgerHeight,
+                Transaction = new Internals.Transaction
+                {
+                    Hash = transaction.GetHash().ToBase64(),
+                    Expire = transaction.Expire,
+                    Message = transaction.Message == null || transaction.Message.Equals(TransactionMessage.Empty) ? null : Convert.ToBase64String(transaction.Message.GetBytes()),
+                    Declarations = declarations,
+                    Inputs = inputs,
+                    Outputs = outputs,
+                    Fees = transaction.Fees == null ? null : CreateInput(transaction.Fees)
+                }
+            };
+        }
 
         private static Internals.TxInput CreateInput(TxInput input)
         {

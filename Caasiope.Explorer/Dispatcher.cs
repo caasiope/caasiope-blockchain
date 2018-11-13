@@ -157,12 +157,12 @@ namespace Caasiope.Explorer
 
                 // TODO this is a temporary hack
                 {
-                    var raw = DatabaseService.ReadDatabaseManager.GetTransactionHistory(address, message.Height);
+                    var raw = DatabaseService.ReadDatabaseManager.GetTransactionHistory(address, message.Height).OrderByDescending(_ => _.LedgerHeight).ToList();
                     var total = raw.Count;
 
                     raw = raw.Skip(message.Count * (message.Page - 1)).Take(message.Count).ToList();
 
-                    var transactions = raw.Select(TransactionConverter.GetTransaction).ToList();
+                    var transactions = raw.Select(TransactionConverter.GetHistoricalTransaction).ToList();
                     sendResponse.Call(ResponseHelper.CreateGetTransactionHistoryResponse(transactions, total), ResultCode.Success);
                 }
             }

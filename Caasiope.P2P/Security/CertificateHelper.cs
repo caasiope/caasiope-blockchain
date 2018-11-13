@@ -72,48 +72,47 @@ namespace Caasiope.P2P.Security
         private static X509Certificate2 GenerateSelfSignedCertificate(string subjectName, string issuerName, AsymmetricKeyParameter issuerPrivKey)
         {
             // Generating Random Numbers
-            CryptoApiRandomGenerator randomGenerator = new CryptoApiRandomGenerator();
-            SecureRandom random = new SecureRandom(randomGenerator);
+            var randomGenerator = new CryptoApiRandomGenerator();
+            var random = new SecureRandom(randomGenerator);
 
             // The Certificate Generator
-            X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
+            var certificateGenerator = new X509V3CertificateGenerator();
 
             // Serial Number
-            BigInteger serialNumber = BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random);
+            var serialNumber = BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random);
             certificateGenerator.SetSerialNumber(serialNumber);
 
             // Signature Algorithm
             certificateGenerator.SetSignatureAlgorithm(SIGNATURE_ALGORYTHM);
 
             // Issuer and Subject Name
-            X509Name subjectDN = new X509Name(subjectName);
-            X509Name issuerDN = new X509Name(issuerName);
+            var subjectDN = new X509Name(subjectName);
+            var issuerDN = new X509Name(issuerName);
             certificateGenerator.SetIssuerDN(issuerDN);
             certificateGenerator.SetSubjectDN(subjectDN);
 
             // Valid For
-            DateTime notBefore = DateTime.UtcNow.Date;
-            DateTime notAfter = notBefore.AddYears(2);
+            var notBefore = DateTime.UtcNow.Date;
+            var notAfter = notBefore.AddYears(2);
 
             certificateGenerator.SetNotBefore(notBefore);
             certificateGenerator.SetNotAfter(notAfter);
 
             // Subject Public Key
-            AsymmetricCipherKeyPair subjectKeyPair;
             var keyGenerationParameters = new KeyGenerationParameters(random, KEY_STRENGTH);
             var keyPairGenerator = new RsaKeyPairGenerator();
             keyPairGenerator.Init(keyGenerationParameters);
-            subjectKeyPair = keyPairGenerator.GenerateKeyPair();
+            var subjectKeyPair = keyPairGenerator.GenerateKeyPair();
 
             certificateGenerator.SetPublicKey(subjectKeyPair.Public);
 
             // Generating the Certificate
-            AsymmetricCipherKeyPair issuerKeyPair = subjectKeyPair;
+            var issuerKeyPair = subjectKeyPair;
 
             // selfsign certificate
-            Org.BouncyCastle.X509.X509Certificate certificate = certificateGenerator.Generate(issuerPrivKey, random);
+            var certificate = certificateGenerator.Generate(issuerPrivKey, random);
             
-            X509Certificate2 x509 = new System.Security.Cryptography.X509Certificates.X509Certificate2(certificate.GetEncoded());
+            var x509 = new System.Security.Cryptography.X509Certificates.X509Certificate2(certificate.GetEncoded());
             // merge into X509Certificate2
             MergePrivateKey(x509, subjectKeyPair.Private);
 
@@ -150,44 +149,44 @@ namespace Caasiope.P2P.Security
         public static X509Certificate2 GenerateCACertificate(string subjectName, ref AsymmetricKeyParameter CaPrivateKey)
         {
             // Generating Random Numbers
-            CryptoApiRandomGenerator randomGenerator = new CryptoApiRandomGenerator();
-            SecureRandom random = new SecureRandom(randomGenerator);
+            var randomGenerator = new CryptoApiRandomGenerator();
+            var random = new SecureRandom(randomGenerator);
 
             // The Certificate Generator
-            X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
+            var certificateGenerator = new X509V3CertificateGenerator();
 
             // Serial Number
-            BigInteger serialNumber = BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random);
+            var serialNumber = BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random);
             certificateGenerator.SetSerialNumber(serialNumber);
             
             // Issuer and Subject Name
-            X509Name subjectDN = new X509Name(subjectName);
-            X509Name issuerDN = subjectDN;
+            var subjectDN = new X509Name(subjectName);
+            var issuerDN = subjectDN;
             certificateGenerator.SetIssuerDN(issuerDN);
             certificateGenerator.SetSubjectDN(subjectDN);
 
             // Valid For
-            DateTime notBefore = DateTime.UtcNow.Date;
-            DateTime notAfter = notBefore.AddYears(2);
+            var notBefore = DateTime.UtcNow.Date;
+            var notAfter = notBefore.AddYears(2);
 
             certificateGenerator.SetNotBefore(notBefore);
             certificateGenerator.SetNotAfter(notAfter);
 
             // Subject Public Key
             AsymmetricCipherKeyPair subjectKeyPair;
-            KeyGenerationParameters keyGenerationParameters = new KeyGenerationParameters(random, KEY_STRENGTH);
-            RsaKeyPairGenerator keyPairGenerator = new RsaKeyPairGenerator();
+            var keyGenerationParameters = new KeyGenerationParameters(random, KEY_STRENGTH);
+            var keyPairGenerator = new RsaKeyPairGenerator();
             keyPairGenerator.Init(keyGenerationParameters);
             subjectKeyPair = keyPairGenerator.GenerateKeyPair();
 
             certificateGenerator.SetPublicKey(subjectKeyPair.Public);
 
             // Generating the Certificate
-            AsymmetricCipherKeyPair issuerKeyPair = subjectKeyPair;
+            var issuerKeyPair = subjectKeyPair;
 
             // selfsign certificate
-            Org.BouncyCastle.X509.X509Certificate certificate = certificateGenerator.Generate(new Asn1SignatureFactory(SIGNATURE_ALGORYTHM, issuerKeyPair.Private, random));
-            X509Certificate2 x509 = new System.Security.Cryptography.X509Certificates.X509Certificate2(certificate.GetEncoded());
+            var certificate = certificateGenerator.Generate(new Asn1SignatureFactory(SIGNATURE_ALGORYTHM, issuerKeyPair.Private, random));
+            var x509 = new System.Security.Cryptography.X509Certificates.X509Certificate2(certificate.GetEncoded());
 
             CaPrivateKey = issuerKeyPair.Private;
 
@@ -199,25 +198,25 @@ namespace Caasiope.P2P.Security
         {
 
             // Generating Random Numbers
-            CryptoApiRandomGenerator randomGenerator = new CryptoApiRandomGenerator();
-            SecureRandom random = new SecureRandom(randomGenerator);
+            var randomGenerator = new CryptoApiRandomGenerator();
+            var random = new SecureRandom(randomGenerator);
 
             // The Certificate Generator
-            X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
+            var certificateGenerator = new X509V3CertificateGenerator();
 
             // Serial Number
-            BigInteger serialNumber = BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random);
+            var serialNumber = BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random);
             certificateGenerator.SetSerialNumber(serialNumber);
 
             // Issuer and Subject Name
-            X509Name subjectDN = new X509Name(subject);
-            X509Name issuerDN = new X509Name(authority.Subject);
+            var subjectDN = new X509Name(subject);
+            var issuerDN = new X509Name(authority.Subject);
             certificateGenerator.SetIssuerDN(issuerDN);
             certificateGenerator.SetSubjectDN(subjectDN);
 
             // Valid For
-            DateTime notBefore = DateTime.UtcNow.Date;
-            DateTime notAfter = notBefore.AddYears(2);
+            var notBefore = DateTime.UtcNow.Date;
+            var notAfter = notBefore.AddYears(2);
 
             certificateGenerator.SetNotBefore(notBefore);
             certificateGenerator.SetNotAfter(notAfter);
@@ -229,19 +228,19 @@ namespace Caasiope.P2P.Security
             var akp = TransformRSAPrivateKey(authority.PrivateKey);
             
             // Signature Algorithm
-            Org.BouncyCastle.X509.X509Certificate certificate = certificateGenerator.Generate(new Asn1SignatureFactory(SIGNATURE_ALGORYTHM, akp, random));
-            X509Certificate2 x509 = new System.Security.Cryptography.X509Certificates.X509Certificate2(certificate.GetEncoded());
+            var certificate = certificateGenerator.Generate(new Asn1SignatureFactory(SIGNATURE_ALGORYTHM, akp, random));
+            var x509 = new System.Security.Cryptography.X509Certificates.X509Certificate2(certificate.GetEncoded());
 
             return x509;
         }
 
         private static bool addCertToStore(System.Security.Cryptography.X509Certificates.X509Certificate2 cert, System.Security.Cryptography.X509Certificates.StoreName st, System.Security.Cryptography.X509Certificates.StoreLocation sl)
         {
-            bool bRet = false;
+            var bRet = false;
 
             try
             {
-                X509Store store = new X509Store(st, sl);
+                var store = new X509Store(st, sl);
                 store.Open(OpenFlags.ReadWrite);
                 store.Add(cert);
 
@@ -258,8 +257,8 @@ namespace Caasiope.P2P.Security
         // https://stackoverflow.com/questions/3240222/get-private-key-from-bouncycastle-x509-certificate-c-sharp
         public static AsymmetricKeyParameter TransformRSAPrivateKey(AsymmetricAlgorithm privateKey)
         {
-            RSACryptoServiceProvider prov = privateKey as RSACryptoServiceProvider;
-            RSAParameters parameters = prov.ExportParameters(true);
+            var prov = privateKey as RSACryptoServiceProvider;
+            var parameters = prov.ExportParameters(true);
 
             return new RsaPrivateCrtKeyParameters(
                 new BigInteger(1, parameters.Modulus),
@@ -276,7 +275,7 @@ namespace Caasiope.P2P.Security
         // https://stackoverflow.com/questions/6497040/how-do-i-validate-that-a-certificate-was-created-by-a-particular-certification-a
         public static bool IsCertificateSignedByAuthority(X509Certificate2 authority, X509Certificate2 certificate)
         {
-            X509Chain chain = new X509Chain();
+            var chain = new X509Chain();
             chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
             chain.ChainPolicy.RevocationFlag = X509RevocationFlag.ExcludeRoot;
             chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
@@ -288,7 +287,7 @@ namespace Caasiope.P2P.Security
             chain.ChainPolicy.ExtraStore.Add(authority);
 
             // TODO still the same problem, can't validate chain because we are self signed
-            bool isChainValid = chain.Build(certificate);
+            var isChainValid = chain.Build(certificate);
 
             /*
             if (!isChainValid)
@@ -322,11 +321,11 @@ namespace Caasiope.P2P.Security
 
         public static AsymmetricCipherKeyPair GenerateKeyPair()
         {
-            CryptoApiRandomGenerator randomGenerator = new CryptoApiRandomGenerator();
-            SecureRandom random = new SecureRandom(randomGenerator);
+            var randomGenerator = new CryptoApiRandomGenerator();
+            var random = new SecureRandom(randomGenerator);
 
-            KeyGenerationParameters keyGenerationParameters = new KeyGenerationParameters(random, KEY_STRENGTH);
-            RsaKeyPairGenerator keyPairGenerator = new RsaKeyPairGenerator();
+            var keyGenerationParameters = new KeyGenerationParameters(random, KEY_STRENGTH);
+            var keyPairGenerator = new RsaKeyPairGenerator();
             keyPairGenerator.Init(keyGenerationParameters);
             return keyPairGenerator.GenerateKeyPair();
         }
@@ -334,16 +333,16 @@ namespace Caasiope.P2P.Security
         public static void MergePrivateKey(X509Certificate2 certificate, AsymmetricKeyParameter keyPrivate)
         {
             // correcponding private key
-            PrivateKeyInfo info = PrivateKeyInfoFactory.CreatePrivateKeyInfo(keyPrivate);
+            var info = PrivateKeyInfoFactory.CreatePrivateKeyInfo(keyPrivate);
 
-            Asn1Sequence seq = (Asn1Sequence)Asn1Object.FromByteArray(info.PrivateKey.GetDerEncoded());
+            var seq = (Asn1Sequence)Asn1Object.FromByteArray(info.ParsePrivateKey().GetDerEncoded());
             if (seq.Count != 9)
             {
                 throw new PemException("malformed sequence in RSA private key");
             }
 
-            RsaPrivateKeyStructure rsa = RsaPrivateKeyStructure.GetInstance(seq);
-            RsaPrivateCrtKeyParameters rsaparams = new RsaPrivateCrtKeyParameters(
+            var rsa = RsaPrivateKeyStructure.GetInstance(seq);
+            var rsaparams = new RsaPrivateCrtKeyParameters(
                 rsa.Modulus, rsa.PublicExponent, rsa.PrivateExponent, rsa.Prime1, rsa.Prime2, rsa.Exponent1, rsa.Exponent2, rsa.Coefficient);
 
             certificate.PrivateKey = ToDotNetKey(rsaparams); //x509.PrivateKey = DotNetUtilities.ToRSA(rsaparams);

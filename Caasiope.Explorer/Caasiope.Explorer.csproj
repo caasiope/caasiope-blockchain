@@ -98,9 +98,7 @@
       <Name>Caasiope.Protocol</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="config\vice\explorer_server.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

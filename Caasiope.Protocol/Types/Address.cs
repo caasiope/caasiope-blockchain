@@ -58,6 +58,31 @@ namespace Caasiope.Protocol.Types
             return buffer;
         }
 
+        public static bool Verify(string encoded)
+        {
+            if (string.IsNullOrEmpty(encoded.Trim()))
+                return false;
+            if (encoded.Length != ENCODED_SIZE)
+                return false;
+
+            try
+            {
+                var hash = Address32Format.Decode(encoded, out var type);
+
+                if (hash == null || hash.Length != RAW_SIZE - 1)
+                    return false;
+
+                if (!Enum.IsDefined(typeof(AddressType), type))
+                    return false;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public static bool operator == (Address a, Address b)
         {
             if ((object)a == null || (object)b == null)

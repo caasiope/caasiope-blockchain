@@ -19,7 +19,7 @@ namespace Caasiope.Explorer.JSON.API
 		    return transaction == null ? new GetTransactionResponse() : new GetTransactionResponse {Transaction = transaction};
 		}
 
-		public static Response CreateGetTransactionHistoryResponse(List<Internals.Transaction> transactions = null, int? total = null)
+		public static Response CreateGetTransactionHistoryResponse(List<Internals.HistoricalTransaction> transactions = null, int? total = null)
 		{
 		    return transactions == null ? new GetTransactionHistoryResponse() : new GetTransactionHistoryResponse { Transactions = transactions, Total = total};
 		}

@@ -5,10 +5,10 @@ using Newtonsoft.Json;
 
 namespace Caasiope.Explorer.JSON.API.Responses
 {
-	public class GetTransactionHistoryResponse : Response<GetTransactionHistoryRequest>
-	{
-		public List<Internals.Transaction> Transactions;
-	    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public class GetTransactionHistoryResponse : Response<GetTransactionHistoryRequest>
+    {
+        public List<Internals.HistoricalTransaction> Transactions;
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int? Total;
     }
 }
