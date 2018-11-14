@@ -8,7 +8,8 @@ namespace Caasiope.Node.ConsoleCommands.Commands
     {
         protected override void ExecuteCommand(string[] args)
         {
-            var results = LiveService.AccountManager.GetAccounts().ToList();
+            // TODO optimize, remove ToList() / we need it because we need to get count
+            var results = LedgerService.LedgerManager.LedgerState.GetAccounts().ToList();
             var issuers = LiveService.IssuerManager.GetIssuers().ToDictionary(_ => _.Address);
 
             Console.WriteLine($"Number of Accounts : {results.Count}");

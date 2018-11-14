@@ -32,12 +32,8 @@ namespace Caasiope.Node.Managers
         // create the account for the issuer in memory at statup
         private void CreateAccount(Address address)
         {
-            if (!LiveService.AccountManager.TryGetAccount(address.Encoded, out var account))
-            {
-                account = Account.FromAddress(address);
-                LiveService.AccountManager.AddAccount(account);
-                // throw new Exception($"Issuer account {address.Encoded} does not exist !");
-            }
+            LiveService.AccountManager.GetOrCreateAccount(address, () => new ExtendedAccount());
+            // throw new Exception($"Issuer account {address.Encoded} does not exist !");
         }
 
         public bool IsIssuer(Currency currency, Address address)

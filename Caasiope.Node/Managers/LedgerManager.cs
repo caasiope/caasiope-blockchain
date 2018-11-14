@@ -4,9 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using Caasiope.JSON.Helpers;
 using Caasiope.Log;
-using Caasiope.Node.Sagas;
 using Caasiope.Node.Services;
-using Caasiope.Node.Trackers;
 using Caasiope.Node.Types;
 using Caasiope.Node.Validators;
 using Caasiope.Protocol.MerkleTrees;
@@ -19,9 +17,9 @@ namespace Caasiope.Node.Managers
 {
     public class LedgerManager
     {
-		[Injected] public ILiveService LiveService;
-		[Injected] public ILedgerService LedgerService;
-		[Injected] public IConnectionService ConnectionService;
+        [Injected] public ILiveService LiveService;
+        [Injected] public ILedgerService LedgerService;
+        [Injected] public IConnectionService ConnectionService;
 
         public SignedLedgerValidator SignedLedgerValidator;
         // TODO remove what is already in the ledger state
@@ -59,11 +57,13 @@ namespace Caasiope.Node.Managers
 
         public LedgerMerkleRoot GetMerkleRoot()
         {
-            return new LedgerMerkleRoot(LiveService.AccountManager.GetAccounts(), GetDeclarations(), merkleLogger);
+            return new LedgerMerkleRoot(LedgerState.GetAccounts(), GetDeclarations(), merkleLogger);
         }
 
         private IEnumerable<TxDeclaration> GetDeclarations()
         {
+            throw new NotImplementedException();
+            // 
             var result = new List<TxDeclaration>();
             result.AddRange(LiveService.MultiSignatureManager.GetMultiSignatures());
             result.AddRange(LiveService.HashLockManager.GetHashLocks());
@@ -98,7 +98,7 @@ namespace Caasiope.Node.Managers
         {
             Debug.Assert(ValidateSignedLedgerInternal(signed));
             Debug.Assert(ValidateSignatures(signed));
-            
+
             Finalize(CreateLedgerState(signed));
 
             needSetInitialLedger = false;
@@ -109,7 +109,7 @@ namespace Caasiope.Node.Managers
         {
             if (needSetInitialLedger)
                 return true;
-            
+
             return ValidateSignedLedger(signed);
         }
 
@@ -166,14 +166,13 @@ namespace Caasiope.Node.Managers
         {
             return GetLedgerLight().Height + 1;
         }
-        
+
         // we create a new ledger state based on the current state and the new ledger
         private MutableLedgerState CreateLedgerState(SignedLedger signedLedger)
         {
             var state = new MutableLedgerState(LedgerState);
-            state.Bard = new FinalizeLedgerBard(new FinalizeLedgerFolklore(state), Contextualize(new FinalizeLedgerSaga()));
             state.SignedLedger = signedLedger;
-            
+
             byte index = 0;
             foreach (var signed in signedLedger.Ledger.Block.Transactions)
             {
@@ -202,12 +201,6 @@ namespace Caasiope.Node.Managers
             // broadcast the hash of the new ledger with the signature.
             ConnectionService.BlockchainChannel.Broadcast(message);
             logger.Log("Broadcast Signed New Ledger");
-        }
-
-        private FinalizeLedgerSaga Contextualize(FinalizeLedgerSaga finalizeLedgerSaga)
-        {
-            // finalizeLedgerSaga.SetServices(services);
-            return finalizeLedgerSaga;
         }
 
         public LedgerLight GetLedgerLight()

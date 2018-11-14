@@ -4,6 +4,7 @@ using Helios.Common.Extensions;
 
 namespace Caasiope.Node.Processors.Commands
 {
+    // the name and logic of this command are not satisfying
     public class GetAccountCommand : LiveCommand<string>
     {
         private readonly Action<Account, ResultCode> onFinished;
@@ -19,7 +20,7 @@ namespace Caasiope.Node.Processors.Commands
             var resultCode = ResultCode.Failed;
             try
             {
-                resultCode = LiveService.AccountManager.TryGetAccount(address, out account) ? ResultCode.Success : ResultCode.UnknownAccount;
+                resultCode = LedgerService.LedgerManager.LedgerState.TryGetAccount(new Address(address), out account) ? ResultCode.Success : ResultCode.UnknownAccount;
             }
             catch (Exception e)
             {

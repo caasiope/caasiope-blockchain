@@ -387,12 +387,7 @@ namespace Caasiope.Protocol
 
         public Account ReadAccount()
         {
-            var account = Account.FromAddress(ReadAddress());
-            foreach (var balance in ReadAccountBalances())
-            {
-                account.AddBalance(balance);
-            }
-            return account;
+            return new Account(ReadAddress(), ReadAccountBalances());
         }
 
         protected List<AccountBalance> ReadAccountBalances()

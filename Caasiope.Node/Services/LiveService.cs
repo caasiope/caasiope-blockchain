@@ -88,6 +88,7 @@ namespace Caasiope.Node.Services
             DataTransformationService.WaitTransformationCompleted();
 
             // load all the accounts
+            // TODO initialize account balances after declarations
             AccountManager.Initialize(DatabaseService.ReadDatabaseManager.GetAccounts());
             MultiSignatureManager.Initialize(DatabaseService.ReadDatabaseManager.GetMultiSignatureAddresses());
             HashLockManager.Initialize(DatabaseService.ReadDatabaseManager.GetHashLockAccounts());

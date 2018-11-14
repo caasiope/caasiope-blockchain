@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using Caasiope.Node.Sagas;
+﻿using System.Diagnostics;
 using Caasiope.Node.Services;
 using Caasiope.Node.Types;
 using Caasiope.Protocol.Types;
@@ -55,23 +53,7 @@ namespace Caasiope.Node.Managers
 
         private void UpdateBalance(MutableLedgerState state, Address address, Currency currency, Amount amount)
         {
-            if (!state.TryGetAccount(address.Encoded, out var account))
-            {
-                //Debug.Assert(address.Type == AddressType.ECDSA);
-                Debug.Assert(amount != 0);
-                if(address.Type == AddressType.ECDSA)
-                    account = LiveService.AccountManager.CreateECDSAAccount(address);
-                else if (address.Type == AddressType.MultiSignatureECDSA)
-                    account = LiveService.AccountManager.CreateMultisignatureECDSAAccount(address);
-                else if (address.Type == AddressType.HashLock)
-                    account = LiveService.AccountManager.CreateHashLockAccount(address);
-                else if (address.Type == AddressType.TimeLock)
-                    account = LiveService.AccountManager.CreateTimeLockAccount(address);
-                else 
-                    throw new NotImplementedException();
-                state.AddAccount(account);
-            }
-
+            var account = state.GetOrCreateMutableAccount(address);
             var balance = account.GetBalance(currency);
 
             Debug.Assert(LiveService.IssuerManager.IsIssuer(currency, address) || balance + amount >= 0);

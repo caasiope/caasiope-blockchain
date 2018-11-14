@@ -40,6 +40,7 @@
     <Compile Include="ByteStream.cs" />
     <Compile Include="Formats\EncryptedPrivateKeyFormat.cs" />
     <Compile Include="Formats\MnemonicPrivateKeyFormat.cs" />
+    <Compile Include="Types\AddressCurrency.cs" />
     <Compile Include="Types\HashLockAccount.cs" />
     <Compile Include="Types\MultiSignatureAccount.cs" />
     <Compile Include="Types\MultiSignatureAddress.cs" />

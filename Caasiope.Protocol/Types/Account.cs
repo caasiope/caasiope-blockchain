@@ -6,20 +6,60 @@ using HashLib;
 
 namespace Caasiope.Protocol.Types
 {
-	[DebuggerDisplay("Address = {Address.Encoded}")]
+    // TODO this should be a wrapper
+    public class MutableAccount : Account
+    {
+        public MutableAccount(Address address) : base(address)
+        {
+        }
+
+        public MutableAccount(Address address, IEnumerable<AccountBalance> balances) : base(address, balances)
+        {
+        }
+
+        public void SetBalance(AccountBalance balance)
+        {
+            balances[balance.Currency] = balance;
+        }
+    }
+
+    // TODO this should be the default account class
+    public class ImmutableAccount : Account
+    {
+        protected ImmutableAccount(Address address, List<AccountBalance> balances) : base(address, balances) { }
+    }
+
+    // TODO this should be the default account class
+    public class AccountHistory
+    {
+        public readonly ImmutableAccount Account;
+        public readonly long CurrentLedger;
+        public readonly long PreviousLedger;
+        public readonly bool IsDeclared; // this should be able to mute
+
+        public AccountHistory(ImmutableAccount account, long currentLedger, long previousLedger, bool isDeclared)
+        {
+            Account = account;
+            CurrentLedger = currentLedger;
+            PreviousLedger = previousLedger;
+            IsDeclared = isDeclared;
+        }
+    }
+
+    [DebuggerDisplay("Address = {Address.Encoded}")]
     public class Account
     {
         public readonly Address Address;
         public IEnumerable<AccountBalance> Balances => balances.Values;
 
-        private readonly Dictionary<Currency, AccountBalance> balances = new Dictionary<Currency, AccountBalance>();
+        protected readonly Dictionary<Currency, AccountBalance> balances = new Dictionary<Currency, AccountBalance>();
 
-        private Account(Address address)
+        protected Account(Address address)
         {
             Address = address;
         }
 
-        private Account(Address address, List<AccountBalance> balances) : this(address)
+        public Account(Address address, IEnumerable<AccountBalance> balances) : this(address)
         {
             foreach (var balance in balances)
             {
@@ -27,6 +67,25 @@ namespace Caasiope.Protocol.Types
             }
         }
 
+        // TODO remove
+        public static bool operator ==(Account a, Account b)
+        {
+            return a.Address == b.Address;
+        }
+
+        // TODO remove
+        public static bool operator !=(Account a, Account b)
+        {
+            return !(a == b);
+        }
+
+        // TODO remove
+        public Account Clone()
+        {
+            return new Account(Address, Balances.Select(b => new AccountBalance((short)b.Currency, (long)b.Amount)).ToList());
+        }
+
+        // used only for merkle tree
         public AccountHash GetHash()
         {
             var sorted = SortBalances(Balances);
@@ -43,26 +102,7 @@ namespace Caasiope.Protocol.Types
             return list;
         }
 
-        public static Account FromAddress(Address address)
-        {
-            return new Account(address);
-        }
-
-        public static bool operator ==(Account a, Account b)
-        {
-            return a.Address == b.Address;
-        }
-
-        public static bool operator !=(Account a, Account b)
-        {
-            return !(a == b);
-        }
-
-        public Account Clone()
-        {
-            return new Account(Address, Balances.Select(b => new AccountBalance((short)b.Currency, (long)b.Amount)).ToList());
-        }
-
+        // TODO move
         private AccountHash GetHash(SortedList<int, AccountBalance> balances)
         {
             using (var stream = new ByteStream())
@@ -76,16 +116,6 @@ namespace Caasiope.Protocol.Types
                 var hash = hasher.ComputeBytes(message).GetBytes();
                 return new AccountHash(hash);
             }
-        }
-
-        public void AddBalance(AccountBalance balance)
-        {
-            balances.Add(balance.Currency, balance);
-        }
-
-        public void RemoveBalance(Currency currency)
-        {
-            balances.Remove(currency);
         }
     }
 

@@ -59,15 +59,15 @@ namespace Caasiope.Database.Managers
         // This we load to the state on initialization
         public List<Account> GetAccounts()
         {
-            var list = new Dictionary<string, Account>();
+            var list = new Dictionary<string, MutableAccount>();
 
             foreach (var balance in repositoryManager.GetRepository<BalanceRepository>().GetEnumerable())
             {
                 var address = balance.Account;
-                list.GetOrCreate(address.Encoded, () => Account.FromAddress(address)).AddBalance(balance.AccountBalance);
+                list.GetOrCreate(address.Encoded, () => new MutableAccount(address)).SetBalance(balance.AccountBalance);
             }
 
-            return list.Values.ToList();
+            return list.Values.Select(mutable => (Account) mutable).ToList();
         }
 
         // This is used only in UnitTests to verify if transformation works correctly

@@ -114,6 +114,10 @@ namespace Caasiope.UnitTest
                 return dummyLedgerCreator.TryCreateNextLedger();
             }
 
+            public bool TryGetAccount(string encoded, out Account account)
+            {
+                return LedgerService.LedgerManager.LedgerState.TryGetAccount(new Address(encoded), out account);
+            }
         }
 
         protected TestContext CreateContext(bool isSave = false)

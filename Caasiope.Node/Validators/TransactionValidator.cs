@@ -191,16 +191,17 @@ namespace Caasiope.Node.Validators
         public bool ValidateBalance(LedgerState state, IEnumerable<TxInput> inputs)
         {
             // we cannot have duplicate (account + currency). In fact we can since we use fees in input
-            var amounts = new Dictionary<string, Amount>();
+            var amounts = new Dictionary<AddressCurrency, Amount>();
             foreach (var input in inputs)
             {
                 var currency = input.Currency;
-                var address = input.Address.Encoded;
+                var address = input.Address;
                 if (!state.TryGetAccount(address, out var account))
                     return false;
 
                 // TODO looks not good
-                var amount = amounts[address + Currency.ToSymbol(currency)] = amounts.GetOrCreate(address + Currency.ToSymbol(currency), () => 0) + input.Amount;
+                var key = new AddressCurrency(address, currency);
+                var amount = amounts[key] = amounts.GetOrCreate(key, () => 0) + input.Amount;
                 if (!LiveService.IssuerManager.IsIssuer(currency, account.Address) && account.GetBalance(currency) < amount)
                     return false;
             }
