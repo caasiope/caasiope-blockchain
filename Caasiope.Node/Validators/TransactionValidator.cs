@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Caasiope.Node.Sagas;
 using Caasiope.Node.Services;
 using Caasiope.Protocol.Types;
 using Helios.Common.Extensions;
 using Caasiope.Node.Managers;
-using Caasiope.Protocol;
+using Caasiope.Node.Types;
 using Caasiope.Protocol.Validators;
 
 namespace Caasiope.Node.Validators
@@ -189,7 +188,7 @@ namespace Caasiope.Node.Validators
         }
         */
 
-        public bool ValidateBalance(IAccountList accounts, IEnumerable<TxInput> inputs)
+        public bool ValidateBalance(LedgerState state, IEnumerable<TxInput> inputs)
         {
             // we cannot have duplicate (account + currency). In fact we can since we use fees in input
             var amounts = new Dictionary<string, Amount>();
@@ -197,8 +196,7 @@ namespace Caasiope.Node.Validators
             {
                 var currency = input.Currency;
                 var address = input.Address.Encoded;
-                Account account;
-                if (!accounts.TryGetAccount(address, out account))
+                if (!state.TryGetAccount(address, out var account))
                     return false;
 
                 // TODO looks not good

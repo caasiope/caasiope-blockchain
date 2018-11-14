@@ -7,6 +7,7 @@ using Caasiope.Log;
 using Caasiope.Node.Sagas;
 using Caasiope.Node.Services;
 using Caasiope.Node.Trackers;
+using Caasiope.Node.Types;
 using Caasiope.Node.Validators;
 using Caasiope.Protocol.MerkleTrees;
 using Caasiope.Protocol.Types;
@@ -23,12 +24,14 @@ namespace Caasiope.Node.Managers
 		[Injected] public IConnectionService ConnectionService;
 
         public SignedLedgerValidator SignedLedgerValidator;
-        private SignedLedger lastLedger;
+        // TODO remove what is already in the ledger state
         public ProtocolVersion Version;
         public readonly Network Network;
         private readonly ILogger logger;
         private readonly ILogger merkleLogger;
         private bool needSetInitialLedger;
+
+        public ImmutableLedgerState LedgerState;
 
         public LedgerManager(Network network, ILogger logger)
         {
@@ -49,8 +52,8 @@ namespace Caasiope.Node.Managers
 
         private void InitializeLedger(SignedLedger lastLedger)
         {
-            this.lastLedger = lastLedger;
-            Debug.Assert(SignedLedgerValidator.Validate(this.lastLedger) == LedgerValidationStatus.Ok, "Last Ledger is not valid"); // Most likely not enough signatures (see quorum)
+            LedgerState = new ImmutableLedgerState(lastLedger);
+            // Debug.Assert(SignedLedgerValidator.Validate(this.lastLedger) == LedgerValidationStatus.Ok, "Last Ledger is not valid"); // Most likely not enough signatures (see quorum)
             Version = GetLedgerLight().Version;
         }
 
@@ -95,9 +98,8 @@ namespace Caasiope.Node.Managers
         {
             Debug.Assert(ValidateSignedLedgerInternal(signed));
             Debug.Assert(ValidateSignatures(signed));
-
-            // save all    
-            Finalize(signed);
+            
+            Finalize(CreateLedgerState(signed));
 
             needSetInitialLedger = false;
             logger.Log($"Ledger Finalized. Height : {signed.Ledger.LedgerLight.Height} Transactions : {signed.Ledger.Block.Transactions.Count()} ");
@@ -157,32 +159,41 @@ namespace Caasiope.Node.Managers
 
         public LedgerHash GetLastLedgerHash()
         {
-            return lastLedger.Hash;
+            return LedgerState.LastLedger.Hash;
         }
 
         public long GetNextHeight()
         {
             return GetLedgerLight().Height + 1;
         }
-
-        // TODO wait for other threads to release ressources, maybe via live service
-        private void Finalize(SignedLedger signedLedger)
+        
+        // we create a new ledger state based on the current state and the new ledger
+        private MutableLedgerState CreateLedgerState(SignedLedger signedLedger)
         {
-            using (var bard = new FinalizeLedgerBard(new FinalizeLedgerFolklore(signedLedger), Contextualize(new FinalizeLedgerSaga())))
+            var state = new MutableLedgerState(LedgerState);
+            state.Bard = new FinalizeLedgerBard(new FinalizeLedgerFolklore(state), Contextualize(new FinalizeLedgerSaga()));
+            state.SignedLedger = signedLedger;
+            
+            byte index = 0;
+            foreach (var signed in signedLedger.Ledger.Block.Transactions)
             {
-                byte index = 0;
-                foreach (var signed in signedLedger.Ledger.Block.Transactions)
-                {
-                    // TODO make a better validation
-                    // Debug.Assert(signed.Transaction.Expire > signedLedger.Ledger.LedgerLight.BeginTime);
-                    Debug.Assert(signedLedger.Ledger.Block.FeeTransactionIndex == index++ || LiveService.TransactionManager.TransactionValidator.ValidateBalance(bard.Saga, signed.Transaction.GetInputs()));
-                    LiveService.SignedTransactionManager.Execute(bard.Saga, signed.Transaction);
-                }
+                // TODO make a better validation
+                // Debug.Assert(signed.Transaction.Expire > signedLedger.Ledger.LedgerLight.BeginTime);
+                Debug.Assert(signedLedger.Ledger.Block.FeeTransactionIndex == index++ || LiveService.TransactionManager.TransactionValidator.ValidateBalance(state, signed.Transaction.GetInputs()));
+                LiveService.SignedTransactionManager.Execute(state, signed.Transaction);
             }
 
-            lastLedger = signedLedger;
+            return state;
+        }
 
-            BroadcastNewLedger(lastLedger);
+        // we finalize the ledger and create a new immutable ledger state
+        private void Finalize(MutableLedgerState state)
+        {
+            LiveService.PersistenceManager.Save(state.GetLedgerStateChange());
+
+            LedgerState = state.Finalize();
+
+            BroadcastNewLedger(LedgerState.LastLedger);
         }
 
         private void BroadcastNewLedger(SignedLedger signedLedger)
@@ -201,12 +212,12 @@ namespace Caasiope.Node.Managers
 
         public LedgerLight GetLedgerLight()
         {
-            return lastLedger.Ledger.LedgerLight;
+            return GetSignedLedger().Ledger.LedgerLight;
         }
 
         public SignedLedger GetSignedLedger()
         {
-            return lastLedger;
+            return LedgerState.LastLedger;
         }
 
         public long GetLedgerBeginTime()

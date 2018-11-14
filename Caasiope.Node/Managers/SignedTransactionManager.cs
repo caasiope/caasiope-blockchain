@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using Caasiope.Node.Sagas;
 using Caasiope.Node.Services;
+using Caasiope.Node.Types;
 using Caasiope.Protocol.Types;
 
 namespace Caasiope.Node.Managers
@@ -15,46 +16,46 @@ namespace Caasiope.Node.Managers
             Injector.Inject(this);
         }
 
-        public void Execute(IUpdateStateSaga saga, Transaction transaction)
+        public void Execute(MutableLedgerState state, Transaction transaction)
         {
             // TODO declarations
             foreach (var declaration in transaction.Declarations)
-                ApplyDeclaration(saga, declaration);
+                ApplyDeclaration(state, declaration);
 
             // update balances
             foreach (var input in transaction.Inputs)
-                UpdateBalance(saga, input.Address, input.Currency, -input.Amount);
+                UpdateBalance(state, input.Address, input.Currency, -input.Amount);
             foreach (var input in transaction.Outputs)
-                UpdateBalance(saga, input.Address, input.Currency, input.Amount);
+                UpdateBalance(state, input.Address, input.Currency, input.Amount);
 
             if (transaction.Fees != null)
             {
-                UpdateBalance(saga, transaction.Fees.Address, transaction.Fees.Currency, -transaction.Fees.Amount);
+                UpdateBalance(state, transaction.Fees.Address, transaction.Fees.Currency, -transaction.Fees.Amount);
             }
         }
 
-        private void ApplyDeclaration(IUpdateStateSaga saga, TxDeclaration declaration)
+        private void ApplyDeclaration(MutableLedgerState state, TxDeclaration declaration)
         {
             if (declaration.Type == DeclarationType.MultiSignature)
             {
                 var multisig = (MultiSignature)declaration;
-                saga.TryAddAccount(multisig);
+                state.TryAddAccount(multisig);
             }
             else if (declaration.Type == DeclarationType.HashLock)
             {
                 var hashLock = (HashLock)declaration;
-                saga.TryAddAccount(hashLock);
+                state.TryAddAccount(hashLock);
             }
             else if(declaration.Type == DeclarationType.TimeLock)
             {
                 var timeLock = (TimeLock)declaration;
-                saga.TryAddAccount(timeLock);
+                state.TryAddAccount(timeLock);
             }
         }
 
-        private void UpdateBalance(IUpdateStateSaga saga, Address address, Currency currency, Amount amount)
+        private void UpdateBalance(MutableLedgerState state, Address address, Currency currency, Amount amount)
         {
-            if (!saga.TryGetAccount(address.Encoded, out var account))
+            if (!state.TryGetAccount(address.Encoded, out var account))
             {
                 //Debug.Assert(address.Type == AddressType.ECDSA);
                 Debug.Assert(amount != 0);
@@ -68,39 +69,13 @@ namespace Caasiope.Node.Managers
                     account = LiveService.AccountManager.CreateTimeLockAccount(address);
                 else 
                     throw new NotImplementedException();
-                saga.AddAccount(account);
+                state.AddAccount(account);
             }
 
             var balance = account.GetBalance(currency);
 
             Debug.Assert(LiveService.IssuerManager.IsIssuer(currency, address) || balance + amount >= 0);
-            saga.SetBalance(account, currency, balance + amount);
+            state.SetBalance(account, currency, balance + amount);
         }
-        /*
-        public bool Validate(SignedTransaction signed)
-        {
-            if (!Validate(signed))
-                return false;
-
-            // validate balance
-            if (!ValidateBalance(saga, signed.Transaction))
-                return false;
-
-            return true;
-        }
-        */
-        /*
-        public static bool Validate(IAccountList accounts, SignedTransaction signed)
-        {
-            if (!Validate(signed))
-                return false;
-
-            // validate balance
-            if (!ValidateBalance(accounts, signed.Transaction.GetInputs()))
-                return false;
-
-            return true;
-        }
-        */
     }
 }

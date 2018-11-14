@@ -100,6 +100,7 @@
     <Compile Include="Transformers\TransactionSignatureTransformerService.cs" />
     <Compile Include="Transformers\TransactionTransformerService.cs" />
     <Compile Include="Transformers\TxInputOutputTransformerService.cs" />
+    <Compile Include="Types\LedgerState.cs" />
     <Compile Include="Validators\SignedLedgerValidator.cs" />
     <Compile Include="ConsoleLogger.cs" />
     <Compile Include="Managers\AccountManager.cs" />

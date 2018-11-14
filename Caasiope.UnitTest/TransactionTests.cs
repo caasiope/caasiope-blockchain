@@ -246,7 +246,8 @@ namespace Caasiope.UnitTest
         private bool ValidateTransaction(TestContext context, SignedTransaction signed)
         {
             // TODO
-            return context.LiveService.TransactionManager.TransactionValidator.ValidateBalance(context.LiveService.AccountManager, signed.Transaction.GetInputs());
+            var state = context.LedgerService.LedgerManager.LedgerState;
+            return context.LiveService.TransactionManager.TransactionValidator.ValidateBalance(state, signed.Transaction.GetInputs());
         }
 
         [TestMethod]

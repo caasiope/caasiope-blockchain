@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Caasiope.Node.Types;
 using Caasiope.Protocol.Types;
 using Helios.Common.Concepts.Chronicles;
 
@@ -14,19 +15,18 @@ namespace Caasiope.Node.Sagas
 
         protected override void Terminate(FinalizeLedgerFolklore folklore)
         {
-            LiveService.PersistenceManager.Save(new SignedLedgerState(folklore.SignedLedger, GetStateChange()));
         }
     }
 
     internal class FinalizeLedgerFolklore
     {
 
-        public FinalizeLedgerFolklore(SignedLedger signedLedger)
+        public FinalizeLedgerFolklore(MutableLedgerState state)
         {
-            SignedLedger = signedLedger;
+            LedgerState = state;
         }
 
-        public SignedLedger SignedLedger { get; }
+        public MutableLedgerState LedgerState { get; }
     }
 
     class FinalizeLedgerBard : Bard<FinalizeLedgerFolklore, FinalizeLedgerSaga>

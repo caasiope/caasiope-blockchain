@@ -4,6 +4,7 @@ namespace Caasiope.Node.Managers
 {
     public static class AccountExtensions
     {
+        // TODO it is a bit stupid since we have a dictionnary in the Account implementation
         public static Amount GetBalance(this Account account, Currency currency)
         {
             foreach (var balance in account.Balances)
