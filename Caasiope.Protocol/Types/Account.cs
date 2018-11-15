@@ -73,22 +73,6 @@ namespace Caasiope.Protocol.Types
             }
         }
 
-        // TODO move
-        // used only for merkle tree
-        public AccountHash GetHash()
-        {
-            using (var stream = new ByteStream())
-            {
-                stream.WriteOld(this);
-
-                var message = stream.GetBytes();
-
-                var hasher = HashFactory.Crypto.SHA3.CreateKeccak256();
-                var hash = hasher.ComputeBytes(message).GetBytes();
-                return new AccountHash(hash);
-            }
-        }
-
         public Amount GetBalance(Currency currency)
         {
             if (balances.TryGetValue(currency, out var balance))

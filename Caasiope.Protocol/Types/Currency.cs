@@ -104,17 +104,6 @@ namespace Caasiope.Protocol.Types
             return !(a == b);
         }
 
-        // TODO replace
-        // version < cip#0001 : immutable state
-        public static int CompareOld(Currency x, Currency y)
-        {
-            if (x.GetHashCode() == y.GetHashCode())
-                return 0;
-            else if (x.GetHashCode() > y.GetHashCode())
-                return 1;
-            return -1;
-        }
-
         public static int Compare(Currency x, Currency y)
         {
             if (x.value == y.value)
@@ -129,7 +118,20 @@ namespace Caasiope.Protocol.Types
     {
         public int Compare(Currency x, Currency y)
         {
-            return Currency.CompareOld(x, y);
+            return Currency.Compare(x, y);
+        }
+    }
+
+    // version < cip#0001 : immutable state
+    public class CurrencyComparer1 : IComparer<Currency>
+    {
+        public int Compare(Currency x, Currency y)
+        {
+            if (x.GetHashCode() == y.GetHashCode())
+                return 0;
+            else if (x.GetHashCode() > y.GetHashCode())
+                return 1;
+            return -1;
         }
     }
 }

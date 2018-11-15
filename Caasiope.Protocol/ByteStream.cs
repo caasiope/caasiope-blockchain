@@ -76,7 +76,7 @@ namespace Caasiope.Protocol
             Write(account.IsDeclared);
         }
 
-        public void Write<T>(List<T> items, Action<T> write, int bytes = 1)
+        public void Write<T>(IList<T> items, Action<T> write, int bytes = 1)
         {
             Debug.Assert(bytes > 0 && bytes <= 4);
             var count = items.Count;
@@ -234,10 +234,13 @@ namespace Caasiope.Protocol
 
         // TODO replace
         // version < cip#0001 : immutable state
-        public void WriteOld(Account account)
+        public void Write1(Account account)
         {
             Write(account.Address);
-            Write(account.Balances.ToList(), Write);
+            var sorted = new SortedList<Currency, AccountBalance>(new CurrencyComparer1());
+            foreach (var balance in account.Balances)
+                sorted.Add(balance.Currency, balance);
+            Write(sorted.Values, Write);
         }
 
         public void Write(AccountBalance accountBalance)

@@ -57,7 +57,7 @@ namespace Caasiope.Node.Managers
 
         public LedgerMerkleRoot GetMerkleRoot()
         {
-            return new LedgerMerkleRoot(LedgerState.GetAccounts(), GetDeclarations(), merkleLogger);
+            return new LedgerMerkleRoot(LedgerState.GetAccounts(), GetDeclarations(), merkleLogger, HasherFactory.CreateHasher(Network, LedgerState.Height));
         }
 
         // for merkle root
