@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BlockchainEntities.cs" />
+    <Compile Include="Entities\account.cs" />
     <Compile Include="Entities\balance.cs" />
     <Compile Include="Entities\block.cs" />
     <Compile Include="Entities\declaration.cs" />

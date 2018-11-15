@@ -1,31 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Caasiope.Node.Managers;
+using Caasiope.Protocol.Extensions;
 using Caasiope.Protocol.Types;
+using Helios.Common.Extensions;
 
 namespace Caasiope.Node.Types
 {
-    public class ImmutableLedgerState : LedgerState
-    {
-        public readonly SignedLedger LastLedger;
-
-        public ImmutableLedgerState(SignedLedger lastLedger)
-        {
-            LastLedger = lastLedger;
-        }
-
-        public IEnumerable<Account> GetAccounts()
-        {
-            throw new NotImplementedException();
-            // TODO Optimize
-            // return accounts.Values.Where(account => account.Balances.Any(balance => balance.Amount != 0));
-        }
-    }
-
     public class MutableLedgerState : LedgerState
     {
         private readonly ImmutableLedgerState previous;
+        public long Height => previous.Height + 1;
+
+        public Action<MutableAccount> AccountCreated;
 
         public MutableLedgerState(ImmutableLedgerState previous)
         {
@@ -60,8 +47,9 @@ namespace Caasiope.Node.Types
         {
             // useless everything is already immutable
             var results = balances.Values.Select(balance => new Protocol.Types.AccountBalanceFull(balance.Account, balance.AccountBalance)).ToList();
+            var accountes = accounts.Values.Select(account => new AccountEntity(account.Address, account.CurrentLedger, account.Declaration != null)).ToList();
 
-            return new LedgerStateChange(results, multisigToInclude, hashLocksToInclude, timeLocksToInclude);
+            return new LedgerStateChange(accountes, results, multisigToInclude, hashLocksToInclude, timeLocksToInclude);
         }
 
         public virtual void RemoveTransaction(Dictionary<TransactionHash, SignedTransaction> pendingTransactions, TransactionHash hash)
@@ -72,9 +60,9 @@ namespace Caasiope.Node.Types
         }
 
         // bad naming
-        public virtual bool TryAddAccount(MultiSignature account)
+        public virtual bool DeclareAccount(MultiSignature account)
         {
-            if (ApplyDeclaration(account))
+            if (TrySetDeclaration(account))
             {
                 multisigToInclude.Add(account);
                 return true;
@@ -84,9 +72,9 @@ namespace Caasiope.Node.Types
         }
 
         // bad naming
-        public virtual bool TryAddAccount(HashLock account)
+        public virtual bool DeclareAccount(HashLock account)
         {
-            if (ApplyDeclaration(account))
+            if (TrySetDeclaration(account))
             {
                 hashLocksToInclude.Add(account);
                 return true;
@@ -96,9 +84,9 @@ namespace Caasiope.Node.Types
         }
 
         // bad naming
-        public virtual bool TryAddAccount(TimeLock account)
+        public virtual bool DeclareAccount(TimeLock account)
         {
-            if (ApplyDeclaration(account))
+            if (TrySetDeclaration(account))
             {
                 timeLocksToInclude.Add(account);
                 return true;
@@ -107,23 +95,18 @@ namespace Caasiope.Node.Types
         }
 
         // bad naming
-        public bool ApplyDeclaration<T>(T declaration) where T : TxAddressDeclaration
+        public bool TrySetDeclaration<T>(T declaration) where T : TxAddressDeclaration
         {
             var address = declaration.Address;
             // look in the state if it is already declared
-            throw new NotImplementedException();
-            // get and update in memory
-            // accountmanager should also manage declarations
-            /*
-            var extended = LiveService.AccountManager.GetOrCreateAccount(address, () => new ExtendedAccount());
-            // TODO handle concurrency
-            if (extended.Declaration == null)
-            {
-                extended.Declaration = declaration;
-                return true;
-            }
-            */
-            return false;
+
+            var account = GetOrCreateMutableAccount(address);
+            
+            if(account.Declaration != null)
+                return false;
+
+            account.SetDeclaration(declaration);
+            return true;
         }
 
         public void SetBalance(MutableAccount account, Currency currency, Amount amount)
@@ -133,8 +116,15 @@ namespace Caasiope.Node.Types
 
         public ImmutableLedgerState Finalize()
         {
-            throw new NotImplementedException();
-            return new ImmutableLedgerState(SignedLedger);
+            var dictionary = new Dictionary<Address,Account>();
+
+            foreach (var pair in accounts)
+                dictionary.Add(pair.Key, pair.Value);
+
+            foreach (var account in previous.GetAccounts())
+                dictionary.GetOrCreate(account.Address, () => account);
+
+            return new ImmutableLedgerState(SignedLedger, dictionary);
         }
 
         public MutableAccount GetOrCreateMutableAccount(Address address)
@@ -149,26 +139,27 @@ namespace Caasiope.Node.Types
             if (previous.TryGetAccount(address, out var old))
             {
                 // make a new copy
-                account = new MutableAccount(old.Address, old.Balances);
+                account = new MutableAccount(old, Height);
             }
             else
             {
-                throw new NotImplementedException();
-                // TODO use a callback
-                // try to get it from the account manager
-                // var extended = LiveService.AccountManager.GetOrCreateAccount(address, () => new ExtendedAccount());
+                account = new MutableAccount(address, Height);
+                AccountCreated(account);
             }
 
             accounts.Add(address, account);
             return account;
         }
-    }
 
-    public class LedgerState
-    {
-        public bool TryGetAccount(Address address, out Account account)
+        public override bool TryGetAccount(Address address, out Account account)
         {
-            throw new NotImplementedException();
+            if (accounts.TryGetValue(address, out var mutable))
+            {
+                account = mutable;
+                return true;
+            }
+
+            return previous.TryGetAccount(address, out account);
         }
     }
 }

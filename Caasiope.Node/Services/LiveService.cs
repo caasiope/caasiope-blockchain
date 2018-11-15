@@ -16,9 +16,6 @@ namespace Caasiope.Node.Services
         PersistenceManager PersistenceManager { get; }
         SignedTransactionManager SignedTransactionManager { get; }
         TransactionManager TransactionManager { get; }
-        MultiSignatureManager MultiSignatureManager { get; }
-        HashLockManager HashLockManager { get; }
-        TimeLockManager TimeLockManager { get; }
         SignatureManager SignatureManager { get; }
         ValidatorManager ValidatorManager { get; }
         CatchupManager CatchupManager { get; }
@@ -37,9 +34,6 @@ namespace Caasiope.Node.Services
         public PersistenceManager PersistenceManager { get; } = new PersistenceManager();
         public SignedTransactionManager SignedTransactionManager { get; } = new SignedTransactionManager();
         public TransactionManager TransactionManager { get; } = new TransactionManager();
-        public MultiSignatureManager MultiSignatureManager { get; } = new MultiSignatureManager();
-        public HashLockManager HashLockManager { get; } = new HashLockManager();
-        public TimeLockManager TimeLockManager { get; } = new TimeLockManager();
         public SignatureManager SignatureManager { get; } = new SignatureManager();
         public ValidatorManager ValidatorManager { get; } = new ValidatorManager();
         public CatchupManager CatchupManager { get; } = new CatchupManager();
@@ -87,13 +81,10 @@ namespace Caasiope.Node.Services
             DataTransformationService.StartedHandle.WaitOne();
             DataTransformationService.WaitTransformationCompleted();
 
+            var accounts = DatabaseService.ReadDatabaseManager.GetAccounts();
+
             // load all the accounts
-            // TODO initialize account balances after declarations
-            AccountManager.Initialize(DatabaseService.ReadDatabaseManager.GetAccounts());
-            MultiSignatureManager.Initialize(DatabaseService.ReadDatabaseManager.GetMultiSignatureAddresses());
-            HashLockManager.Initialize(DatabaseService.ReadDatabaseManager.GetHashLockAccounts());
-            TimeLockManager.Initialize(DatabaseService.ReadDatabaseManager.GetTimeLockAccounts());
-            SignatureManager.Initialize();
+            AccountManager.Initialize(accounts);
             IssuerManager.Initialize(issuers);
             ValidatorManager.Initialize(validators, quorum);
             TransactionManager.Initialize();

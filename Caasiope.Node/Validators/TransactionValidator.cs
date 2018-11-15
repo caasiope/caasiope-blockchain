@@ -5,7 +5,6 @@ using Caasiope.Node.Services;
 using Caasiope.Protocol.Types;
 using Helios.Common.Extensions;
 using Caasiope.Node.Managers;
-using Caasiope.Node.Types;
 using Caasiope.Protocol.Validators;
 
 namespace Caasiope.Node.Validators
@@ -33,7 +32,7 @@ namespace Caasiope.Node.Validators
                 return false;
 
             // validate signature
-            if (!signed.CheckSignatures(LiveService.SignatureManager.TransactionRequiredValidationFactory, LedgerService.LedgerManager.Network, timestamp))
+            if (!signed.CheckSignatures(LiveService.SignatureManager.TransactionRequiredValidationFactory, LedgerService.LedgerManager.Network, timestamp, LedgerService.LedgerManager.LedgerState))
                 return false;
 
             return Validate(signed.Transaction);
@@ -188,6 +187,7 @@ namespace Caasiope.Node.Validators
         }
         */
 
+        // validates the inputs are spending money that exists
         public bool ValidateBalance(LedgerState state, IEnumerable<TxInput> inputs)
         {
             // we cannot have duplicate (account + currency). In fact we can since we use fees in input
@@ -196,13 +196,18 @@ namespace Caasiope.Node.Validators
             {
                 var currency = input.Currency;
                 var address = input.Address;
+
+                // no need to check we have enough balance if we are issuer
+                if(LiveService.IssuerManager.IsIssuer(currency, address))
+                    continue;
+
                 if (!state.TryGetAccount(address, out var account))
                     return false;
 
                 // TODO looks not good
                 var key = new AddressCurrency(address, currency);
                 var amount = amounts[key] = amounts.GetOrCreate(key, () => 0) + input.Amount;
-                if (!LiveService.IssuerManager.IsIssuer(currency, account.Address) && account.GetBalance(currency) < amount)
+                if (account.GetBalance(currency) < amount)
                     return false;
             }
 

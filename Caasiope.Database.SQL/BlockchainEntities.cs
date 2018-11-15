@@ -16,6 +16,10 @@ namespace Caasiope.Database.SQL
         }
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<account>().HasKey(u => new
+            {
+                u.address
+            });
             modelBuilder.Entity<balance>().HasKey(u => new
             {
                 u.account,
@@ -92,6 +96,7 @@ namespace Caasiope.Database.SQL
             });
         }
 
+        public virtual DbSet<account> accounts { get; set; }
         public virtual DbSet<balance> balances { get; set; }
         public virtual DbSet<transactioninputoutput> transactioninputoutputs { get; set; }
         public virtual DbSet<transaction> transactions { get; set; }

@@ -20,11 +20,16 @@ namespace Caasiope.P2P
             {
                 var certPath = lines.GetValue("TLS_CERT");
                 var pwd = lines.GetValue("TLS_PWD");
-                cert = new X509Certificate2(certPath, pwd);
+                if (File.Exists(certPath))
+                    cert = new X509Certificate2(certPath, pwd);
             }
             catch (Exception e)
             {
-                if(File.Exists(defaultPath))
+            }
+
+            if (cert == null)
+            {
+                if (File.Exists(defaultPath))
                     cert = new X509Certificate2(defaultPath, "");
             }
 

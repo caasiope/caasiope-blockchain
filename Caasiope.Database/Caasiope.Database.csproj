@@ -41,9 +41,11 @@
     <Compile Include="Managers\SqlTransactionManager.cs" />
     <Compile Include="Managers\WipeDatabaseHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\AccountRepository.cs" />
     <Compile Include="Repositories\BalanceRepository.cs" />
     <Compile Include="Repositories\BlockRepository.cs" />
     <Compile Include="Repositories\DeclarationRepository.cs" />
+    <Compile Include="Repositories\Entities\AccountEntity.cs" />
     <Compile Include="Repositories\TransactionDeclarationRepository.cs" />
     <Compile Include="Repositories\Entities\BlockEntity.cs" />
     <Compile Include="Repositories\Entities\AccountBalanceFull.cs" />

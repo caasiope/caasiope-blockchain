@@ -9,7 +9,7 @@ namespace Caasiope.Protocol.Validators.Transactions
         private readonly List<TransactionRequiredValidation> signers;
         private readonly int threshold;
 
-        public MultiAddressRequiredSignature(MultiSignatureAddress multi, List<TransactionRequiredValidation> signers)
+        public MultiAddressRequiredSignature(MultiSignature multi, List<TransactionRequiredValidation> signers)
         {
             this.signers = signers;
             threshold = multi.Required;

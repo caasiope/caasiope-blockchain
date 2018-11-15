@@ -59,15 +59,34 @@ namespace Caasiope.Database.Managers
         // This we load to the state on initialization
         public List<Account> GetAccounts()
         {
-            var list = new Dictionary<string, MutableAccount>();
+            var list = new Dictionary<Address, MutableAccount>();
+
+            foreach (var account in repositoryManager.GetRepository<AccountRepository>().GetEnumerable())
+            {
+                list.Add(account.Address, new MutableAccount(account.Address, account.CurrentLedgerHeight));
+            }
 
             foreach (var balance in repositoryManager.GetRepository<BalanceRepository>().GetEnumerable())
             {
-                var address = balance.Account;
-                list.GetOrCreate(address.Encoded, () => new MutableAccount(address)).SetBalance(balance.AccountBalance);
+                list[balance.Account].SetBalance(balance.AccountBalance);
             }
 
-            return list.Values.Select(mutable => (Account) mutable).ToList();
+            foreach (var multi in GetMultiSignatureAddresses())
+            {
+                list[multi.Address].SetDeclaration(new MultiSignature(multi.Signers, multi.Required));
+            }
+
+            foreach (var hashlock in GetHashLockAccounts())
+            {
+                list[hashlock.Address].SetDeclaration(new HashLock(hashlock.SecretHash)); // TODO optimize
+            }
+
+            foreach (var timelock in GetTimeLockAccounts())
+            {
+                list[timelock.Address].SetDeclaration(new TimeLock(timelock.Timestamp));
+            }
+
+            return list.Values.Select(mutable => mutable.Finalize()).ToList(); // TODO ugly
         }
 
         // This is used only in UnitTests to verify if transformation works correctly

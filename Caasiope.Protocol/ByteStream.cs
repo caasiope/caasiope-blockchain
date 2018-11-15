@@ -56,6 +56,7 @@ namespace Caasiope.Protocol
 
         public void Write(LedgerStateChange change)
         {
+            Write(change.Accounts, Write);
             Write(change.Balances, Write);
             Write(change.MultiSignatures, Write);
             Write(change.HashLocks, Write);
@@ -66,6 +67,13 @@ namespace Caasiope.Protocol
         {
             Write(accountBalance.Account);
             Write(accountBalance.AccountBalance);
+        }
+
+        private void Write(AccountEntity account)
+        {
+            Write(account.Address);
+            Write(account.CurrentLedgerHeight);
+            Write(account.IsDeclared);
         }
 
         public void Write<T>(List<T> items, Action<T> write, int bytes = 1)
@@ -217,6 +225,16 @@ namespace Caasiope.Protocol
         }
 
         public void Write(Account account)
+        {
+            Write(account.Address);
+            Write(account.CurrentLedger);
+            Write(account.Balances.ToList(), Write);
+            WriteNullable(account.Declaration, Write);
+        }
+
+        // TODO replace
+        // version < cip#0001 : immutable state
+        public void WriteOld(Account account)
         {
             Write(account.Address);
             Write(account.Balances.ToList(), Write);
@@ -387,7 +405,7 @@ namespace Caasiope.Protocol
 
         public Account ReadAccount()
         {
-            return new Account(ReadAddress(), ReadAccountBalances());
+            return new Account(ReadAddress(), ReadLong(), ReadAccountBalances(), (TxAddressDeclaration) ReadNullable(ReadTxDeclaration));
         }
 
         protected List<AccountBalance> ReadAccountBalances()
@@ -469,12 +487,17 @@ namespace Caasiope.Protocol
 
         public LedgerStateChange ReadLedgerStateChange()
         {
-            return new LedgerStateChange(ReadList(ReadAccountBalanceFull), ReadList(ReadMultiSignature), ReadList(ReadHashLock), ReadList(ReadTimeLock));
+            return new LedgerStateChange(ReadList(ReadAccountEntity), ReadList(ReadAccountBalanceFull), ReadList(ReadMultiSignature), ReadList(ReadHashLock), ReadList(ReadTimeLock));
         }
 
         private AccountBalanceFull ReadAccountBalanceFull()
         {
             return new AccountBalanceFull(ReadAddress(), ReadAccountBalance());
+        }
+
+        private AccountEntity ReadAccountEntity()
+        {
+            return new AccountEntity(ReadAddress(), ReadLong(), ReadBool());
         }
     }
 }

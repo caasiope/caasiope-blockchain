@@ -7,6 +7,8 @@ namespace Caasiope.Node.ConsoleCommands.Commands
     {
         protected override void ExecuteCommand(string[] args)
         {
+            throw new NotImplementedException();
+            /*
             var results = LiveService.MultiSignatureManager.GetMultiSignatures().ToList();
 
             Console.WriteLine($"Number of MultiSignatures : {results.Count}");
@@ -20,6 +22,7 @@ namespace Caasiope.Node.ConsoleCommands.Commands
                     Console.WriteLine($"Address : {multiSignatureSigner.Encoded} AddressType : {multiSignatureSigner.Type}");
                 }
             }
+            */
         }
     }
 }

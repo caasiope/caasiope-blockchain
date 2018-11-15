@@ -37,17 +37,17 @@ namespace Caasiope.Node.Managers
             if (declaration.Type == DeclarationType.MultiSignature)
             {
                 var multisig = (MultiSignature)declaration;
-                state.TryAddAccount(multisig);
+                state.DeclareAccount(multisig);
             }
             else if (declaration.Type == DeclarationType.HashLock)
             {
                 var hashLock = (HashLock)declaration;
-                state.TryAddAccount(hashLock);
+                state.DeclareAccount(hashLock);
             }
             else if(declaration.Type == DeclarationType.TimeLock)
             {
                 var timeLock = (TimeLock)declaration;
-                state.TryAddAccount(timeLock);
+                state.DeclareAccount(timeLock);
             }
         }
 

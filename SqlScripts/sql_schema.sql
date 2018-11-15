@@ -1,5 +1,7 @@
 CREATE TABLE `accounts` (
 	`address` BINARY(21) NOT NULL,
+	`current_ledger_height` BIGINT NOT NULL,
+	`is_declared` TINYINT(1) NOT NULL,
 
 	PRIMARY KEY(`address`)
 );

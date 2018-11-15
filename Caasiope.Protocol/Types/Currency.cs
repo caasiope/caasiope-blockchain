@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Caasiope.Protocol.Types
@@ -100,6 +102,34 @@ namespace Caasiope.Protocol.Types
         public static bool operator != (Currency a, Currency b)
         {
             return !(a == b);
+        }
+
+        // TODO replace
+        // version < cip#0001 : immutable state
+        public static int CompareOld(Currency x, Currency y)
+        {
+            if (x.GetHashCode() == y.GetHashCode())
+                return 0;
+            else if (x.GetHashCode() > y.GetHashCode())
+                return 1;
+            return -1;
+        }
+
+        public static int Compare(Currency x, Currency y)
+        {
+            if (x.value == y.value)
+                return 0;
+            else if (x.value > y.value)
+                return 1;
+            return -1;
+        }
+    }
+
+    public class CurrencyComparer : IComparer<Currency>
+    {
+        public int Compare(Currency x, Currency y)
+        {
+            return Currency.CompareOld(x, y);
         }
     }
 }

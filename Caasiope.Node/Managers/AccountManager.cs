@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Caasiope.Protocol.Types;
 using Helios.Common.Synchronization;
 
@@ -15,14 +16,14 @@ namespace Caasiope.Node.Managers
         private readonly Dictionary<Address, ExtendedAccount> accounts = new Dictionary<Address, ExtendedAccount>();
         private readonly MonitorLocker locker = new MonitorLocker();
 
-        public void Initialize(List<Account> list)
+        public void Initialize(IEnumerable<Account> list)
         {
             // TODO add the account as the last history
             using (locker.CreateLock())
             {
                 foreach (var account in list)
                 {
-                    accounts.Add(account.Address, new ExtendedAccount());
+                    accounts.Add(account.Address, new ExtendedAccount(account));
                 }
             }
         }
@@ -59,6 +60,19 @@ namespace Caasiope.Node.Managers
                 return account;
             }
         }
+
+        // TODO ugly
+        // used only for initialization
+        internal Dictionary<Address, Account> GetAccounts()
+        {
+            var dictionary = new Dictionary<Address, Account>();
+            using (locker.CreateLock())
+            {
+                foreach (var pair in accounts)
+                    dictionary.Add(pair.Key, pair.Value.Account);
+            }
+            return dictionary;
+        }
     }
 
     // represents an account in memory
@@ -67,5 +81,13 @@ namespace Caasiope.Node.Managers
         public TxAddressDeclaration Declaration { get; set; }
 
         // make it a node of the account history list
+
+        // the initial account
+        public readonly Account Account;
+
+        public ExtendedAccount(Account account)
+        {
+            Account = account;
+        }
     }
 }

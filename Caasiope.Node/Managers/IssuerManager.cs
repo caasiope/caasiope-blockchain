@@ -18,7 +18,7 @@ namespace Caasiope.Node.Managers
             foreach (var issuer in list)
             {
                 // if(issuer.Currency == Currency.CAS) throw new ArgumentException($"{nameof(Currency.CAS)} cannot have issuer");
-                CreateAccount(issuer.Address);
+                // CreateAccount(issuer.Address);
                 issuers.Add(issuer.Currency, issuer.Address);
             }
 
@@ -32,7 +32,7 @@ namespace Caasiope.Node.Managers
         // create the account for the issuer in memory at statup
         private void CreateAccount(Address address)
         {
-            LiveService.AccountManager.GetOrCreateAccount(address, () => new ExtendedAccount());
+            // LiveService.AccountManager.GetOrCreateAccount(address, () => new ExtendedAccount());
             // throw new Exception($"Issuer account {address.Encoded} does not exist !");
         }
 

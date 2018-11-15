@@ -50,7 +50,7 @@ namespace Caasiope.Node.Managers
 
         private void InitializeLedger(SignedLedger lastLedger)
         {
-            LedgerState = new ImmutableLedgerState(lastLedger);
+            LedgerState = new ImmutableLedgerState(lastLedger, LiveService.AccountManager.GetAccounts());
             // Debug.Assert(SignedLedgerValidator.Validate(this.lastLedger) == LedgerValidationStatus.Ok, "Last Ledger is not valid"); // Most likely not enough signatures (see quorum)
             Version = GetLedgerLight().Version;
         }
@@ -60,15 +60,10 @@ namespace Caasiope.Node.Managers
             return new LedgerMerkleRoot(LedgerState.GetAccounts(), GetDeclarations(), merkleLogger);
         }
 
+        // for merkle root
         private IEnumerable<TxDeclaration> GetDeclarations()
         {
-            throw new NotImplementedException();
-            // 
-            var result = new List<TxDeclaration>();
-            result.AddRange(LiveService.MultiSignatureManager.GetMultiSignatures());
-            result.AddRange(LiveService.HashLockManager.GetHashLocks());
-            result.AddRange(LiveService.TimeLockManager.GetTimeLocks());
-            return result;
+            return LedgerState.GetAccounts().Where(account => account.Declaration != null).Select(account => (TxDeclaration) account.Declaration);
         }
 
         // call from command
@@ -170,7 +165,7 @@ namespace Caasiope.Node.Managers
         // we create a new ledger state based on the current state and the new ledger
         private MutableLedgerState CreateLedgerState(SignedLedger signedLedger)
         {
-            var state = new MutableLedgerState(LedgerState);
+            var state = new MutableLedgerState(LedgerState) {AccountCreated = account => LiveService.AccountManager.AddAccount(account.Address, new ExtendedAccount(account))};
             state.SignedLedger = signedLedger;
 
             byte index = 0;

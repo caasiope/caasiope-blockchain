@@ -9,57 +9,63 @@ namespace Caasiope.Protocol.Types
     // TODO this should be a wrapper
     public class MutableAccount : Account
     {
-        public MutableAccount(Address address) : base(address)
+        public MutableAccount(Address address, long current) : base(address, current)
         {
         }
 
-        public MutableAccount(Address address, IEnumerable<AccountBalance> balances) : base(address, balances)
+        // TODO make it static method with explicit name
+        public MutableAccount(Account account, long current) : base(account.Address, current, account.Balances, account.Declaration)
         {
         }
 
-        public void SetBalance(AccountBalance balance)
+        public MutableAccount SetBalance(AccountBalance balance)
         {
             balances[balance.Currency] = balance;
+            return this;
         }
-    }
 
-    // TODO this should be the default account class
-    public class ImmutableAccount : Account
-    {
-        protected ImmutableAccount(Address address, List<AccountBalance> balances) : base(address, balances) { }
-    }
-
-    // TODO this should be the default account class
-    public class AccountHistory
-    {
-        public readonly ImmutableAccount Account;
-        public readonly long CurrentLedger;
-        public readonly long PreviousLedger;
-        public readonly bool IsDeclared; // this should be able to mute
-
-        public AccountHistory(ImmutableAccount account, long currentLedger, long previousLedger, bool isDeclared)
+        public new MutableAccount SetBalances(IEnumerable<AccountBalance> balances)
         {
-            Account = account;
-            CurrentLedger = currentLedger;
-            PreviousLedger = previousLedger;
-            IsDeclared = isDeclared;
+            base.SetBalances(balances);
+            return this;
+        }
+
+        public MutableAccount SetDeclaration(TxAddressDeclaration declaration)
+        {
+            Declaration = declaration;
+            return this;
+        }
+
+        public Account Finalize()
+        {
+            return this;
         }
     }
 
+    // this account should be immutable
     [DebuggerDisplay("Address = {Address.Encoded}")]
     public class Account
     {
         public readonly Address Address;
         public IEnumerable<AccountBalance> Balances => balances.Values;
+        public readonly long CurrentLedger;
+        public TxAddressDeclaration Declaration { get; protected set; }
 
-        protected readonly Dictionary<Currency, AccountBalance> balances = new Dictionary<Currency, AccountBalance>();
+        protected readonly SortedDictionary<Currency, AccountBalance> balances = new SortedDictionary<Currency, AccountBalance>(new CurrencyComparer());
 
-        protected Account(Address address)
+        protected Account(Address address, long current)
         {
             Address = address;
+            CurrentLedger = current;
         }
 
-        public Account(Address address, IEnumerable<AccountBalance> balances) : this(address)
+        public Account(Address address, long current, IEnumerable<AccountBalance> balances, TxAddressDeclaration declaration = null) : this(address, current)
+        {
+            Declaration = declaration;
+            SetBalances(balances);
+        }
+
+        protected void SetBalances(IEnumerable<AccountBalance> balances)
         {
             foreach (var balance in balances)
             {
@@ -67,48 +73,13 @@ namespace Caasiope.Protocol.Types
             }
         }
 
-        // TODO remove
-        public static bool operator ==(Account a, Account b)
-        {
-            return a.Address == b.Address;
-        }
-
-        // TODO remove
-        public static bool operator !=(Account a, Account b)
-        {
-            return !(a == b);
-        }
-
-        // TODO remove
-        public Account Clone()
-        {
-            return new Account(Address, Balances.Select(b => new AccountBalance((short)b.Currency, (long)b.Amount)).ToList());
-        }
-
+        // TODO move
         // used only for merkle tree
         public AccountHash GetHash()
         {
-            var sorted = SortBalances(Balances);
-            return GetHash(sorted);
-        }
-
-        private static SortedList<int, AccountBalance> SortBalances(IEnumerable<AccountBalance> balances)
-        {
-            var list = new SortedList<int, AccountBalance>();
-            foreach (var balance in balances)
-            {
-                list.Add(balance.Currency.GetHashCode(), balance);
-            }
-            return list;
-        }
-
-        // TODO move
-        private AccountHash GetHash(SortedList<int, AccountBalance> balances)
-        {
             using (var stream = new ByteStream())
             {
-                stream.Write(Address);
-                stream.Write(balances.Values.ToList(), stream.Write);
+                stream.WriteOld(this);
 
                 var message = stream.GetBytes();
 
@@ -116,6 +87,14 @@ namespace Caasiope.Protocol.Types
                 var hash = hasher.ComputeBytes(message).GetBytes();
                 return new AccountHash(hash);
             }
+        }
+
+        public Amount GetBalance(Currency currency)
+        {
+            if (balances.TryGetValue(currency, out var balance))
+                return balance.Amount;
+
+            return 0;
         }
     }
 
