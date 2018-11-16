@@ -86,11 +86,8 @@ namespace Caasiope.Node.Services
 
         private void CheckMerkleRoot()
         {
-            var merkle = LedgerService.LedgerManager.GetMerkleRoot();
-            var ledger = LedgerService.LedgerManager.GetSignedLedger();
-
             // TODO why debug assert ?
-            Debug.Assert(ledger.Ledger.MerkleHash.Equals(merkle.Hash));
+            Debug.Assert(LedgerService.LedgerManager.CheckMerkleRoot());
         }
 
         protected override void OnStop()

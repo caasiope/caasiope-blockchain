@@ -14,7 +14,7 @@ namespace Caasiope.Protocol.Types
             accounts = list;
         }
 
-        private readonly Dictionary<Address, Account> accounts;
+        private readonly IReadOnlyDictionary<Address, Account> accounts;
 
         public IEnumerable<Account> GetAccounts()
         {

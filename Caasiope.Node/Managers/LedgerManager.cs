@@ -29,7 +29,7 @@ namespace Caasiope.Node.Managers
         private readonly ILogger merkleLogger;
         private bool needSetInitialLedger;
 
-        public ImmutableLedgerState LedgerState;
+        public ImmutableLedgerState LedgerState { get; private set; }
 
         public LedgerManager(Network network, ILogger logger)
         {
@@ -57,13 +57,18 @@ namespace Caasiope.Node.Managers
 
         public LedgerMerkleRoot GetMerkleRoot()
         {
-            return new LedgerMerkleRoot(LedgerState.GetAccounts(), GetDeclarations(), merkleLogger, HasherFactory.CreateHasher(Network, LedgerState.Height));
+            return GetMerkleRootInternal(LedgerState);
+        }
+
+        private LedgerMerkleRoot GetMerkleRootInternal(ImmutableLedgerState ledgerState)
+        {
+            return new LedgerMerkleRoot(ledgerState.GetAccounts(), GetDeclarations(ledgerState), merkleLogger, HasherFactory.CreateHasher(Network, ledgerState.Height));
         }
 
         // for merkle root
-        private IEnumerable<TxDeclaration> GetDeclarations()
+        private IEnumerable<TxDeclaration> GetDeclarations(ImmutableLedgerState ledgerState)
         {
-            return LedgerState.GetAccounts().Where(account => account.Declaration != null).Select(account => (TxDeclaration) account.Declaration);
+            return ledgerState.GetAccounts().Where(account => account.Declaration != null).Select(account => (TxDeclaration) account.Declaration);
         }
 
         // call from command
@@ -183,11 +188,30 @@ namespace Caasiope.Node.Managers
         // we finalize the ledger and create a new immutable ledger state
         private void Finalize(MutableLedgerState state)
         {
+            var ledgerState = state.Finalize();
+            
+            if (!CheckMerkleRootInternal(ledgerState))
+                throw new Exception("Merkle root is not valid");
+
             LiveService.PersistenceManager.Save(state.GetLedgerStateChange());
 
-            LedgerState = state.Finalize();
+            LedgerState = ledgerState;
 
             BroadcastNewLedger(LedgerState.LastLedger);
+        }
+
+        private bool CheckMerkleRootInternal(ImmutableLedgerState ledgerState)
+        {
+            var merkle = GetMerkleRootInternal(ledgerState);
+            var ledger = ledgerState.LastLedger;
+
+            return ledger.Ledger.MerkleHash.Equals(merkle.Hash);
+        }
+
+
+        public bool CheckMerkleRoot()
+        {
+            return CheckMerkleRootInternal(LedgerState);
         }
 
         private void BroadcastNewLedger(SignedLedger signedLedger)

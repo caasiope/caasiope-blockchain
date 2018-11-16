@@ -35,7 +35,7 @@ namespace Caasiope.Node.Types
 
         // TODO use the account history list to dynamicly compute the changes ?
         // we keep the list of the changes
-        private readonly Dictionary<AddressCurrency, Protocol.Types.AccountBalanceFull> balances = new Dictionary<AddressCurrency, Protocol.Types.AccountBalanceFull>();
+        private readonly Dictionary<AddressCurrency, AccountBalanceFull> balances = new Dictionary<AddressCurrency, AccountBalanceFull>();
         private readonly List<MultiSignature> multisigToInclude = new List<MultiSignature>();
         private readonly List<HashLock> hashLocksToInclude = new List<HashLock>();
         private readonly List<TimeLock> timeLocksToInclude = new List<TimeLock>();
@@ -45,11 +45,8 @@ namespace Caasiope.Node.Types
 
         public LedgerStateChange GetStateChange()
         {
-            // useless everything is already immutable
-            var results = balances.Values.Select(balance => new Protocol.Types.AccountBalanceFull(balance.Account, balance.AccountBalance)).ToList();
             var accountes = accounts.Values.Select(account => new AccountEntity(account.Address, account.CurrentLedger, account.Declaration != null)).ToList();
-
-            return new LedgerStateChange(accountes, results, multisigToInclude, hashLocksToInclude, timeLocksToInclude);
+            return new LedgerStateChange(accountes, balances.Values.ToList(), multisigToInclude, hashLocksToInclude, timeLocksToInclude);
         }
 
         public virtual void RemoveTransaction(Dictionary<TransactionHash, SignedTransaction> pendingTransactions, TransactionHash hash)
