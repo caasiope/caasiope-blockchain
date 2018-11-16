@@ -53,7 +53,7 @@ namespace Caasiope.Database.Repositories
 
         protected override SignedTransactionSimple ToItem(transaction entity)
         {
-            return new SignedTransactionSimple(new TransactionHash(entity.hash), entity.ledger_height, entity.expire);
+            return new SignedTransactionSimple(new TransactionHash(entity.hash), entity.ledger_height, entity.expire, entity.ledger_timestamp);
         }
 
         public IEnumerable<SignedTransactionSimple> GetByHeight(long height)

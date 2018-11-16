@@ -15,6 +15,7 @@ CREATE TABLE `balances` (
 CREATE TABLE `transactions` (
 	`hash` BINARY(32) NOT NULL,
 	`ledger_height` BIGINT NOT NULL,
+	`ledger_timestamp` BIGINT NOT NULL,
 	`expire` BIGINT NOT NULL,
 	PRIMARY KEY(`hash`)
 );

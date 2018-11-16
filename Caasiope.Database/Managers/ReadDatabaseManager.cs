@@ -221,8 +221,7 @@ namespace Caasiope.Database.Managers
 
                     if (ledgerHeight == null || simple.LedgerHeight > ledgerHeight)
                     {
-
-                        list.Add(hash, new HistoricalTransaction(simple.LedgerHeight, GetTransaction(simple)));
+                        list.Add(hash, new HistoricalTransaction(simple.LedgerHeight, GetTransaction(simple), simple.LedgerTimestamp));
                     }
                 }
             }
