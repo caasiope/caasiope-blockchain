@@ -91,6 +91,7 @@ namespace Caasiope.Node.Services
 
             // TODO why debug assert ?
             Debug.Assert(ledger.Ledger.MerkleHash.Equals(merkle));
+            Debug.Assert(LedgerService.LedgerManager.CheckMerkleRoot());
         }
 
         protected override void OnStop()
