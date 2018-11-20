@@ -86,11 +86,11 @@ namespace Caasiope.UnitTest
 
                 context.DataTransformationService.WaitTransformationCompleted();
 
-                var last = context.LedgerService.LedgerManager.GetMerkleRoot();
+                var last = context.LedgerService.LedgerManager.GetMerkleRootHash();
 
                 var fromDb = context.DatabaseService.ReadDatabaseManager.GetLastLedger();
 
-                Assert.IsTrue(last.Hash.Equals(fromDb.Ledger.MerkleHash));
+                Assert.IsTrue(last.Equals(fromDb.Ledger.MerkleHash));
             }
         }
     }

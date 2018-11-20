@@ -2,26 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caasiope.Protocol.Extensions;
+using Caasiope.Protocol.MerkleTrees;
 using Caasiope.Protocol.Types;
-using Helios.Common.Extensions;
 
 namespace Caasiope.Node.Types
 {
     public class MutableLedgerState : LedgerState
     {
-        private readonly ImmutableLedgerState previous;
-        public long Height => previous.Height + 1;
+        public readonly SignedLedger SignedLedger;
+        public long Height => SignedLedger.Ledger.LedgerLight.Height;
 
         public Action<MutableAccount> AccountCreated;
 
-        public MutableLedgerState(ImmutableLedgerState previous)
+        public MutableLedgerState(LedgerState previous, SignedLedger ledger) : base(GetTree(previous).Clone())
         {
-            this.previous = previous;
-            // create next state
-            // throw new NotImplementedException();
+            SignedLedger = ledger;
         }
-
-        public SignedLedger SignedLedger { get; set; }
 
         public SignedLedgerState GetLedgerStateChange()
         {
@@ -116,15 +112,7 @@ namespace Caasiope.Node.Types
 
         public ImmutableLedgerState Finalize()
         {
-            var dictionary = new Dictionary<Address,Account>();
-
-            foreach (var pair in accounts)
-                dictionary.Add(pair.Key, pair.Value);
-
-            foreach (var account in previous.GetAccounts())
-                dictionary.GetOrCreate(account.Address, () => account);
-
-            return new ImmutableLedgerState(SignedLedger, dictionary);
+            return new ImmutableLedgerState(SignedLedger, tree, HasherFactory.CreateHasher(SignedLedger.Ledger.LedgerLight.Version));
         }
 
         public MutableAccount GetOrCreateMutableAccount(Address address)
@@ -135,17 +123,22 @@ namespace Caasiope.Node.Types
                 return account;
             }
 
-            // try to get it into the previous state
-            if (previous.TryGetAccount(address, out var old))
+            tree.CreateOrUpdate(address.ToRawBytes(), old =>
             {
-                // make a new copy
-                account = new MutableAccount(old, Height);
-            }
-            else
-            {
-                account = new MutableAccount(address, Height);
-                AccountCreated(account);
-            }
+                // try to get it into the previous state
+                if (old != null)
+                {
+                    // make a new copy
+                    account = new MutableAccount(old, Height);
+                }
+                else
+                {
+                    account = new MutableAccount(address, Height);
+                    AccountCreated(account);
+                }
+
+                return account;
+            });
 
             accounts.Add(address, account);
             return account;
@@ -153,13 +146,7 @@ namespace Caasiope.Node.Types
 
         public override bool TryGetAccount(Address address, out Account account)
         {
-            if (accounts.TryGetValue(address, out var mutable))
-            {
-                account = mutable;
-                return true;
-            }
-
-            return previous.TryGetAccount(address, out account);
+            return tree.TryGetValue(address.ToRawBytes(), out account);
         }
     }
 }

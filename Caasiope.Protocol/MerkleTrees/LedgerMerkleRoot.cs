@@ -7,6 +7,7 @@ using Helios.Common.Logs;
 
 namespace Caasiope.Protocol.MerkleTrees
 {
+    // outdated use trie
     public class LedgerMerkleRoot
     {
         private readonly ILogger logger;

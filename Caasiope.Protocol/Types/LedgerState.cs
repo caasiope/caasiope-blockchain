@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Caasiope.Protocol.Extensions;
+using Caasiope.Protocol.MerkleTrees;
 
 namespace Caasiope.Protocol.Types
 {
@@ -8,29 +10,44 @@ namespace Caasiope.Protocol.Types
         public readonly SignedLedger LastLedger;
         public long Height => LastLedger.Ledger.LedgerLight.Height;
 
-        public ImmutableLedgerState(SignedLedger lastLedger, Dictionary<Address, Account> list)
+        public ImmutableLedgerState(SignedLedger lastLedger, Trie<Account> accounts, IHasher<Account> hasher) : base(accounts)
         {
             LastLedger = lastLedger;
-            accounts = list;
+            tree.ComputeHash(hasher);
         }
-
-        private readonly Dictionary<Address, Account> accounts;
 
         public IEnumerable<Account> GetAccounts()
         {
             // TODO Optimize
-            return accounts.Values;
+            return tree.GetEnumerable();
         }
 
         public override bool TryGetAccount(Address address, out Account account)
         {
-            return accounts.TryGetValue(address, out account);
+            return tree.TryGetValue(address.ToRawBytes(), out account);
+        }
+
+        public LedgerMerkleRootHash GetHash()
+        {
+            return new LedgerMerkleRootHash(tree.GetHash().Bytes);
         }
     }
 
     // TODO move in Node project
     public abstract class LedgerState
     {
+        protected readonly Trie<Account> tree;
+
+        protected LedgerState(Trie<Account> tree)
+        {
+            this.tree = tree;
+        }
+
+        protected static Trie<Account> GetTree(LedgerState state)
+        {
+            return state.tree;
+        }
+
         public abstract bool TryGetAccount(Address address, out Account account);
 
         public bool TryGetDeclaration<T>(Address address, out T declaration) where T : TxAddressDeclaration

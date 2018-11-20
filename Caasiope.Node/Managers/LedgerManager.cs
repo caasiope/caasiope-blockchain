@@ -22,8 +22,7 @@ namespace Caasiope.Node.Managers
         [Injected] public IConnectionService ConnectionService;
 
         public SignedLedgerValidator SignedLedgerValidator;
-        // TODO remove what is already in the ledger state
-        public ProtocolVersion Version;
+        public ProtocolVersion Version => GetLedgerLight().Version;
         public readonly Network Network;
         private readonly ILogger logger;
         private readonly ILogger merkleLogger;
@@ -50,14 +49,21 @@ namespace Caasiope.Node.Managers
 
         private void InitializeLedger(SignedLedger lastLedger)
         {
-            LedgerState = new ImmutableLedgerState(lastLedger, LiveService.AccountManager.GetAccounts());
+            var accounts = new Trie<Account>(Address.RAW_SIZE);
+            foreach (var account in LiveService.AccountManager.GetAccounts())
+                accounts.Add(account.Key.ToRawBytes(), account.Value);
+
+            LedgerState = new ImmutableLedgerState(lastLedger, accounts, HasherFactory.CreateHasher(lastLedger.Ledger.LedgerLight.Version));
             // Debug.Assert(SignedLedgerValidator.Validate(this.lastLedger) == LedgerValidationStatus.Ok, "Last Ledger is not valid"); // Most likely not enough signatures (see quorum)
-            Version = GetLedgerLight().Version;
         }
 
-        public LedgerMerkleRoot GetMerkleRoot()
+        public LedgerMerkleRootHash GetMerkleRootHash()
         {
-            return new LedgerMerkleRoot(LedgerState.GetAccounts(), GetDeclarations(), merkleLogger, HasherFactory.CreateHasher(Network, LedgerState.Height));
+            // backward compatibility
+            if(Version == ProtocolVersion.InitialVersion)
+                return new LedgerMerkleRoot(LedgerState.GetAccounts(), GetDeclarations(), merkleLogger, HasherFactory.CreateHasher(Version)).Hash;
+
+            return LedgerState.GetHash();
         }
 
         // for merkle root
@@ -165,8 +171,7 @@ namespace Caasiope.Node.Managers
         // we create a new ledger state based on the current state and the new ledger
         private MutableLedgerState CreateLedgerState(SignedLedger signedLedger)
         {
-            var state = new MutableLedgerState(LedgerState) {AccountCreated = account => LiveService.AccountManager.AddAccount(account.Address, new ExtendedAccount(account))};
-            state.SignedLedger = signedLedger;
+            var state = new MutableLedgerState(LedgerState, signedLedger) {AccountCreated = account => LiveService.AccountManager.AddAccount(account.Address, new ExtendedAccount(account))};
 
             byte index = 0;
             foreach (var signed in signedLedger.Ledger.Block.Transactions)

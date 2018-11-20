@@ -210,7 +210,7 @@ namespace Caasiope.UnitTest
 
                 var block = Block.CreateBlock(light.Height, pendingTransactions);
 
-                var ledger = new Ledger(light, block, ledgerService.LedgerManager.GetMerkleRoot().Hash);
+                var ledger = new Ledger(light, block, ledgerService.LedgerManager.GetMerkleRootHash());
                 var signed = new SignedLedger(ledger);
 
                 validator.SignLedger(signed, NodeConfiguration.GetNetwork());

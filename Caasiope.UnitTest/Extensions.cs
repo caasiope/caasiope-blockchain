@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Helios.Common.Extensions;
 using Caasiope.NBitcoin;
+using Caasiope.Protocol.MerkleTrees;
 using Caasiope.Protocol.Types;
 
 namespace Caasiope.UnitTest
@@ -57,6 +58,11 @@ namespace Caasiope.UnitTest
                 }
             }
             return isValid;
+        }
+
+        public static Hash256 ComputeHash(this Trie<Account> tree)
+        {
+            return tree.ComputeHash(new Hasher());
         }
     }
 }

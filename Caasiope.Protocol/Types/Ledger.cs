@@ -57,6 +57,19 @@ namespace Caasiope.Protocol.Types
         {
             VersionNumber = version;
         }
+
+        public static ProtocolVersion InitialVersion = new ProtocolVersion(0x1);
+        public static ProtocolVersion ImmutableState = new ProtocolVersion(0x2);
+
+        public static bool operator ==(ProtocolVersion a, ProtocolVersion b)
+        {
+            return a.VersionNumber == b.VersionNumber;
+        }
+
+        public static bool operator !=(ProtocolVersion a, ProtocolVersion b)
+        {
+            return !(a == b);
+        }
     }
 
     public class LedgerHash : Hash256 { public LedgerHash(byte[] bytes) : base(bytes) { }}
