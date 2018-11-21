@@ -44,8 +44,23 @@
     <Compile Include="BlockchainExplorer.cs" />
     <Compile Include="Dispatcher.cs" />
     <Compile Include="ExplorerConnectionService.cs" />
+    <Compile Include="ExplorerDatabaseService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Transformers\BlockTransformerService.cs" />
+    <Compile Include="Transformers\DataTransformerService.cs" />
+    <Compile Include="Transformers\DeclarationTransformerService.cs" />
+    <Compile Include="Transformers\HashLockTransformerService.cs" />
+    <Compile Include="Transformers\LedgerSignatureTransformerService.cs" />
+    <Compile Include="Transformers\MultiSignatureAccountTransformerService.cs" />
+    <Compile Include="Transformers\MultiSignatureSignerTransformerService.cs" />
+    <Compile Include="Transformers\SecretRevelationTransformerService.cs" />
+    <Compile Include="Transformers\TimeLockTransformerService.cs" />
+    <Compile Include="Transformers\TransactionDeclarationTransformerService.cs" />
+    <Compile Include="Transformers\TransactionMessageTransformerService.cs" />
+    <Compile Include="Transformers\TransactionSignatureTransformerService.cs" />
+    <Compile Include="Transformers\TransactionTransformerService.cs" />
+    <Compile Include="Transformers\TxInputOutputTransformerService.cs" />
     <Compile Include="WebSocketServer.cs" />
   </ItemGroup>
   <ItemGroup>

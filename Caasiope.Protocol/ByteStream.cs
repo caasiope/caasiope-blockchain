@@ -57,7 +57,6 @@ namespace Caasiope.Protocol
         public void Write(LedgerStateChange change)
         {
             Write(change.Accounts, Write);
-            Write(change.Balances, Write);
             Write(change.MultiSignatures, Write);
             Write(change.HashLocks, Write);
             Write(change.TimeLocks, Write);
@@ -444,7 +443,7 @@ namespace Caasiope.Protocol
             return new Transaction(ReadList(ReadTxDeclaration), ReadList(ReadTxInput), ReadList(ReadTxOutput), ReadNullable(ReadTransactionMessage), expire, fees);
         }
 
-        protected TxDeclaration ReadTxDeclaration()
+        public TxDeclaration ReadTxDeclaration()
         {
             var type = (DeclarationType)ReadByte();
 
@@ -490,7 +489,7 @@ namespace Caasiope.Protocol
 
         public LedgerStateChange ReadLedgerStateChange()
         {
-            return new LedgerStateChange(ReadList(ReadAccountEntity), ReadList(ReadAccountBalanceFull), ReadList(ReadMultiSignature), ReadList(ReadHashLock), ReadList(ReadTimeLock));
+            return new LedgerStateChange(ReadList(ReadAccount), ReadList(ReadMultiSignature), ReadList(ReadHashLock), ReadList(ReadTimeLock));
         }
 
         private AccountBalanceFull ReadAccountBalanceFull()

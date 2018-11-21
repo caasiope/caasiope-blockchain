@@ -6,7 +6,6 @@ using System.Data.Entity.Infrastructure;
 using System.Diagnostics;
 using System.Linq;
 using Caasiope.Database.SQL;
-using Helios.Common.Concepts.Configuration;
 using Helios.Common.Extensions;
 using Helios.Common.Logs;
 using Helios.Common.Synchronization;

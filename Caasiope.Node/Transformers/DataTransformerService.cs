@@ -78,7 +78,7 @@ namespace Caasiope.Node.Transformers
 
         private void ProcessSave(DataTransformationContext context)
         {
-            var transaction = new TransformerSqlTransaction<TItem>(Transform(context), Repository, context.SignedLedgerState.Ledger.Ledger.LedgerLight.Height, Logger);
+            var transaction = new TransformerTransaction<TItem>(Transform(context), Repository, context.SignedLedgerState.Ledger.Ledger.LedgerLight.Height, Logger);
             DatabaseService.SqlTransactionManager.ExecuteTransaction(transaction);
         }
 
@@ -93,32 +93,9 @@ namespace Caasiope.Node.Transformers
             trigger.Set();
         }
     }
-
-
-    public class TransactionDeclarationContext
-    {
-        public readonly Dictionary<Address, TransactionDeclarationEntity> AddressDeclarations = new Dictionary<Address, TransactionDeclarationEntity>();
-        public readonly List<TransactionDeclarationEntity> Declarations = new List<TransactionDeclarationEntity>();
-
-        public void TryAdd(TransactionDeclarationEntity entity, TxDeclaration declaration)
-        {
-            // we can duplicate declarations like Secret Reveliation
-            Declarations.Add(entity);
-
-            // we include unly once Account declarations
-            if (declaration is TxAddressDeclaration)
-            {
-                var address = ((TxAddressDeclaration) declaration).Address;
-                if (!AddressDeclarations.ContainsKey(address))
-                    AddressDeclarations.Add(address, entity);
-            }
-        }
-    }
-
+    
     public class DataTransformationContext
     {
-        private readonly ManualResetEvent declarationCreated = new ManualResetEvent(false);
-        private TransactionDeclarationContext declarations;
         public readonly SignedLedgerState SignedLedgerState;
 
         public DataTransformationContext(SignedLedgerState signedLedgerState)
@@ -126,16 +103,5 @@ namespace Caasiope.Node.Transformers
             SignedLedgerState = signedLedgerState;
         }
 
-        public void SetDeclarations(TransactionDeclarationContext declarations)
-        {
-            this.declarations = declarations;
-            declarationCreated.Set();
-        }
-
-        public TransactionDeclarationContext GetDeclarations()
-        {
-            declarationCreated.WaitOne();
-            return declarations;
-        }
     }
 }

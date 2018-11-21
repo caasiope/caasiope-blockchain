@@ -1,10 +1,8 @@
-﻿
-namespace Caasiope.Database.SQL.Entities
+﻿namespace Caasiope.Database.SQL.Entities
 {
     public class transactiondeclaration
     {
-        public byte[] transaction_hash { get; set; }
-        public byte index { get; set; }
-        public long declaration_id { get; set; }
+        public byte[] address { get; set; }
+        public byte[] raw { get; set; }
     }
 }

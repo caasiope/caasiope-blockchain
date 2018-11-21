@@ -1,4 +1,4 @@
-﻿using System.Data.Entity;
+using System.Data.Entity;
 using Caasiope.Database.Repositories.Entities;
 using Caasiope.Database.SQL;
 using Caasiope.Database.SQL.Entities;

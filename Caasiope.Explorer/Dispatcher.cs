@@ -24,6 +24,8 @@ namespace Caasiope.Explorer
         public ILedgerService LedgerService;
         [Injected]
         public IDatabaseService DatabaseService;
+        [Injected]
+        public IExplorerDatabaseService ExplorerDatabaseService;
 
         protected readonly ILogger Logger;
 
@@ -125,7 +127,7 @@ namespace Caasiope.Explorer
                     return;
                 }
 
-                var transaction = DatabaseService.ReadDatabaseManager.GetTransaction(new TransactionHash(hash));
+                var transaction = ExplorerDatabaseService.ReadDatabaseManager.GetTransaction(new TransactionHash(hash));
 
                 sendResponse.Call(ResponseHelper.CreateGetTransactionResponse(TransactionConverter.GetTransaction(transaction)), ResultCode.Success);
             }
@@ -157,7 +159,7 @@ namespace Caasiope.Explorer
 
                 // TODO this is a temporary hack
                 {
-                    var raw = DatabaseService.ReadDatabaseManager.GetTransactionHistory(address, message.Height).OrderByDescending(_ => _.LedgerHeight).ToList();
+                    var raw = ExplorerDatabaseService.ReadDatabaseManager.GetTransactionHistory(address, message.Height).OrderByDescending(_ => _.LedgerHeight).ToList();
                     var total = raw.Count;
 
                     raw = raw.Skip(message.Count * (message.Page - 1)).Take(message.Count).ToList();

@@ -44,23 +44,11 @@
   <ItemGroup>
     <Compile Include="BlockchainEntities.cs" />
     <Compile Include="Entities\account.cs" />
-    <Compile Include="Entities\balance.cs" />
-    <Compile Include="Entities\block.cs" />
-    <Compile Include="Entities\declaration.cs" />
     <Compile Include="Entities\transactiondeclaration.cs" />
-    <Compile Include="Entities\hashlock.cs" />
-    <Compile Include="Entities\secretrevelation.cs" />
     <Compile Include="Entities\tableledgerheight.cs" />
     <Compile Include="Entities\ledger.cs" />
     <Compile Include="Entities\ledgersignature.cs" />
-    <Compile Include="Entities\multisignatureaccount.cs" />
-    <Compile Include="Entities\multisignaturesigner.cs" />
     <Compile Include="Entities\ledgerstatechange.cs" />
-    <Compile Include="Entities\timelock.cs" />
-    <Compile Include="Entities\transaction.cs" />
-    <Compile Include="Entities\transactioninputoutput.cs" />
-    <Compile Include="Entities\transactionmessage.cs" />
-    <Compile Include="Entities\transactionsignature.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

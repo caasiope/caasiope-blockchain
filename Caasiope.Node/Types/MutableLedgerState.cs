@@ -28,14 +28,8 @@ namespace Caasiope.Node.Types
             return new SignedLedgerState(SignedLedger, GetStateChange());
         }
 
-        public void SaveBalance(Account account, AccountBalance amount)
-        {
-            balances[new AddressCurrency(account.Address, amount.Currency)] = new AccountBalanceFull(account.Address, amount);
-        }
-
         // TODO use the account history list to dynamicly compute the changes ?
         // we keep the list of the changes
-        private readonly Dictionary<AddressCurrency, AccountBalanceFull> balances = new Dictionary<AddressCurrency, AccountBalanceFull>();
         private readonly List<MultiSignature> multisigToInclude = new List<MultiSignature>();
         private readonly List<HashLock> hashLocksToInclude = new List<HashLock>();
         private readonly List<TimeLock> timeLocksToInclude = new List<TimeLock>();
@@ -45,8 +39,8 @@ namespace Caasiope.Node.Types
 
         public LedgerStateChange GetStateChange()
         {
-            var accountes = accounts.Values.Select(account => new AccountEntity(account.Address, account.CurrentLedger, account.Declaration != null)).ToList();
-            return new LedgerStateChange(accountes, balances.Values.ToList(), multisigToInclude, hashLocksToInclude, timeLocksToInclude);
+            var accountes = accounts.Values.Select(_ => (Account)_).ToList();
+            return new LedgerStateChange(accountes, multisigToInclude, hashLocksToInclude, timeLocksToInclude);
         }
 
         public virtual void RemoveTransaction(Dictionary<TransactionHash, SignedTransaction> pendingTransactions, TransactionHash hash)
@@ -108,7 +102,7 @@ namespace Caasiope.Node.Types
 
         public void SetBalance(MutableAccount account, Currency currency, Amount amount)
         {
-            SaveBalance(account, account.SetBalance(currency, amount));
+            account.SetBalance(currency, amount);
         }
 
         public ImmutableLedgerState Finalize()

@@ -410,6 +410,20 @@ namespace Caasiope.Protocol.Types
             if (obj.GetType() != this.GetType()) return false;
             return Equals((Secret) obj);
         }
+
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                foreach (var b in Bytes)
+                {
+                    hash = hash * 23 + b;
+                }
+                return hash;
+            }
+        }
     }
 
     public enum SecretHashType : byte

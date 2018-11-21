@@ -32,7 +32,7 @@ namespace Caasiope.UnitTest
                     Debug.Assert(processedHeights[expected.TableName].Height == 0);
                 }
 
-                var readedLedger = context.DatabaseService.ReadDatabaseManager.GetLastLedger();
+                var readedLedger = context.DatabaseService.ReadDatabaseManager.GetLastLedgerFromRaw();
                 var ledger = context.LedgerService.LedgerManager.GetSignedLedger();
 
                 Debug.Assert(ledger.Ledger.LedgerLight.Height == 0);

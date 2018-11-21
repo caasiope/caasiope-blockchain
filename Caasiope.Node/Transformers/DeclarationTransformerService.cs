@@ -1,35 +1,45 @@
 using System.Collections.Generic;
-using System.Linq;
 using Caasiope.Database.Repositories;
 using Caasiope.Database.Repositories.Entities;
+using Caasiope.Protocol;
+using Caasiope.Protocol.Types;
 
 namespace Caasiope.Node.Transformers
 {
-    internal class DeclarationTransformerService : DataTransformerService<DeclarationEntity, DeclarationRepository>
+    internal class DeclarationTransformerService : DataTransformerService<TxDeclarationEntity, TransactionDeclarationRepository>
     {
-        protected override IEnumerable<DeclarationEntity> Transform(DataTransformationContext context)
+        protected override IEnumerable<TxDeclarationEntity> Transform(DataTransformationContext context)
         {
-            var signedLedgerState = context.SignedLedgerState;
+            var list = new List<TxDeclarationEntity>();
 
-            var list = new List<DeclarationEntity>();
-            var transactions = signedLedgerState.Ledger.Ledger.Block.Transactions;
-            var declarations = context.GetDeclarations();
-            var index = 0;
-            foreach (var transaction in transactions)
+            var timelocks = context.SignedLedgerState.State.TimeLocks;
+            foreach (var locker in timelocks)
             {
-                foreach (var declaration in transaction.Transaction.Declarations)
-                {
-                    list.Add(new DeclarationEntity(GetDeclarationId(declarations.Declarations, index), declaration.Type));
-                    index++;
-                }
+                list.Add(new TxDeclarationEntity(locker.Address, GetRaw(locker)));
             }
-            return list.Distinct();
+
+            var hashlocks = context.SignedLedgerState.State.HashLocks;
+            foreach (var locker in hashlocks)
+            {
+                list.Add(new TxDeclarationEntity(locker.Address, GetRaw(locker)));
+            }
+
+            var multiSignatures = context.SignedLedgerState.State.MultiSignatures;
+            foreach (var locker in multiSignatures)
+            {
+                list.Add(new TxDeclarationEntity(locker.Address, GetRaw(locker)));
+            }
+
+            return list;
         }
 
-
-        private long GetDeclarationId(List<TransactionDeclarationEntity> declarations, int index)
+        private byte[] GetRaw(TxDeclaration multiSignature)
         {
-            return declarations[index].DeclarationId;
+            using (var stream = new ByteStream())
+            {
+                stream.Write(multiSignature);
+                return stream.GetBytes();
+            }
         }
     }
 }

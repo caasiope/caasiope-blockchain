@@ -1,5 +1,4 @@
 ﻿using System.Data.Entity;
-using Caasiope.Database.Repositories.Entities;
 using Caasiope.Database.SQL;
 using Caasiope.Database.SQL.Entities;
 using Caasiope.Protocol.Types;
@@ -19,14 +18,13 @@ namespace Caasiope.Database.Repositories
             return new account()
             {
                 address = item.Address.ToRawBytes(),
-                current_ledger_height = item.CurrentLedgerHeight,
-                is_declared = item.IsDeclared
+                raw = item.Raw
             };
         }
 
         protected override AccountEntity ToItem(account entity)
         {
-            return new AccountEntity(Address.FromRawBytes(entity.address), entity.current_ledger_height, entity.is_declared);
+            return new AccountEntity(Address.FromRawBytes(entity.address), entity.raw);
         }
 
         protected override Address GetKey(AccountEntity item)

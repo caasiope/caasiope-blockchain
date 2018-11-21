@@ -40,7 +40,7 @@ namespace Caasiope.Node.Managers
         {
             // cannot get it before
             // Update cache by latest data from height tables in the SQl db
-            var lastLedger = GetLastLedger();
+            var lastLedger = DatabaseService.ReadDatabaseManager.GetLastLedgerFromRaw();
             current = lastLedger?.Ledger.LedgerLight.Height ?? -1;
 
             SetInitialTableHeights(current);
@@ -71,42 +71,8 @@ namespace Caasiope.Node.Managers
                 {
                     if(entity.CurrentHeight < height)
                         TransformLedgerState(context, entity.TableName, height);
-                    else if (entity.TableName == "declarations")
-                    {
-                        var declarations = CreateDeclarationContext(context.SignedLedgerState.Ledger, DatabaseService.ReadDatabaseManager.GetDeclarations(height));
-                        context.SetDeclarations(declarations);
-                    }
                 }
             }
-        }
-
-        private TransactionDeclarationContext CreateDeclarationContext(SignedLedger signed, List<TransactionDeclarationEntity> declarations)
-        {
-            var context = new TransactionDeclarationContext();
-
-            foreach (var transaction in signed.Ledger.Block.Transactions)
-            {
-                var index = 0;
-                foreach (var declaration in transaction.Transaction.Declarations)
-                {
-                    if (!MatchInContext(context, declarations, declaration, transaction.Hash, index++)) 
-                        throw new NotImplementedException("It should match"); 
-                }
-            }
-            return context;
-        }
-
-        private bool MatchInContext(TransactionDeclarationContext context, List<TransactionDeclarationEntity> declarations, TxDeclaration declaration, TransactionHash hash, int index)
-        {
-            foreach (var entity in declarations)
-            {
-                if (entity.TransactionHash.Equals(hash) && entity.Index == index)
-                {
-                    context.TryAdd(entity, declaration);
-                    return true;
-                }
-            }
-            return false;
         }
 
         private void SetInitialTableHeights()
@@ -148,7 +114,7 @@ namespace Caasiope.Node.Managers
 
         private bool IsFinished()
         {
-            var currentHeight = GetCurrentHeight();
+            var currentHeight = current;
 
             foreach (var state in tableTransformationStates.Values)
             {
@@ -158,11 +124,6 @@ namespace Caasiope.Node.Managers
             }
 
             return true;
-        }
-
-        private long GetCurrentHeight()
-        {
-            return current;
         }
 
         // Called on run
@@ -176,12 +137,6 @@ namespace Caasiope.Node.Managers
                 TransformLedgerState(context, table.TableName, target);
             }
             current = target;
-        }
-
-        // Get lastLedger from No SQL
-        private SignedLedger GetLastLedger()
-        {
-            return DatabaseService.ReadDatabaseManager.GetLastLedgerFromRaw();
         }
         
         private void TransformLedgerState(DataTransformationContext context, string table, long height)
