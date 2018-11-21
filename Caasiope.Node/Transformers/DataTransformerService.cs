@@ -102,6 +102,5 @@ namespace Caasiope.Node.Transformers
         {
             SignedLedgerState = signedLedgerState;
         }
-
     }
 }

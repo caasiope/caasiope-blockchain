@@ -70,7 +70,7 @@ namespace Caasiope.Node.Managers
             return typeof(DataTransformerManager).Assembly
                 .GetTypes()
                 .Where(t => t.IsClass && !t.IsAbstract
-                            && t.Namespace == typeof(AccountBalanceTransformerService).Namespace
+                            && t.Namespace == typeof(AccountTransformerService).Namespace
                             && t.IsSubclassOf(typeof(DataTransformerService)));
         }
     }

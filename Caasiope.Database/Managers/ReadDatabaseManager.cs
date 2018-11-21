@@ -41,35 +41,44 @@ namespace Caasiope.Database.Managers
             }
         }
 
-        // This we load to the state on initialization
-        public List<Account> GetAccounts()
+        private List<Account> GetAccountsInternal()
         {
-            var list = new Dictionary<Address, MutableAccount>();
-
-            foreach (var account in GetAccountsInternal())
-            {
-                list.Add(account.Address, new MutableAccount(account.Address, account.CurrentLedgerHeight));
-            }
-
-            foreach (var declaration in GetDeclarations())
-            {
-                list[declaration.Address].SetDeclaration(declaration);
-            }
-
-            return list.Values.Select(mutable => mutable.Finalize()).ToList(); // TODO ugly
-        }
-
-        private IEnumerable<object> GetAccountsInternal()
-        {
-            var list = new Dictionary<string, TxAddressDeclaration>();
+            var list = new Dictionary<string, Account>();
 
             foreach (var entity in repositoryManager.GetRepository<AccountRepository>().GetEnumerable())
             {
-                var declaration = ReadDeclaration(entity.Raw);
-                list.Add(entity.Address.Encoded, declaration);
+                var account = ReadAccount(entity.Raw);
+                list.Add(entity.Address.Encoded, account);
             }
 
             return list.Values.ToList();
+        }
+
+        private Account ReadAccount(byte[] raw)
+        {
+            using (var stream = new ByteStream(raw))
+            {
+                return stream.ReadAccount();
+            }
+        }
+
+        // This we load to the state on initialization
+
+        public List<Account> GetAccounts()
+        {
+            var list = new Dictionary<Address, Account>();
+
+            foreach (var account in GetAccountsInternal())
+            {
+                list.Add(account.Address, account);
+            }
+
+            //foreach (var declaration in GetDeclarations())
+            //{
+            //    list[declaration.Address].SetDeclaration(declaration);
+            //}
+
+            return list.Values.ToList(); 
         }
 
         public SignedLedger GetLastLedgerFromRaw()
