@@ -67,7 +67,7 @@ namespace Caasiope.Node.Services
         // TODO move
         private void Validate()
         {
-            var max = LedgerService.LedgerManager.GetLedgerLight().Height;
+            var max = LedgerService.LedgerManager.GetSignedLedger().GetHeight();
             for (long height = 0; height < max; height++)
             {
                 Logger.Log($"Validating Ledger {height}");

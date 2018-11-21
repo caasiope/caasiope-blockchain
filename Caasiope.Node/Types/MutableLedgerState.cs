@@ -9,19 +9,17 @@ namespace Caasiope.Node.Types
 {
     public class MutableLedgerState : LedgerState
     {
-        public readonly SignedLedger SignedLedger;
-        public long Height => SignedLedger.Ledger.LedgerLight.Height;
-
+        public readonly long Height;
         public Action<MutableAccount> AccountCreated;
 
-        public MutableLedgerState(LedgerState previous, SignedLedger ledger) : base(GetTree(previous).Clone())
+        public MutableLedgerState(LedgerState previous, long height) : base(GetTree(previous).Clone())
         {
-            SignedLedger = ledger;
+            Height = height;
         }
 
-        public SignedLedgerState GetLedgerStateChange()
+        public LedgerStateChange GetLedgerStateChange()
         {
-            return new SignedLedgerState(SignedLedger, GetStateChange());
+            return GetStateChange();
         }
 
         public void SaveBalance(Account account, AccountBalance amount)
@@ -109,7 +107,7 @@ namespace Caasiope.Node.Types
 
         public ImmutableLedgerState Finalize()
         {
-            return new ImmutableLedgerState(SignedLedger, tree, HasherFactory.CreateHasher(SignedLedger.Ledger.LedgerLight.Version));
+            return new ImmutableLedgerState(Tree);
         }
 
         public MutableAccount GetOrCreateMutableAccount(Address address)
@@ -120,7 +118,7 @@ namespace Caasiope.Node.Types
                 return account;
             }
 
-            tree.CreateOrUpdate(address.ToRawBytes(), old =>
+            Tree.CreateOrUpdate(address.ToRawBytes(), old =>
             {
                 // try to get it into the previous state
                 if (old != null)
@@ -143,7 +141,7 @@ namespace Caasiope.Node.Types
 
         public override bool TryGetAccount(Address address, out Account account)
         {
-            return tree.TryGetValue(address.ToRawBytes(), out account);
+            return Tree.TryGetValue(address.ToRawBytes(), out account);
         }
     }
 }

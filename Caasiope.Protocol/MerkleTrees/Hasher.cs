@@ -40,6 +40,19 @@ namespace Caasiope.Protocol.MerkleTrees
         {
             return GetHash(item);
         }
+
+        public LedgerHash GetHash(Ledger ledger)
+        {
+            using (var stream = new ByteStream())
+            {
+                stream.Write(ledger);
+                var message = stream.GetBytes();
+
+                var hasher = HashFactory.Crypto.SHA3.CreateKeccak256();
+                var hash = hasher.ComputeBytes(message).GetBytes();
+                return new LedgerHash(hash);
+            }
+        }
     }
 
     public class Hasher1 : Hasher
@@ -56,6 +69,14 @@ namespace Caasiope.Protocol.MerkleTrees
                 var hash = hasher.ComputeBytes(message).GetBytes();
                 return new AccountHash(hash);
             }
+        }
+    }
+
+    public static class HasherExtensions
+    {
+        public static LedgerHash GetHash(this Ledger ledger)
+        {
+            return HasherFactory.CreateHasher(ledger.GetVersion()).GetHash(ledger);
         }
     }
 }

@@ -75,7 +75,7 @@ namespace Caasiope.Explorer
                     return;
                 }
 
-                var currentHeight = LedgerService.LedgerManager.GetLedgerLight().Height;
+                var currentHeight = LedgerService.LedgerManager.GetSignedLedger().GetHeight();
 
                 if (height > currentHeight)
                 {

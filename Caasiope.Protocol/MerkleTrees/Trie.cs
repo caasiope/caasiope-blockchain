@@ -148,7 +148,7 @@ namespace Caasiope.Protocol.MerkleTrees
             throw new NotImplementedException();
         }
 
-        private bool IsFinalized()
+        public bool IsFinalized()
         {
             return IsFinalized(root);
         }

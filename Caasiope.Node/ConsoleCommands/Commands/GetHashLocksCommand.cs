@@ -8,9 +8,9 @@ namespace Caasiope.Node.ConsoleCommands.Commands
     {
         protected override void ExecuteCommand(string[] args)
         {
-            throw new NotImplementedException();
-            /*
-            var results = LiveService.HashLockManager.GetHashLocks().ToList();
+            var results = LiveService.AccountManager.GetAccounts().Values
+                .Where(account => account.Address.Type == AddressType.HashLock && account.Declaration != null)
+                .Select(account => (HashLock) account.Declaration).ToList();
 
             Console.WriteLine($"Number of HashLocks : {results.Count}");
 
@@ -18,7 +18,6 @@ namespace Caasiope.Node.ConsoleCommands.Commands
             {
                 Console.WriteLine($"Address : {hashLock.Address.Encoded} Hash : {hashLock.Hash.ToBase64()} Secret Hash : {hashLock.SecretHash.Hash.ToBase64()}");
             }
-            */
         }
     }
 }

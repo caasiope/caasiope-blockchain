@@ -96,7 +96,7 @@ namespace Caasiope.Node.Connections
                     return;
                 }
 
-                var height = LedgerService.LedgerManager.GetLedgerLight().Height;
+                var height = LedgerService.LedgerManager.GetSignedLedger().GetHeight();
 
                 if (message.Height > height)
                 {
@@ -122,7 +122,7 @@ namespace Caasiope.Node.Connections
             }
             else if (request is GetCurrentLedgerHeightRequest)
             {
-                var height = LedgerService.LedgerManager.GetLedgerLight().Height;
+                var height = LedgerService.LedgerManager.GetSignedLedger().GetHeight();
                 sendResponse.Call(ResponseHelper.CreateGetCurrentLedgerHeightResponse(height), ResultCode.Success);
             }
 

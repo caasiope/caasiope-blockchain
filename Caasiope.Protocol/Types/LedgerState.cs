@@ -7,45 +7,45 @@ namespace Caasiope.Protocol.Types
 {
     public class ImmutableLedgerState : LedgerState
     {
-        public readonly SignedLedger LastLedger;
-        public long Height => LastLedger.Ledger.LedgerLight.Height;
+        // public readonly long Height;
+        // public readonly LedgerHash LastLedger;
 
-        public ImmutableLedgerState(SignedLedger lastLedger, Trie<Account> accounts, IHasher<Account> hasher) : base(accounts)
+        public ImmutableLedgerState(Trie<Account> accounts) : base(accounts)
         {
-            LastLedger = lastLedger;
-            tree.ComputeHash(hasher);
+            if (!accounts.IsFinalized())
+                throw new ArgumentException("The account trie should be finalized");
         }
 
         public IEnumerable<Account> GetAccounts()
         {
             // TODO Optimize
-            return tree.GetEnumerable();
+            return Tree.GetEnumerable();
         }
 
         public override bool TryGetAccount(Address address, out Account account)
         {
-            return tree.TryGetValue(address.ToRawBytes(), out account);
+            return Tree.TryGetValue(address.ToRawBytes(), out account);
         }
 
         public LedgerMerkleRootHash GetHash()
         {
-            return new LedgerMerkleRootHash(tree.GetHash().Bytes);
+            return new LedgerMerkleRootHash(Tree.GetHash().Bytes);
         }
     }
 
     // TODO move in Node project
     public abstract class LedgerState
     {
-        protected readonly Trie<Account> tree;
+        protected readonly Trie<Account> Tree;
 
         protected LedgerState(Trie<Account> tree)
         {
-            this.tree = tree;
+            Tree = tree;
         }
 
         protected static Trie<Account> GetTree(LedgerState state)
         {
-            return state.tree;
+            return state.Tree;
         }
 
         public abstract bool TryGetAccount(Address address, out Account account);

@@ -206,7 +206,7 @@ namespace Caasiope.UnitTest
                     ledgerService.LedgerManager.GetNextHeight(),
                     DateTime.Now.ToUnixTimestamp() + 1, // TODO ? ledgerService.LedgerManager.GetLedgerBeginTime() + 10,
                     ledgerService.LedgerManager.GetLastLedgerHash(),
-                    ledgerService.LedgerManager.GetLedgerLight().Version);
+                    ledgerService.LedgerManager.GetSignedLedger().GetVersion());
 
                 var block = Block.CreateBlock(light.Height, pendingTransactions);
 
