@@ -68,7 +68,6 @@
     <Compile Include="Entities\transactiondeclaration.cs" />
     <Compile Include="Entities\tableledgerheight.cs" />
     <Compile Include="Entities\ledger.cs" />
-    <Compile Include="Entities\ledgersignature.cs" />
     <Compile Include="Entities\ledgerstatechange.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

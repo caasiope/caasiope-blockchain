@@ -73,11 +73,6 @@ namespace Caasiope.Database.Managers
                 list.Add(account.Address, account);
             }
 
-            //foreach (var declaration in GetDeclarations())
-            //{
-            //    list[declaration.Address].SetDeclaration(declaration);
-            //}
-
             return list.Values.ToList(); 
         }
 

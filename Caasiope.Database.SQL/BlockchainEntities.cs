@@ -29,11 +29,6 @@ namespace Caasiope.Database.SQL
             {
                 u.height
             });
-            modelBuilder.Entity<ledgersignature>().HasKey(u => new
-            {
-                u.ledger_height,
-                u.validator_publickey,
-            });
             modelBuilder.Entity<tableledgerheight>().HasKey(u => new
             {
                 u.table_name
@@ -47,8 +42,7 @@ namespace Caasiope.Database.SQL
         public virtual DbSet<account> accounts { get; set; }
         public virtual DbSet<transactiondeclaration> transactiondeclarations { get; set; }
         public virtual DbSet<ledger> ledgers { get; set; }
-        public virtual DbSet<ledgersignature> ledgersignatures { get; set; }
-        public virtual DbSet<tableledgerheight> tableledgerheights { get; set; }
         public virtual DbSet<ledgerstatechange> ledgerstatechanges { get; set; }
+        public virtual DbSet<tableledgerheight> tableledgerheights { get; set; }
     }
 }
