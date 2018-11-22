@@ -1,19 +1,21 @@
 ﻿using System.Data.Entity;
 using Caasiope.Database.SQL.Entities;
+using SQLite.CodeFirst;
 
 namespace Caasiope.Database.SQL
 {
-    [DbConfigurationType(typeof(MySql.Data.Entity.MySqlEFConfiguration))]
     public class BlockchainEntities: DbContext
     {
         public BlockchainEntities()
-            : base("name=BlockchainEntities")
         {
             Configuration.LazyLoadingEnabled = false;
-            System.Data.Entity.Database.SetInitializer<BlockchainEntities>(null);
         }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            var sqliteConnectionInitializer = new SqliteCreateDatabaseIfNotExists<BlockchainEntities>(modelBuilder);
+            System.Data.Entity.Database.SetInitializer(sqliteConnectionInitializer);
+
             modelBuilder.Entity<account>().HasKey(u => new
             {
                 u.address
@@ -21,7 +23,7 @@ namespace Caasiope.Database.SQL
 
             modelBuilder.Entity<transactiondeclaration>().HasKey(u => new
             {
-                account = u.address
+                u.address
             });
             modelBuilder.Entity<ledger>().HasKey(u => new
             {
