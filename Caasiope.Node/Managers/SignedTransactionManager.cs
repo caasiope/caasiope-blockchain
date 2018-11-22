@@ -14,7 +14,7 @@ namespace Caasiope.Node.Managers
             Injector.Inject(this);
         }
 
-        public void Execute(MutableLedgerState state, Transaction transaction)
+        public void Execute(LedgerPostState state, Transaction transaction)
         {
             // TODO declarations
             foreach (var declaration in transaction.Declarations)
@@ -32,7 +32,7 @@ namespace Caasiope.Node.Managers
             }
         }
 
-        private void ApplyDeclaration(MutableLedgerState state, TxDeclaration declaration)
+        private void ApplyDeclaration(LedgerPostState state, TxDeclaration declaration)
         {
             if (declaration.Type == DeclarationType.MultiSignature)
             {
@@ -51,7 +51,7 @@ namespace Caasiope.Node.Managers
             }
         }
 
-        private void UpdateBalance(MutableLedgerState state, Address address, Currency currency, Amount amount)
+        private void UpdateBalance(LedgerPostState state, Address address, Currency currency, Amount amount)
         {
             var account = state.GetOrCreateMutableAccount(address);
             var balance = account.GetBalance(currency);

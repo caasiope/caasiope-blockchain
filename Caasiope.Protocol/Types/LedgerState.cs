@@ -1,40 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using Caasiope.Protocol.Extensions;
+﻿using Caasiope.Protocol.Extensions;
 using Caasiope.Protocol.MerkleTrees;
 
 namespace Caasiope.Protocol.Types
 {
-    public class ImmutableLedgerState : LedgerState
+    public interface ILedgerState
     {
-        // public readonly long Height;
-        // public readonly LedgerHash LastLedger;
-
-        public ImmutableLedgerState(Trie<Account> accounts) : base(accounts)
-        {
-            if (!accounts.IsFinalized())
-                throw new ArgumentException("The account trie should be finalized");
-        }
-
-        public IEnumerable<Account> GetAccounts()
-        {
-            // TODO Optimize
-            return Tree.GetEnumerable();
-        }
-
-        public override bool TryGetAccount(Address address, out Account account)
-        {
-            return Tree.TryGetValue(address.ToRawBytes(), out account);
-        }
-
-        public LedgerMerkleRootHash GetHash()
-        {
-            return new LedgerMerkleRootHash(Tree.GetHash().Bytes);
-        }
+        bool TryGetAccount(Address address, out Account account);
     }
 
-    // TODO move in Node project
-    public abstract class LedgerState
+    public abstract class LedgerState : ILedgerState
     {
         protected readonly Trie<Account> Tree;
 
@@ -49,11 +23,15 @@ namespace Caasiope.Protocol.Types
         }
 
         public abstract bool TryGetAccount(Address address, out Account account);
+    }
 
-        public bool TryGetDeclaration<T>(Address address, out T declaration) where T : TxAddressDeclaration
+    public static class LedgerStateExtensions
+    {
+
+        public static bool TryGetDeclaration<T>(this ILedgerState state, Address address, out T declaration) where T : TxAddressDeclaration
         {
             // if the account does exists in the state
-            if (!TryGetAccount(address, out var account))
+            if (!state.TryGetAccount(address, out var account))
             {
                 declaration = null;
                 return false;

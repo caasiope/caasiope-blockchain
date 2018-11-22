@@ -2,17 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caasiope.Protocol.Extensions;
-using Caasiope.Protocol.MerkleTrees;
 using Caasiope.Protocol.Types;
 
 namespace Caasiope.Node.Types
 {
-    public class MutableLedgerState : LedgerState
+    public class LedgerPostState : LedgerState
     {
         public readonly long Height;
         public Action<MutableAccount> AccountCreated;
 
-        public MutableLedgerState(LedgerState previous, long height) : base(GetTree(previous).Clone())
+        public LedgerPostState(LedgerState previous, long height) : base(GetTree(previous).Clone())
         {
             Height = height;
         }
@@ -105,9 +104,9 @@ namespace Caasiope.Node.Types
             SaveBalance(account, account.SetBalance(currency, amount));
         }
 
-        public ImmutableLedgerState Finalize()
+        public LedgerStateFinal Finalize()
         {
-            return new ImmutableLedgerState(Tree);
+            return new LedgerStateFinal(Tree);
         }
 
         public MutableAccount GetOrCreateMutableAccount(Address address)

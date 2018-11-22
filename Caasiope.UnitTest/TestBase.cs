@@ -175,7 +175,7 @@ namespace Caasiope.UnitTest
         {
             public static readonly TransactionRequiredValidationFactory Instance = new TransactionRequiredValidationFactory();
 
-            public override bool TryGetRequiredValidations(LedgerState state, Address address, List<TxDeclaration> declarations, out TransactionRequiredValidation required)
+            public override bool TryGetRequiredValidations(ILedgerState state, Address address, List<TxDeclaration> declarations, out TransactionRequiredValidation required)
             {
                 switch (address.Type)
                 {

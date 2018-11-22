@@ -27,7 +27,7 @@ namespace Caasiope.Node.Managers
         private readonly ILogger merkleLogger;
         private bool needSetInitialLedger;
 
-        public ImmutableLedgerState LedgerState { get; private set; }
+        public LedgerStateFinal LedgerState { get; private set; }
         public SignedLedger LastLedger { get; private set; }
 
         public LedgerManager(Network network, ILogger logger)
@@ -54,7 +54,7 @@ namespace Caasiope.Node.Managers
                 accounts.Add(account.Key.ToRawBytes(), account.Value);
             // TODO compute hash
 
-            LedgerState = new ImmutableLedgerState(accounts);
+            LedgerState = new LedgerStateFinal(accounts);
             LastLedger = lastLedger;
             // Debug.Assert(SignedLedgerValidator.Validate(this.lastLedger) == LedgerValidationStatus.Ok, "Last Ledger is not valid"); // Most likely not enough signatures (see quorum)
         }
@@ -64,7 +64,7 @@ namespace Caasiope.Node.Managers
             return GetMerkleRootHash(LedgerState, LastLedger.GetVersion(), merkleLogger);
         }
 
-        public static LedgerMerkleRootHash GetMerkleRootHash(ImmutableLedgerState ledgerState, ProtocolVersion version, ILogger logger)
+        public static LedgerMerkleRootHash GetMerkleRootHash(LedgerStateFinal ledgerState, ProtocolVersion version, ILogger logger)
         {
             // backward compatibility
             if (version == ProtocolVersion.InitialVersion)
@@ -74,7 +74,7 @@ namespace Caasiope.Node.Managers
         }
 
         // for merkle root
-        private static IEnumerable<TxDeclaration> GetDeclarations(ImmutableLedgerState ledgerState)
+        private static IEnumerable<TxDeclaration> GetDeclarations(LedgerStateFinal ledgerState)
         {
             return ledgerState.GetAccounts().Where(account => account.Declaration != null).Select(account => (TxDeclaration) account.Declaration);
         }
@@ -176,9 +176,9 @@ namespace Caasiope.Node.Managers
         }
 
         // we create a new ledger state based on the current state and the new ledger
-        private MutableLedgerState CreateLedgerState(SignedLedger signedLedger)
+        private LedgerPostState CreateLedgerState(SignedLedger signedLedger)
         {
-            var state = new MutableLedgerState(LedgerState, signedLedger.GetHeight()) {AccountCreated = account => LiveService.AccountManager.AddAccount(account.Address, new ExtendedAccount(account))};
+            var state = new LedgerPostState(LedgerState, signedLedger.GetHeight()) {AccountCreated = account => LiveService.AccountManager.AddAccount(account.Address, new ExtendedAccount(account))};
 
             byte index = 0;
             foreach (var signed in signedLedger.Ledger.Block.Transactions)
@@ -193,7 +193,7 @@ namespace Caasiope.Node.Managers
         }
 
         // we finalize the ledger and create a new immutable ledger state
-        private void Finalize(SignedLedger signed, MutableLedgerState state)
+        private void Finalize(SignedLedger signed, LedgerPostState state)
         {
             var ledgerState = state.Finalize();
             
@@ -207,7 +207,7 @@ namespace Caasiope.Node.Managers
             BroadcastNewLedger(LastLedger);
         }
 
-        private bool CheckMerkleRoot(ImmutableLedgerState ledgerState, SignedLedger ledger)
+        private bool CheckMerkleRoot(LedgerStateFinal ledgerState, SignedLedger ledger)
         {
             var hash = GetMerkleRootHash(ledgerState, ledger.GetVersion(), logger);
             return ledger.Ledger.MerkleHash.Equals(hash);
