@@ -25,7 +25,7 @@ namespace Caasiope.Node.Transformers
 
     internal abstract class DataTransformerService : ThreadedService { }
 
-    internal abstract class DataTransformerService<TItem, TRepository> : DataTransformerService, IDataTransformerService where TItem : class where TRepository : Repository<TItem>, IRepository<TItem>
+    internal abstract class DataTransformerService<TItem, TRepository> : DataTransformerService, IDataTransformerService where TItem : class where TRepository : Repository, IRepository<TItem>
     {
         [Injected] public IDatabaseService DatabaseService;
 

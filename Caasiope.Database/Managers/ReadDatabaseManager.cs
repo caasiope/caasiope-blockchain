@@ -19,27 +19,6 @@ namespace Caasiope.Database.Managers
             this.repositoryManager = repositoryManager;
         }
 
-        // This we load to the state on initialization
-        private List<TxAddressDeclaration> GetDeclarations()
-        {
-            var list = new Dictionary<string, TxAddressDeclaration>();
-
-            foreach (var entity in repositoryManager.GetRepository<TransactionDeclarationRepository>().GetEnumerable())
-            {
-                var declaration = ReadDeclaration(entity.Raw);
-                list.Add(entity.Address.Encoded, declaration);
-            }
-
-            return list.Values.ToList();
-        }
-
-        private TxAddressDeclaration ReadDeclaration(byte[] raw)
-        {
-            using (var stream = new ByteStream(raw))
-            {
-                return (TxAddressDeclaration)stream.ReadTxDeclaration();
-            }
-        }
 
         private List<Account> GetAccountsInternal()
         {

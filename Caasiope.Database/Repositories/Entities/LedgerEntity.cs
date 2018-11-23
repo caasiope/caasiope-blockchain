@@ -17,6 +17,5 @@ namespace Caasiope.Database.Repositories.Entities
             MerkleRootHash = merkleRootHash;
             Raw = raw;
         }
-
     }
 }
