@@ -47,6 +47,7 @@ namespace Caasiope.Database.Repositories
             {
                 hash = item.TransactionHash.Bytes,
                 ledger_height = item.LedgerHeight,
+                ledger_timestamp = item.LedgerTimestamp,
                 expire = item.Expire
             };
         }
