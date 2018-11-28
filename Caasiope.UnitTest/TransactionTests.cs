@@ -205,22 +205,29 @@ namespace Caasiope.UnitTest
                 var sender = BTC_ISSUER;
                 var receiver = CreateAccount();
 
-                var signed1 = Transfer(sender, receiver, Currency.BTC, 5);
-                context.SendTransaction(signed1);
-                Assert.IsTrue(context.TryCreateNextLedger());
+                {
+                    var signed = Transfer(sender, receiver, Currency.BTC, 5);
+                    context.SendTransaction(signed);
+                    Assert.IsTrue(context.TryCreateNextLedger());
 
-                context.TryGetAccount(receiver.Address.Encoded, out var receiverAccount);
-                context.TryGetAccount(sender.Address.Encoded, out var senderAccount);
+                    context.TryGetAccount(receiver.Address.Encoded, out var receiverAccount);
+                    context.TryGetAccount(sender.Address.Encoded, out var senderAccount);
 
-                Assert.IsTrue(receiverAccount.GetBalance(Currency.BTC) == 5);
-                Assert.IsTrue(senderAccount.GetBalance(Currency.BTC) == -5);
+                    Assert.IsTrue(receiverAccount.GetBalance(Currency.BTC) == 5);
+                    Assert.IsTrue(senderAccount.GetBalance(Currency.BTC) == -5);
+                }
 
-                var signed = Transfer(sender, receiver, Currency.BTC, 5, receiver, 5);
-                context.SendTransaction(signed);
-                Assert.IsTrue(context.TryCreateNextLedger());
-                
-                Assert.IsTrue(receiverAccount.GetBalance(Currency.BTC) == 5);
-                Assert.IsTrue(senderAccount.GetBalance(Currency.BTC) == -10);
+                {
+                    var signed = Transfer(sender, receiver, Currency.BTC, 5, receiver, 5);
+                    context.SendTransaction(signed);
+                    Assert.IsTrue(context.TryCreateNextLedger());
+
+                    context.TryGetAccount(receiver.Address.Encoded, out var receiverAccount);
+                    context.TryGetAccount(sender.Address.Encoded, out var senderAccount);
+
+                    Assert.IsTrue(receiverAccount.GetBalance(Currency.BTC) == 5);
+                    Assert.IsTrue(senderAccount.GetBalance(Currency.BTC) == -10);
+                }
             }
         }
 
@@ -291,16 +298,14 @@ namespace Caasiope.UnitTest
                 var multi = new MultiSignature(signers, 2);
                 var multiAddress = multi.Address;
 
-                Account multiAccount;
-                Account issuerAccount;
-
                 // issuer send to multisignature
                 {
                     var signed = Transfer(issuer, multiAddress, Currency.BTC, 10, null, null, new List<TxDeclaration>() { multi });
                     context.SendTransaction(signed);
                     Assert.IsTrue(context.TryCreateNextLedger());
-                    Assert.IsTrue(context.TryGetAccount(issuer.Address.Encoded, out issuerAccount));
-                    Assert.IsTrue(context.TryGetAccount(multiAddress.Encoded, out multiAccount));
+
+                    Assert.IsTrue(context.TryGetAccount(issuer.Address.Encoded, out var issuerAccount));
+                    Assert.IsTrue(context.TryGetAccount(multiAddress.Encoded, out var multiAccount));
 
                     // check that the money has been sent
                     Assert.IsTrue(multiAccount.GetBalance(Currency.BTC) == 10);
@@ -312,7 +317,10 @@ namespace Caasiope.UnitTest
                     var signed = Transfer(multiAddress, new List<PrivateKeyNotWallet> { signer1, signer2 }, receiver, Currency.BTC, 10);
                     context.SendTransaction(signed);
                     Assert.IsTrue(context.TryCreateNextLedger());
+
                     Assert.IsTrue(context.TryGetAccount(receiver.Address.Encoded, out var receiverAccount));
+                    Assert.IsTrue(context.TryGetAccount(issuer.Address.Encoded, out var issuerAccount));
+                    Assert.IsTrue(context.TryGetAccount(multiAddress.Encoded, out var multiAccount));
 
                     // check that the money has been received
                     Assert.IsTrue(multiAccount.GetBalance(Currency.BTC) == 0);
@@ -336,17 +344,14 @@ namespace Caasiope.UnitTest
                 var multi = new MultiSignature(signers, 2);
                 var multiAddress = multi.Address;
 
-                Account receiverAccount;
-                Account multiAccount;
-                Account issuerAccount;
-
                 // issuer send to multisignature
                 {
                     var signed = Transfer(issuer, multiAddress, Currency.BTC, 3);
                     context.SendTransaction(signed);
                     Assert.IsTrue(context.TryCreateNextLedger());
-                    Assert.IsTrue(context.TryGetAccount(issuer.Address.Encoded, out issuerAccount));
-                    Assert.IsTrue(context.TryGetAccount(multiAddress.Encoded, out multiAccount));
+
+                    Assert.IsTrue(context.TryGetAccount(issuer.Address.Encoded, out var issuerAccount));
+                    Assert.IsTrue(context.TryGetAccount(multiAddress.Encoded, out var multiAccount));
 
                     // check that the money has been sent
                     Assert.IsTrue(multiAccount.GetBalance(Currency.BTC) == 3);
@@ -358,6 +363,9 @@ namespace Caasiope.UnitTest
                     var signed = Transfer(multiAddress, new List<PrivateKeyNotWallet> { signer1, signer2 }, receiver, Currency.BTC, 1);
                     context.SendTransaction(signed, ResultCode.TransactionValidationFailed);
 
+                    Assert.IsTrue(context.TryGetAccount(issuer.Address.Encoded, out var issuerAccount));
+                    Assert.IsTrue(context.TryGetAccount(multiAddress.Encoded, out var multiAccount));
+
                     // check the money 
                     Assert.IsTrue(multiAccount.GetBalance(Currency.BTC) == 3);
                     Assert.IsTrue(issuerAccount.GetBalance(Currency.BTC) == -3);
@@ -368,7 +376,10 @@ namespace Caasiope.UnitTest
                     var signed = Transfer(multiAddress, new List<PrivateKeyNotWallet> { signer1, signer2 }, receiver, Currency.BTC, 1, new List<TxDeclaration> { multi });
                     context.SendTransaction(signed);
                     Assert.IsTrue(context.TryCreateNextLedger());
-                    Assert.IsTrue(context.TryGetAccount(receiver.Address.Encoded, out receiverAccount));
+
+                    Assert.IsTrue(context.TryGetAccount(issuer.Address.Encoded, out var issuerAccount));
+                    Assert.IsTrue(context.TryGetAccount(multiAddress.Encoded, out var multiAccount));
+                    Assert.IsTrue(context.TryGetAccount(receiver.Address.Encoded, out var receiverAccount));
 
                     // check that the money has been received
                     Assert.IsTrue(multiAccount.GetBalance(Currency.BTC) == 2);
@@ -381,7 +392,10 @@ namespace Caasiope.UnitTest
                     var signed = Transfer(multiAddress, new List<PrivateKeyNotWallet> { signer1, signer2 }, receiver, Currency.BTC, 1);
                     context.SendTransaction(signed);
                     Assert.IsTrue(context.TryCreateNextLedger());
-                    Assert.IsTrue(context.TryGetAccount(receiver.Address.Encoded, out receiverAccount));
+
+                    Assert.IsTrue(context.TryGetAccount(issuer.Address.Encoded, out var issuerAccount));
+                    Assert.IsTrue(context.TryGetAccount(multiAddress.Encoded, out var multiAccount));
+                    Assert.IsTrue(context.TryGetAccount(receiver.Address.Encoded, out var receiverAccount));
 
                     // check that the money has been received
                     Assert.IsTrue(multiAccount.GetBalance(Currency.BTC) == 1);
@@ -405,16 +419,14 @@ namespace Caasiope.UnitTest
                 var multi = new MultiSignature(signers, 2);
                 var multiAddress = multi.Address;
 
-                Account multiAccount;
-                Account issuerAccount;
-
                 // issuer send to multisignature
                 {
                     var signed = Transfer(issuer, multiAddress, Currency.BTC, 10, null, null, new List<TxDeclaration>() { multi });
                     context.SendTransaction(signed);
                     Assert.IsTrue(context.TryCreateNextLedger());
-                    Assert.IsTrue(context.TryGetAccount(issuer.Address.Encoded, out issuerAccount));
-                    Assert.IsTrue(context.TryGetAccount(multiAddress.Encoded, out multiAccount));
+
+                    Assert.IsTrue(context.TryGetAccount(issuer.Address.Encoded, out var issuerAccount));
+                    Assert.IsTrue(context.TryGetAccount(multiAddress.Encoded, out var multiAccount));
 
                     // check that the money has been sent
                     Assert.IsTrue(multiAccount.GetBalance(Currency.BTC) == 10);
@@ -426,6 +438,9 @@ namespace Caasiope.UnitTest
                     var signed = Transfer(multiAddress, new List<PrivateKeyNotWallet> { signer1 }, receiver, Currency.BTC, 10);
                     context.SendTransaction(signed, ResultCode.TransactionValidationFailed);
 
+                    Assert.IsTrue(context.TryGetAccount(issuer.Address.Encoded, out var issuerAccount));
+                    Assert.IsTrue(context.TryGetAccount(multiAddress.Encoded, out var multiAccount));
+
                     // check that the money has been received
                     Assert.IsTrue(multiAccount.GetBalance(Currency.BTC) == 10);
                     Assert.IsTrue(issuerAccount.GetBalance(Currency.BTC) == -10);
@@ -436,6 +451,7 @@ namespace Caasiope.UnitTest
         [TestMethod]
         public void FourThousandTransactionsInBlock()
         {
+            Assert.Inconclusive();
             var rnd = new Random();
             using (var context = CreateContext(true))
             {
@@ -481,16 +497,14 @@ namespace Caasiope.UnitTest
                 var hashlock = new HashLock(hash);
                 var revelation = new SecretRevelation(secret);
 
-                Account senderAccount;
-                Account hashlockAccount;
                 // send money to hashlock account
                 {
                     var signed = Transfer(sender, hashlock.Address, Currency.BTC, 10);
                     context.SendTransaction(signed);
                     Assert.IsTrue(context.TryCreateNextLedger());
 
-                    Assert.IsTrue(context.TryGetAccount(sender.Address.Encoded, out senderAccount));
-                    Assert.IsTrue(context.TryGetAccount(hashlock.Address.Encoded, out hashlockAccount));
+                    Assert.IsTrue(context.TryGetAccount(sender.Address.Encoded, out var senderAccount));
+                    Assert.IsTrue(context.TryGetAccount(hashlock.Address.Encoded, out var hashlockAccount));
 
                     // check that the money has been sent
                     Assert.IsTrue(senderAccount.GetBalance(Currency.BTC) == -10);
@@ -521,6 +535,9 @@ namespace Caasiope.UnitTest
                     context.SendTransaction(signed);
                     Assert.IsTrue(context.TryCreateNextLedger());
 
+                    Assert.IsTrue(context.TryGetAccount(sender.Address.Encoded, out var senderAccount));
+                    Assert.IsTrue(context.TryGetAccount(hashlock.Address.Encoded, out var hashlockAccount));
+
                     // check that the money has been sent
                     Assert.IsTrue(senderAccount.GetBalance(Currency.BTC) == 0);
                     Assert.IsTrue(hashlockAccount.GetBalance(Currency.BTC) == 0);
@@ -534,21 +551,20 @@ namespace Caasiope.UnitTest
             using (var context = CreateContext())
             {
                 var sender = BTC_ISSUER;
-                Account senderAccount;
 
                 // We have an seed block, which has been generated some time ago, so for the first timelock to be unlocked we get the time from it
                 var blockBegin = Utils.UnixTimeToDateTime(context.LedgerService.LedgerManager.GetLedgerBeginTime()).DateTime;
                 // create timelock unlocked
                 var timeunlocked = new TimeLock(blockBegin.AddDays(-1).ToUnixTimestamp());
-                Account timeunlockedAccount;
+
                 // send money to unlocked account
                 {
                     var signed = Transfer(sender, timeunlocked.Address, Currency.BTC, 10);
                     context.SendTransaction(signed);
                     Assert.IsTrue(context.TryCreateNextLedger());
 
-                    Assert.IsTrue(context.TryGetAccount(sender.Address.Encoded, out senderAccount));
-                    Assert.IsTrue(context.TryGetAccount(timeunlocked.Address.Encoded, out timeunlockedAccount));
+                    Assert.IsTrue(context.TryGetAccount(sender.Address.Encoded, out var senderAccount));
+                    Assert.IsTrue(context.TryGetAccount(timeunlocked.Address.Encoded, out var timeunlockedAccount));
 
                     // check that the money has been sent
                     Assert.IsTrue(senderAccount.GetBalance(Currency.BTC) == -10);
@@ -567,6 +583,9 @@ namespace Caasiope.UnitTest
                     context.SendTransaction(signed);
                     Assert.IsTrue(context.TryCreateNextLedger());
 
+                    Assert.IsTrue(context.TryGetAccount(sender.Address.Encoded, out var senderAccount));
+                    Assert.IsTrue(context.TryGetAccount(timeunlocked.Address.Encoded, out var timeunlockedAccount));
+
                     // check that the money has been sent
                     Assert.IsTrue(senderAccount.GetBalance(Currency.BTC) == 0);
                     Assert.IsTrue(timeunlockedAccount.GetBalance(Currency.BTC) == 0);
@@ -580,7 +599,7 @@ namespace Caasiope.UnitTest
                     context.SendTransaction(signed);
                     Assert.IsTrue(context.TryCreateNextLedger());
 
-                    Assert.IsTrue(context.TryGetAccount(sender.Address.Encoded, out senderAccount));
+                    Assert.IsTrue(context.TryGetAccount(sender.Address.Encoded, out var senderAccount));
                     Assert.IsTrue(context.TryGetAccount(timelocked.Address.Encoded, out var timelockedAccount));
 
                     // check that the money has been sent
@@ -658,16 +677,14 @@ namespace Caasiope.UnitTest
                 var hashtimelocked = new MultiSignature(new List<Address>() { claim.Address, timeoutlocked.Address }, 1);
                 var hashtimeunlocked = new MultiSignature(new List<Address>() { claim.Address, timeoutunlocked.Address }, 1);
 
-                Account issuerAccount;
-                Account hashtimelockedAccount;
                 // send money to hashtimelocked account
                 {
                     var signed = Transfer(issuer, hashtimelocked.Address, Currency.BTC, 10, null, null, new List<TxDeclaration>() { hashtimelocked });
                     context.SendTransaction(signed);
                     Assert.IsTrue(context.TryCreateNextLedger());
 
-                    Assert.IsTrue(context.TryGetAccount(issuer.Address.Encoded, out issuerAccount));
-                    Assert.IsTrue(context.TryGetAccount(hashtimelocked.Address.Encoded, out hashtimelockedAccount));
+                    Assert.IsTrue(context.TryGetAccount(issuer.Address.Encoded, out var issuerAccount));
+                    Assert.IsTrue(context.TryGetAccount(hashtimelocked.Address.Encoded, out var hashtimelockedAccount));
 
                     // check that the money has been sent
                     Assert.IsTrue(issuerAccount.GetBalance(Currency.BTC) == -10);
@@ -686,19 +703,23 @@ namespace Caasiope.UnitTest
                     context.SendTransaction(signed);
                     Assert.IsTrue(context.TryCreateNextLedger());
 
+                    // update data
+                    Assert.IsTrue(context.TryGetAccount(issuer.Address.Encoded, out var issuerAccount));
+                    Assert.IsTrue(context.TryGetAccount(hashtimelocked.Address.Encoded, out var hashtimelockedAccount));
+
                     // check that the money has been sent
                     Assert.IsTrue(issuerAccount.GetBalance(Currency.BTC) == 0);
                     Assert.IsTrue(hashtimelockedAccount.GetBalance(Currency.BTC) == 0);
                 }
 
-                Account hashtimeunlockedAccount;
                 // send money to hashtimeunlocked account
                 {
                     var signed = Transfer(issuer, hashtimeunlocked.Address, Currency.BTC, 10, null, null, new List<TxDeclaration>() { hashtimeunlocked });
                     context.SendTransaction(signed);
                     Assert.IsTrue(context.TryCreateNextLedger());
 
-                    Assert.IsTrue(context.TryGetAccount(hashtimeunlocked.Address.Encoded, out hashtimeunlockedAccount));
+                    Assert.IsTrue(context.TryGetAccount(issuer.Address.Encoded, out var issuerAccount));
+                    Assert.IsTrue(context.TryGetAccount(hashtimeunlocked.Address.Encoded, out var hashtimeunlockedAccount));
 
                     // check that the money has been sent
                     Assert.IsTrue(issuerAccount.GetBalance(Currency.BTC) == -10);
@@ -710,6 +731,10 @@ namespace Caasiope.UnitTest
                     var signed = Transfer(hashtimeunlocked.Address, new List<PrivateKeyNotWallet>() { sender }, issuer.Address, Currency.BTC, 10, new List<TxDeclaration>() { timeunlocked, timeoutunlocked });
                     context.SendTransaction(signed);
                     Assert.IsTrue(context.TryCreateNextLedger());
+
+                    // update data
+                    Assert.IsTrue(context.TryGetAccount(issuer.Address.Encoded, out var issuerAccount));
+                    Assert.IsTrue(context.TryGetAccount(hashtimeunlocked.Address.Encoded, out var hashtimeunlockedAccount));
 
                     // check that the money has been sent
                     Assert.IsTrue(issuerAccount.GetBalance(Currency.BTC) == 0);

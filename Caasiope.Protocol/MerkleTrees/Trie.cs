@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Caasiope.NBitcoin;
 using Caasiope.NBitcoin.Crypto;
 
@@ -212,8 +213,9 @@ namespace Caasiope.Protocol.MerkleTrees
         public Hash256 ComputeHash(IHasher<T> hasher)
         {
             CheckFinalized();
-            if(Count == 0)
-                return Hash256.Zero;
+            if (Count == 0)
+                return root.Hash = Hash256.Zero;
+
             ComputeHash(root, hasher);
             return root.Hash;
         }
@@ -358,10 +360,12 @@ namespace Caasiope.Protocol.MerkleTrees
         // the callback will give the old item and get the new item
         public void CreateOrUpdate(byte[] key, Func<T,T> get)
         {
-            CreateOrUpdate(root, key, get);
+            var ret = CreateOrUpdate(root, key, get);
+            Debug.Assert(ret == root);
         }
 
-        private void CreateOrUpdate(Node parent, byte[] key, Func<T, T> get)
+        // return the old parent or a new parent if modified
+        private Node CreateOrUpdate(Node parent, byte[] key, Func<T, T> get)
         {
             var next = (byte)(parent.Depth + 1); // pass this as argument ? i would say no, it should not be in the stack
             var index = parent.GetIndex(key);
@@ -392,7 +396,7 @@ namespace Caasiope.Protocol.MerkleTrees
                     child = new Node(next);
                 }
                 // recursively call on children
-                CreateOrUpdate(child, key, get);
+                child = CreateOrUpdate(child, key, get);
             }
 
             // the node is immutable
@@ -401,6 +405,7 @@ namespace Caasiope.Protocol.MerkleTrees
 
             // we dont check, those operations are not costly
             parent.Children[index] = child;
+            return parent;
         }
     }
 }

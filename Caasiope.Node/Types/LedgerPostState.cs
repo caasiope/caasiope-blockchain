@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caasiope.Protocol.Extensions;
+using Caasiope.Protocol.MerkleTrees;
 using Caasiope.Protocol.Types;
+using Helios.Common.Extensions;
 
 namespace Caasiope.Node.Types
 {
@@ -104,8 +106,9 @@ namespace Caasiope.Node.Types
             SaveBalance(account, account.SetBalance(currency, amount));
         }
 
-        public LedgerStateFinal Finalize()
+        public LedgerStateFinal Finalize(IHasher<Account> hasher)
         {
+            Tree.ComputeHash(hasher);
             return new LedgerStateFinal(Tree);
         }
 
@@ -128,7 +131,7 @@ namespace Caasiope.Node.Types
                 else
                 {
                     account = new MutableAccount(address, Height);
-                    AccountCreated(account);
+                    AccountCreated.Call(account);
                 }
 
                 return account;
