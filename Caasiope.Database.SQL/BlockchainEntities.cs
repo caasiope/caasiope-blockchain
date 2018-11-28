@@ -6,15 +6,15 @@ namespace Caasiope.Database.SQL
 {
     public class BlockchainEntities: DbContext
     {
-        public BlockchainEntities() : base("Data Source=|DataDirectory|blockchain.db")
+        public BlockchainEntities()
         {
             Configuration.LazyLoadingEnabled = false;
         }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            //var sqliteConnectionInitializer = new SqliteCreateDatabaseIfNotExists<BlockchainEntities>(modelBuilder);
-            //System.Data.Entity.Database.SetInitializer(sqliteConnectionInitializer);
+            var sqliteConnectionInitializer = new SqliteCreateDatabaseIfNotExists<BlockchainEntities>(modelBuilder);
+            System.Data.Entity.Database.SetInitializer(sqliteConnectionInitializer);
 
             modelBuilder.Entity<account>().HasKey(u => new
             {
