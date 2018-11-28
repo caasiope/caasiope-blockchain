@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using Caasiope.NBitcoin;
 using Caasiope.NBitcoin.Crypto;
 
@@ -48,16 +50,43 @@ namespace Caasiope.Protocol.MerkleTrees
             // OPTIMIZE is it better to return an int ?
             public byte GetIndex(byte[] key)
             {
-                var @byte = key[Depth/2];
-                return (byte) (Depth % 2 == 0 ? @byte >> 4 : @byte & 0b1111);
+                return GetIndex(key, Depth);
             }
 
+            public static byte GetIndex(byte[] key, byte depth)
+            {
+                var @byte = key[depth / 2];
+                return (byte)(depth % 2 == 0 ? @byte >> 4 : @byte & 0b1111);
+            }
+
+            // TODO only we should only have specualized methods
             public Node Clone()
+            {
+                return Children.Length == 1 ? CloneCompact() : CloneNode();
+            }
+
+            private Node CloneNode()
             {
                 var clone = new Node(Depth);
                 for (int i = 0; i < NB_CHILDREN; i++)
                     clone.Children[i] = Children[i];
                 return clone;
+            }
+
+            private Node CloneCompact()
+            {
+                var compact = (CompactNode) this;
+                return new CompactNode(Children[0].CloneNode(), compact.Path);
+            }
+
+            public bool IsLeaf()
+            {
+                return Children == null;
+            }
+
+            public bool IsCompact()
+            {
+                return Children.Length == 1;
             }
         }
 
@@ -65,9 +94,19 @@ namespace Caasiope.Protocol.MerkleTrees
         {
             public readonly T Item;
 
-            public Leaf(byte depth, T item) : base(depth)
+            public Leaf(byte depth, T item) : base(depth, null)
             {
                 Item = item;
+            }
+        }
+
+        public class CompactNode : Node
+        {
+            public readonly byte[] Path;
+
+            public CompactNode(Node child, byte[] path) : base(child.Depth, new[]{child})
+            {
+                Path = path;
             }
         }
 
@@ -109,29 +148,19 @@ namespace Caasiope.Protocol.MerkleTrees
             // check if we have child
             if (child != null)
             {
-                // we already have this item
-                if (IsLeaf(next))
-                    // failed
-                    return null;
-                child = Add(child, key, item);
-
+                child = CreateChild(child, key, item, next);
                 // failed
                 if (child == null)
                     return null;
             }
             else
             {
-                if (IsLeaf(next))
-                {
-                    // create child
-                    child = new Leaf(next, item);
-                    Count++;
-                }
+                var leaf  = new Leaf(max_depth, item);
+                if (IsLeafDepth(next))
+                    child = leaf;
                 else
-                {
-                    child = new Node(next);
-                    Add(child, key, item); // AddNoReplace
-                }
+                    child = new CompactNode(leaf, key);
+                Count++;
             }
 
             // the node is immutable
@@ -141,6 +170,76 @@ namespace Caasiope.Protocol.MerkleTrees
             // we dont check, those operations are not costly
             parent.Children[index] = child;
             return parent;
+        }
+
+        private Node CreateChild(Node child, byte[] key, T item, byte next)
+        {
+            // we already have this item
+            if (IsLeafDepth(next))
+                // failed
+                return null;
+
+            if (IsCompact(next, child.Depth))
+            {
+                var compactor = (CompactNode)child;
+                var depth = FindDivergence(key, compactor.Path, next, child.Depth);
+                // we are on same path
+                Node node;
+                if (depth > 0)
+                {
+                    // is it really a compactor ?
+                    node = new Node(depth);
+
+                    if (depth == next)
+                    {
+                        child = node;
+                    }
+                    else
+                    {
+                        child = new CompactNode(node, key);
+                        // attach old compact to the new node
+                    }
+                    node.Children[child.GetIndex(compactor.Path)] = GetCompactorOrNode(compactor, depth);
+                }
+                else
+                {
+                    node = compactor.Children[0];
+                    if (node.IsLeaf())
+                    {
+                        return null;
+                    }
+                }
+                // attach children to node
+                if(Add(node, key, item) == null)
+                    return null;
+                return child;
+            }
+            return Add(child, key, item);
+        }
+
+        // TODO create generic ?
+        private Node GetCompactorOrNode(CompactNode compact, byte depth)
+        {
+            if (compact.Depth == depth + 1)
+                return compact.Children[0];
+            return compact;
+        }
+
+        // return 0 if no divergence ?
+        private byte FindDivergence(byte[] path1, byte[] path2, byte begin, byte end)
+        {
+            for (byte depth = begin ; depth < end; depth++)
+            {
+                if (Node.GetIndex(path1, depth) != Node.GetIndex(path2, depth))
+                    return depth;
+            }
+
+            return 0;
+        }
+
+        private bool IsCompact(byte next, byte depth)
+        {
+            return next != depth;
         }
 
         private void AddNoReplace(Node child, byte[] key, T item)
@@ -158,7 +257,7 @@ namespace Caasiope.Protocol.MerkleTrees
             return node.Hash != null;
         }
 
-        private bool IsLeaf(byte next)
+        private bool IsLeafDepth(byte next)
         {
             return max_depth <= next;
         }
@@ -192,14 +291,43 @@ namespace Caasiope.Protocol.MerkleTrees
             }
 
             // check if next node is leaf
-            if (IsLeaf(child.Depth))
+            if (child.IsLeaf())
             {
                 item = ((Leaf)child).Item;
                 return true;
             }
 
+            // if compact
+            if (IsCompact(child))
+            {
+                // look if shortcut matches
+                var begin = parent.Depth;
+                var end = child.Depth;
+                var compactor = (CompactNode) child;
+                child = child.Children[0];
+                // not on the path
+                if (FindDivergence(compactor.Path, key, begin, end) != 0)
+                {
+                    item = default(T);
+                    return false;
+                }
+
+                if (child.IsLeaf())
+                {
+                    item = ((Leaf) child).Item;
+                    return true;
+                }
+
+                return TryGetValue(child, key, out item);
+            }
+
             // recursively call on children
             return TryGetValue(child, key, out item);
+        }
+
+        private bool IsCompact(Node node)
+        {
+            return node.Children.Length == 1;
         }
 
         public Hash256 GetHash()
@@ -225,7 +353,7 @@ namespace Caasiope.Protocol.MerkleTrees
             // use old hash
 
             // leaf is return the hash of the item provided by the extractor
-            if (IsLeaf(node.Depth))
+            if(node.IsLeaf())
             {
                 var leaf = (Leaf) node;
                 leaf.Hash = hasher.GetHash(leaf.Item);
@@ -288,7 +416,7 @@ namespace Caasiope.Protocol.MerkleTrees
         private void CheckFinalized()
         {
             if (IsFinalized())
-                throw new Exception("The trie has already been finalized !");
+                throw new TrieFinalizedException("The trie has already been finalized !");
         }
 
         public bool Update(byte[] key, T item)
@@ -310,7 +438,7 @@ namespace Caasiope.Protocol.MerkleTrees
                 return null;
 
             // check if next node is leaf
-            if (IsLeaf(next))
+            if (IsLeafDepth(next))
             {
                 // add the item
                  child =  new Leaf(next, item);
@@ -343,14 +471,17 @@ namespace Caasiope.Protocol.MerkleTrees
 
         private void GetEnumerable(Node node, List<T> list)
         {
-            if (IsLeaf(node.Depth))
+            if (IsLeafDepth(node.Depth))
                 list.Add(((Leaf)node).Item);
             else
             {
                 foreach (var child in node.Children)
                 {
                     if (child != null)
-                        GetEnumerable(child, list);
+                    {
+                        var next = IsCompact((byte) (node.Depth + 1), child.Depth) ? child.Children[0] : child;
+                        GetEnumerable(next, list);
+                    }
                 }
             }
         }
@@ -368,7 +499,7 @@ namespace Caasiope.Protocol.MerkleTrees
             var child = parent.Children[index];
 
             // check if next node is leaf
-            if (IsLeaf(next))
+            if (IsLeafDepth(next))
             {
                 T old;
                 if (child == null)
@@ -402,5 +533,10 @@ namespace Caasiope.Protocol.MerkleTrees
             // we dont check, those operations are not costly
             parent.Children[index] = child;
         }
+    }
+
+    public class TrieFinalizedException : Exception
+    {
+        public TrieFinalizedException(string msg) : base(msg) { }
     }
 }

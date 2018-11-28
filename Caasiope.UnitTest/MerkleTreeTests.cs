@@ -204,7 +204,7 @@ namespace Caasiope.UnitTest
                 FillTree(tree, accounts2);
                 Assert.Fail("Did not throw expected exception !");
             }
-            catch (Exception e) {}
+            catch (TrieFinalizedException e) {}
 
             // get value
             var address = addresses1[0].ToRawBytes();
@@ -216,7 +216,7 @@ namespace Caasiope.UnitTest
                 tree.Update(address, new MutableAccount(account.Address, account.CurrentLedger + 1));
                 Assert.Fail("Did not throw expected exception !");
             }
-            catch (Exception e) { }
+            catch (TrieFinalizedException e) { }
         }
 
         [TestMethod]
@@ -245,6 +245,76 @@ namespace Caasiope.UnitTest
 
 
             // check the second and first tree share some common parts
+        }
+
+        [TestMethod]
+        public void TestCompact()
+        {
+            var tree = new Trie<int>(4);
+
+            // root - 1 -> (compact) 2345678 -> 0x12345678
+            AddHexa(tree, 0x12345678);
+
+            // diverge on last leaf
+            // root - 1 -> (compact) 234567 - 8 -> 0x12345678
+            //                              - 9 -> 0x12345679
+            AddHexa(tree, 0x12345679);
+
+            // diverge on root node
+            // root - 0 -> (compact) 2345678 -> 0x02345678
+            //      - 1 -> (compact) 234567 - 8 -> 0x12345678
+            //                              - 9 -> 0x12345679
+            AddHexa(tree, 0x02345678);
+
+            // diverge on random node
+            // root - 0 -> (compact) 2345678 -> 0x02345678
+            //      - 1 -> (compact) 23 - 4 -> (compact) 567 - 8 -> 0x12345678
+            //                                               - 9 -> 0x12345679
+            //                          - 5 -> (compact) 5678 -> 0x12355678
+            AddHexa(tree, 0x12355678);
+
+            // diverge on random node
+            // root - 0 -> (compact) 23 - 4 -> (compact) 5678 -> 0x02345678
+            //                          - 5 -> (compact) 5678 -> 0x02355678
+            //      - 1 -> (compact) 23 - 4 -> (compact) 567 - 8 -> 0x12345678
+            //                                               - 9 -> 0x12345679
+            //                          - 5 -> (compact) 5678 -> 0x12355678
+            AddHexa(tree, 0x02355678);
+
+            // root - 0 -> (compact) 23 - 4 -> (compact) 5678 -> 0x02345678
+            //                          - 5 -> (compact) 5678 -> 0x02355678
+            //                          - 6 -> (compact) 5678 -> 0x02365678
+            //      - 1 -> (compact) 23 - 4 -> (compact) 567 - 8 -> 0x12345678
+            //                                               - 9 -> 0x12345679
+            //                          - 5 -> (compact) 5678 -> 0x12355678
+            AddHexa(tree, 0x02365678);
+
+            // root - 0 -> (compact) 23 - 4 -> (compact) 5678 -> 0x02345678
+            //                          - 5 -> (compact) 5678 -> 0x02355678
+            //                          - 6 -> 5 - 6 (compact) 78 -> 0x02365678
+            //                                   - 7 (compact) 78 -> 0x02365778
+            //      - 1 -> (compact) 23 - 4 -> (compact) 567 - 8 -> 0x12345678
+            //                                               - 9 -> 0x12345679
+            //                          - 5 -> (compact) 5678 -> 0x12355678
+            AddHexa(tree, 0x02365778);
+
+            // root - 0 -> (compact) 23 - 4 -> (compact) 5678 -> 0x02345678
+            //                          - 5 -> (compact) 5678 -> 0x02355678
+            //                          - 6 -> 5 - 6 (compact) 78 -> 0x02365678
+            //                                   - 7 (compact) 78 -> 0x02365778
+            //      - 1 - 1 -> (compact) 345678 -> 0x11345678
+            //          - 2 -> 3 - 4 -> (compact) 567 - 8 -> 0x12345678
+            //                                        - 9 -> 0x12345679
+            //                   - 5 -> (compact) 5678 -> 0x12355678
+            AddHexa(tree, 0x11345678);
+        }
+
+        private void AddHexa(Trie<int> tree, int value)
+        {
+            var expected = tree.Count + 1;
+            Assert.IsTrue(tree.Add(BitConverter.GetBytes(value).Reverse().ToArray(), value));
+            Assert.AreEqual(expected, tree.Count);
+            Assert.AreEqual(expected, tree.GetEnumerable().Count());
         }
     }
 }
