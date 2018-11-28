@@ -8,7 +8,7 @@ namespace Caasiope.Explorer.Database.Repositories
 {
     public class TransactionMessageRepository : Repository<TransactionMessageEntity, transactionmessage, TransactionHash>
     {
-        protected override DbSet<transactionmessage> GetDbSet(BlockchainEntities entities)
+        protected override DbSet<transactionmessage> GetDbSet(ExplorerEntities entities)
         {
             return entities.transactionmessages;
         }

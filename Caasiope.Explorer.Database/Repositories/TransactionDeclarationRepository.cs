@@ -112,7 +112,7 @@ namespace Caasiope.Explorer.Database.Repositories
 			return new TransactionDeclarationEntity(new TransactionHash(entity.transaction_hash), entity.index, entity.declaration_id);
 		}
 
-		protected override DbSet<transactiondeclaration> GetDbSet(BlockchainEntities entities)
+		protected override DbSet<transactiondeclaration> GetDbSet(ExplorerEntities entities)
 		{
 			return entities.transactiondeclarations;
 		}
@@ -127,7 +127,7 @@ namespace Caasiope.Explorer.Database.Repositories
 			return new EnumeratorToEnumerable<TransactionDeclarationEntity>(transactions.GetEnumerator(hash)).OrderBy(declaration => declaration.Index);
 		}
 
-	    public override void Initialize(BlockchainEntities entities)
+	    public override void Initialize(ExplorerEntities entities)
 	    {
 	        base.Initialize(entities);
 	        last = GetEnumerable().Select(declaration => declaration.DeclarationId).DefaultIfEmpty(-1).Max();

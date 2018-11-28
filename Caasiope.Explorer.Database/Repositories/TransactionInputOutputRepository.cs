@@ -130,7 +130,7 @@ namespace Caasiope.Explorer.Database.Repositories
 		    RegisterIndex(addresses);
 	    }
 
-		protected override DbSet<transactioninputoutput> GetDbSet(BlockchainEntities entities)
+		protected override DbSet<transactioninputoutput> GetDbSet(ExplorerEntities entities)
         {
             return entities.transactioninputoutputs;
         }

@@ -1,18 +1,16 @@
 ﻿using System.Data.Entity;
-using System.Data.Entity.Core.Metadata.Edm;
-using System.Data.Entity.Infrastructure;
-using Caasiope.Database.SQL.Entities;
+using Caasiope.Explorer.Database.SQL.Entities;
 
-namespace Caasiope.Database.SQL
+namespace Caasiope.Explorer.Database.SQL
 {
     [DbConfigurationType(typeof(MySql.Data.Entity.MySqlEFConfiguration))]
-    public class BlockchainEntities: DbContext
+    public class ExplorerEntities: DbContext
     {
-        public BlockchainEntities()
-            : base("name=BlockchainEntities")
+        public ExplorerEntities()
+            : base("name=ExplorerEntities")
         {
             Configuration.LazyLoadingEnabled = false;
-            System.Data.Entity.Database.SetInitializer<BlockchainEntities>(null);
+            System.Data.Entity.Database.SetInitializer<ExplorerEntities>(null);
         }
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -61,15 +59,6 @@ namespace Caasiope.Database.SQL
             {
                 u.ledger_height
             });
-            modelBuilder.Entity<ledger>().HasKey(u => new
-            {
-                u.height
-            });
-            modelBuilder.Entity<ledgersignature>().HasKey(u => new
-            {
-                u.ledger_height,
-                u.validator_publickey,
-            });
             modelBuilder.Entity<transactionmessage>().HasKey(u => new
             {
                 u.transaction_hash
@@ -77,10 +66,6 @@ namespace Caasiope.Database.SQL
             modelBuilder.Entity<tableledgerheight>().HasKey(u => new
             {
                 u.table_name
-            });
-            modelBuilder.Entity<ledgerstatechange>().HasKey(u => new
-            {
-                u.ledger_height
             });
             modelBuilder.Entity<hashlock>().HasKey(u => new
             {
@@ -104,13 +89,10 @@ namespace Caasiope.Database.SQL
         public virtual DbSet<multisignatureaccount> multisignatureaccounts { get; set; }
         public virtual DbSet<multisignaturesigner> multisignaturesigners { get; set; }
         public virtual DbSet<block> blocks { get; set; }
-        public virtual DbSet<ledger> ledgers { get; set; }
-        public virtual DbSet<ledgersignature> ledgersignatures { get; set; }
         public virtual DbSet<transactionmessage> transactionmessages { get; set; }
         public virtual DbSet<transactiondeclaration> transactiondeclarations { get; set; }
         public virtual DbSet<declaration> declarations { get; set; }
         public virtual DbSet<tableledgerheight> tableledgerheights { get; set; }
-        public virtual DbSet<ledgerstatechange> ledgerstatechanges { get; set; }
         public virtual DbSet<hashlock> hashlocks { get; set; }
         public virtual DbSet<timelock> timelocks { get; set; }
         public virtual DbSet<secretrevelation> secretrevelations { get; set; }

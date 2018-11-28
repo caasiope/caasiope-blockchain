@@ -9,7 +9,7 @@ namespace Caasiope.Explorer.Database.Repositories
 {
     public class AccountRepository : Repository<AccountEntity, account, Address>
     {
-        protected override DbSet<account> GetDbSet(BlockchainEntities entities)
+        protected override DbSet<account> GetDbSet(ExplorerEntities entities)
         {
             return entities.accounts;
         }

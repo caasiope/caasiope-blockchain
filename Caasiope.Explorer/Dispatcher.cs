@@ -2,6 +2,7 @@
 using System.Linq;
 using Caasiope.Explorer.JSON.API;
 using Caasiope.Explorer.JSON.API.Requests;
+using Caasiope.Explorer.Services;
 using Caasiope.Node;
 using Caasiope.Node.Connections;
 using Caasiope.Node.Processors.Commands;

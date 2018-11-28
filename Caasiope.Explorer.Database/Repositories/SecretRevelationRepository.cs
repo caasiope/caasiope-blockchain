@@ -22,7 +22,7 @@ namespace Caasiope.Explorer.Database.Repositories
             return new SecretRevelationEntity(entity.declaration_id, new SecretRevelation(new Secret(entity.secret)));
         }
 
-        protected override DbSet<secretrevelation> GetDbSet(BlockchainEntities entities)
+        protected override DbSet<secretrevelation> GetDbSet(ExplorerEntities entities)
         {
             return entities.secretrevelations;
         }

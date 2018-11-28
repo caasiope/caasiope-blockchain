@@ -4,8 +4,6 @@ using System.Linq;
 using System;
 using Caasiope.Explorer.Database.Repositories;
 using Caasiope.Explorer.Database.Repositories.Entities;
-using Caasiope.Explorer.Database.SQL;
-using Caasiope.Protocol;
 using Caasiope.Protocol.Types;
 
 namespace Caasiope.Explorer.Database.Managers
@@ -19,129 +17,110 @@ namespace Caasiope.Explorer.Database.Managers
             this.repositoryManager = repositoryManager;
         }
 
-        // This we load to the state on initialization
-        private List<MultiSignatureAddress> GetMultiSignatureAddresses()
+        public List<HistoricalTransaction> GetTransactionHistory(Address address, long? ledgerHeight)
         {
-            var list = new Dictionary<string, MultiSignatureAddress>();
+            var transactions = repositoryManager.GetRepository<TransactionRepository>();
+            var inputs = repositoryManager.GetRepository<TransactionInputOutputRepository>().GetByAddress(address);
 
-            foreach (var entity in repositoryManager.GetRepository<MultiSignatureAccountRepository>().GetEnumerable())
+            var list = new Dictionary<TransactionHash, HistoricalTransaction>();
+            foreach (var input in inputs)
             {
-                var address = entity.Account.Address;
-                var account = new MultiSignatureAddress(address, new List<Address>(), entity.Account.Required);
-                list.Add(address.Encoded, account);
-            }
+                var hash = input.TransactionHash;
+                if (!list.ContainsKey(hash))
+                {
+                    var simple = transactions.GetByKey(hash);
 
-            foreach (var signer in repositoryManager.GetRepository<MultiSignatureSignerRepository>().GetEnumerable())
-            {
-                // TODO optimize
-                var encoded = signer.MultiSignature.Encoded;
-                Debug.Assert(list.ContainsKey(encoded));
-                list[encoded].Signers.Add(signer.Signer);
-            }
+                    if (ledgerHeight == null || simple.LedgerHeight > ledgerHeight)
+                    {
 
+                        list.Add(hash, new HistoricalTransaction(simple.LedgerHeight, GetTransaction(simple)));
+                    }
+                }
+            }
             return list.Values.ToList();
         }
 
-        // This we load to the state on initialization
-        public List<Account> GetAccounts()
+        public Transaction GetTransaction(TransactionHash hash)
         {
-            var list = new Dictionary<Address, MutableAccount>();
-
-            foreach (var account in repositoryManager.GetRepository<AccountRepository>().GetEnumerable())
-            {
-                list.Add(account.Address, new MutableAccount(account.Address, account.CurrentLedgerHeight));
-            }
-
-            foreach (var balance in repositoryManager.GetRepository<BalanceRepository>().GetEnumerable())
-            {
-                list[balance.Account].SetBalance(balance.AccountBalance);
-            }
-
-            foreach (var multi in GetMultiSignatureAddresses())
-            {
-                list[multi.Address].SetDeclaration(new MultiSignature(multi.Signers, multi.Required));
-            }
-
-            foreach (var hashlock in repositoryManager.GetRepository<HashLockRepository>().GetEnumerable())
-            {
-                list[hashlock.Account.Address].SetDeclaration(new HashLock(hashlock.Account.SecretHash)); // TODO optimize
-            }
-
-            foreach (var timelock in repositoryManager.GetRepository<TimeLockRepository>().GetEnumerable())
-            {
-                list[timelock.Account.Address].SetDeclaration(new TimeLock(timelock.Account.Timestamp));
-            }
-
-            return list.Values.Select(mutable => mutable.Finalize()).ToList(); // TODO ugly
+            var simple = repositoryManager.GetRepository<TransactionRepository>().GetByKey(hash);
+            return GetTransaction(simple);
         }
 
-        public SignedLedger GetLastLedgerFromRaw()
+        private Transaction GetTransaction(SignedTransactionSimple simple)
         {
-            using (var entities = new BlockchainEntities())
+            var declarations = new List<TxDeclaration>();
+            foreach (var declaration in repositoryManager.GetRepository<TransactionDeclarationRepository>().GetEnumerable(simple.TransactionHash))
             {
-                var max = entities.ledgers.OrderByDescending(ledger => ledger.height).FirstOrDefault();
-                Debug.Assert(max == null || max.raw != null && max.raw.Length != 0);
-                return LedgerCompressionEngine.ReadZippedLedger(max?.raw);
+                var type = repositoryManager.GetRepository<DeclarationRepository>().GetByKey(declaration.DeclarationId).DeclarationType;
+
+                if (type == DeclarationType.MultiSignature)
+                    declarations.Add(GetMultiSignature(declaration.DeclarationId));
+
+                else if (type == DeclarationType.TimeLock)
+                    declarations.Add(GetTimeLock(declaration.DeclarationId));
+
+                else if (type == DeclarationType.HashLock)
+                    declarations.Add(GetHashLock(declaration.DeclarationId));
+
+                else if (type == DeclarationType.Secret)
+                    declarations.Add(GetSecret(declaration.DeclarationId));
+
+                else throw new NotImplementedException();
             }
-        }
 
-        public SignedLedger GetLedgerFromRaw(long height)
-        {
-            return LedgerCompressionEngine.ReadZippedLedger(GetRawLedger(height));
-        }
+            var inputs = new List<TxInput>();
+            var outputs = new List<TxOutput>();
+            TxInput fees = null;
 
-        public byte[] GetRawLedger(long height)
-        {
-            using (var entities = new BlockchainEntities())
+            foreach (var inputoutput in repositoryManager.GetRepository<TransactionInputOutputRepository>().GetEnumerable(simple.TransactionHash))
             {
-                var ledger = entities.ledgers.FirstOrDefault(_ => _.height == height);
-                return ledger?.raw;
-            }
-        }
+                if (inputoutput.Index == 0)
+                {
+                    Debug.Assert(inputoutput.TxInputOutput.IsInput);
+                    fees = new TxInput(inputoutput.TxInputOutput.Address, inputoutput.TxInputOutput.Currency, inputoutput.TxInputOutput.Amount);
+                    continue;
+                }
 
-        public List<SignedLedgerState> GetLedgersFromHeight(long startHeight)
+                if (inputoutput.TxInputOutput.IsInput)
+                    inputs.Add(new TxInput(inputoutput.TxInputOutput.Address, inputoutput.TxInputOutput.Currency, inputoutput.TxInputOutput.Amount));
+                else
+                    outputs.Add(new TxOutput(inputoutput.TxInputOutput.Address, inputoutput.TxInputOutput.Currency, inputoutput.TxInputOutput.Amount));
+            }
+
+            var message = repositoryManager.GetRepository<TransactionMessageRepository>().GetByKey(simple.TransactionHash);
+            return new Transaction(declarations, inputs, outputs, message == null ? TransactionMessage.Empty : message.Message, simple.Expire, fees);
+        }
+        private MultiSignature GetMultiSignature(long id)
         {
-            using (var entities = new BlockchainEntities())
+            var multiSignature = repositoryManager.GetRepository<MultiSignatureAccountRepository>().GetByKey(id);
+
+            var signers = new List<Address>();
+            foreach (var signer in repositoryManager.GetRepository<MultiSignatureSignerRepository>().GetEnumerable())
             {
-                var rawLedgers = entities.ledgers.Where(_ => _.height >= startHeight).ToList();
-                var readedLedgers = rawLedgers.Select(_ => LedgerCompressionEngine.ReadZippedLedger(_.raw));
-
-                var rawStateChanges = entities.ledgerstatechanges.Where(_ => _.ledger_height >= startHeight).ToList();
-                var readedStateChanges = rawStateChanges.Select(_ => ReadStateChange(_.ledger_height, _.raw));
-
-                var results = from ledger in readedLedgers
-                    join state in readedStateChanges
-                    on ledger.Ledger.LedgerLight.Height equals state.Item1
-                    select new SignedLedgerState(ledger, state.Item2);
-
-                return results.ToList();
+                if (signer.MultiSignature.Encoded != multiSignature.Account.Address.Encoded)
+                    continue;
+                signers.Add(signer.Signer);
             }
+
+            return new MultiSignature(signers, multiSignature.Account.Required);
         }
 
-        // todo compress this
-        private Tuple<long, LedgerStateChange> ReadStateChange(long height, byte[] data)
+        private TimeLock GetTimeLock(long id)
         {
-            if (data == null)
-                return null;
-
-            using (var stream = new ByteStream(data))
-            {
-                return new Tuple<long, LedgerStateChange>(height, stream.ReadLedgerStateChange());
-            }
+            var timeLock = repositoryManager.GetRepository<TimeLockRepository>().GetByKey(id);
+            return new TimeLock(timeLock.Account.Timestamp);
         }
 
-        public List<TableLedgerHeight> GetHeightTables()
+        private SecretRevelation GetSecret(long id)
         {
-            return repositoryManager.GetRepository<TableLedgerHeightRepository>().GetEnumerable().ToList();
+            var multiSignature = repositoryManager.GetRepository<SecretRevelationRepository>().GetByKey(id);
+            return multiSignature.SecretRevelation;
         }
 
-        public List<TransactionDeclarationEntity> GetDeclarations(long height)
+        private HashLock GetHashLock(long id)
         {
-            var list = new List<TransactionDeclarationEntity>();
-            var transactions = repositoryManager.GetRepository<TransactionRepository>().GetByHeight(height);
-            foreach (var transaction in transactions)
-                list.AddRange(repositoryManager.GetRepository<TransactionDeclarationRepository>().GetEnumerable(transaction.TransactionHash));
-            return list;
+            var hashLock = repositoryManager.GetRepository<HashLockRepository>().GetByKey(id);
+            return new HashLock(hashLock.Account.SecretHash);
         }
     }
 }

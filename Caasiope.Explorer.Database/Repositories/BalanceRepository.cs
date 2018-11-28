@@ -31,7 +31,7 @@ namespace Caasiope.Explorer.Database.Repositories
             return new Entities.AccountBalanceFull(address, new AccountBalance(currency, amount));
         }
 
-        protected override DbSet<balance> GetDbSet(BlockchainEntities entities)
+        protected override DbSet<balance> GetDbSet(ExplorerEntities entities)
         {
             return entities.balances;
         }

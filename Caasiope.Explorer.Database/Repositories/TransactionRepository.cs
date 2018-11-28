@@ -31,7 +31,7 @@ namespace Caasiope.Explorer.Database.Repositories
             }
         }
 
-        protected override DbSet<transaction> GetDbSet(BlockchainEntities entities)
+        protected override DbSet<transaction> GetDbSet(ExplorerEntities entities)
         {
             return entities.transactions;
         }

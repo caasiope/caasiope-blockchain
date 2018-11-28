@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using Caasiope.Protocol.Types;
 
-namespace Caasiope.Database.Repositories.Entities
+namespace Caasiope.Explorer.Database.Repositories.Entities
 {
     [DebuggerDisplay("Account = {Account.Encoded} Currency = {Caasiope.Protocol.Types.Currency.ToSymbol(AccountBalance.Currency)}  Amount = {AccountBalance.Amount.value}")]
     public class AccountBalanceFull

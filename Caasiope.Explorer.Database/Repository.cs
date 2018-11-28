@@ -6,7 +6,6 @@ using System.Data.Entity.Infrastructure;
 using System.Diagnostics;
 using System.Linq;
 using Caasiope.Explorer.Database.SQL;
-using Helios.Common.Concepts.Configuration;
 using Helios.Common.Extensions;
 using Helios.Common.Logs;
 using Helios.Common.Synchronization;
@@ -18,7 +17,7 @@ namespace Caasiope.Explorer.Database
 
     public interface IRepository<in TItem> where TItem : class
     {
-        void CreateOrUpdate(BlockchainEntities entities, TItem item);
+        void CreateOrUpdate(ExplorerEntities entities, TItem item);
         string TableName { get; }
     }
 
@@ -26,7 +25,7 @@ namespace Caasiope.Explorer.Database
     {
         protected ILogger logger;
         public void SetLogger(ILogger logger) { this.logger = logger; }
-        public abstract void Initialize(BlockchainEntities entities);
+        public abstract void Initialize(ExplorerEntities entities);
     }
 
     public abstract class Repository<TItem> : Repository
@@ -84,7 +83,7 @@ namespace Caasiope.Explorer.Database
             }
         }
 
-        public abstract void CreateOrUpdate(BlockchainEntities entities, TItem item);
+        public abstract void CreateOrUpdate(ExplorerEntities entities, TItem item);
         protected  abstract PrimaryIndex GetPrimaryIndex();
 
         // all the index but not the primary
@@ -129,7 +128,7 @@ namespace Caasiope.Explorer.Database
 
     public abstract class Repository<TItem, TEntity> : Repository<TItem>, IRepository<TItem> where TEntity : class where TItem : class
     {
-        public override void Initialize(BlockchainEntities entities)
+        public override void Initialize(ExplorerEntities entities)
         {
             TableName = GetTableName(entities);
 
@@ -146,7 +145,7 @@ namespace Caasiope.Explorer.Database
             }
         }
 
-        public override void CreateOrUpdate(BlockchainEntities entities, TItem item)
+        public override void CreateOrUpdate(ExplorerEntities entities, TItem item)
         {
             using (locker.CreateLock())
             {
@@ -167,18 +166,18 @@ namespace Caasiope.Explorer.Database
 
         public string TableName { get; private set; }
 
-        private IEnumerable<TItem> GetInitial(BlockchainEntities entities)
+        private IEnumerable<TItem> GetInitial(ExplorerEntities entities)
         {
             return GetDbSet(entities).Select(ToItem);
         }
 
-        private string GetTableName(BlockchainEntities entities)
+        private string GetTableName(ExplorerEntities entities)
         {
             var objectContext = ((IObjectContextAdapter)entities).ObjectContext;
             return  objectContext.CreateObjectSet<TEntity>().EntitySet.Name;
         }
 
-        protected abstract DbSet<TEntity> GetDbSet(BlockchainEntities entities);
+        protected abstract DbSet<TEntity> GetDbSet(ExplorerEntities entities);
 
         protected abstract TEntity ToEntity(TItem item);
         protected abstract TItem ToItem(TEntity entity);

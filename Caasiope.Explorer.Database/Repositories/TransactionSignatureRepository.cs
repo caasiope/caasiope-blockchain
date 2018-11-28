@@ -7,7 +7,7 @@ namespace Caasiope.Explorer.Database.Repositories
 {
     public class TransactionSignatureRepository : Repository<TransactionSignature, transactionsignature, string>
     {
-        protected override DbSet<transactionsignature> GetDbSet(BlockchainEntities entities)
+        protected override DbSet<transactionsignature> GetDbSet(ExplorerEntities entities)
         {
             return entities.transactionsignatures;
         }

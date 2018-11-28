@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Caasiope.Database.Repositories;
+using Caasiope.Explorer.Database.Repositories;
 using Caasiope.Protocol.Types;
 
 namespace Caasiope.Explorer.Transformers

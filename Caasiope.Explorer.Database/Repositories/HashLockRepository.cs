@@ -54,7 +54,7 @@ namespace Caasiope.Explorer.Database.Repositories
             return new HashLockEntity(entity.declaration_id, new HashLockAccount(address, new SecretHash((SecretHashType)entity.secret_type, new Hash256(entity.secret_hash))));
         }
 
-        protected override DbSet<hashlock> GetDbSet(BlockchainEntities entities)
+        protected override DbSet<hashlock> GetDbSet(ExplorerEntities entities)
         {
             return entities.hashlocks;
         }

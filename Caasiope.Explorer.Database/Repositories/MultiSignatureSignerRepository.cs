@@ -8,7 +8,7 @@ namespace Caasiope.Explorer.Database.Repositories
 {
     public class MultiSignatureSignerRepository : Repository<MultiSignatureSigner, multisignaturesigner, string>
     {
-        protected override DbSet<multisignaturesigner> GetDbSet(BlockchainEntities entities)
+        protected override DbSet<multisignaturesigner> GetDbSet(ExplorerEntities entities)
         {
             return entities.multisignaturesigners;
         }

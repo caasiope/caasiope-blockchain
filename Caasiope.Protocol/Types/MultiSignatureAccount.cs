@@ -6,13 +6,11 @@ namespace Caasiope.Protocol.Types
     {
         public readonly Address Address;
         public readonly short Required;
-        public readonly IEnumerable<Address> multiSignatureSigners;
 
-        public MultiSignatureAccount(Address address, short required, IEnumerable<Address> multiSignatureSigners)
+        public MultiSignatureAccount(Address address, short required)
         {
             Address = address;
             Required = required;
-            this.multiSignatureSigners = multiSignatureSigners;
         }
     }
 }

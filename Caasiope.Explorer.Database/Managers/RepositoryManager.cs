@@ -49,7 +49,7 @@ namespace Caasiope.Explorer.Database.Managers
         // we initialize every repository and load data from database
         public void Initialize()
         {
-            using (var entities = new BlockchainEntities())
+            using (var entities = new ExplorerEntities())
             {
                 foreach (var repository in repositories.Values)
                     repository.Initialize(entities);

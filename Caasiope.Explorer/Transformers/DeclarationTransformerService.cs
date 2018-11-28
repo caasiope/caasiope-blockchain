@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using Caasiope.Database.Repositories;
-using Caasiope.Database.Repositories.Entities;
+using Caasiope.Explorer.Database.Repositories;
+using Caasiope.Explorer.Database.Repositories.Entities;
 
 namespace Caasiope.Explorer.Transformers
 {

@@ -1,7 +1,8 @@
 using System.Collections.Generic;
-using Caasiope.Database.Repositories;
-using Caasiope.Database.Repositories.Entities;
+using Caasiope.Explorer.Database.Repositories;
+using Caasiope.Explorer.Database.Repositories.Entities;
 using Caasiope.Protocol.Types;
+using TransactionDeclarationEntity = Caasiope.Explorer.Database.Repositories.Entities.TransactionDeclarationEntity;
 
 namespace Caasiope.Explorer.Transformers
 {

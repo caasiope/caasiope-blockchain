@@ -1,36 +1,39 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using Caasiope.Node.Managers;
+using Caasiope.Explorer.Managers;
 using Caasiope.Protocol.Types;
 using Helios.Common.Concepts.Services;
+using ThreadedService = Caasiope.Node.Services.ThreadedService;
 
-namespace Caasiope.Node.Services
+namespace Caasiope.Explorer.Services
 {
-    public interface IDataTransformationService : IService
+    public interface IExplorerDataTransformationService : IService
     {
-        void Transform(SignedLedgerState ledger);
         void WaitTransformationCompleted();
-        void OnTransform(Action<SignedLedgerState> callback);
         DataTransformerManager DataTransformerManager { get; }
     }
 
-    public class DataTransformationService : ThreadedService, IDataTransformationService
+    public class ExplorerDataTransformationService : ThreadedService, IExplorerDataTransformationService
     {
-        public DataTransformerManager DataTransformerManager { get; } = new DataTransformerManager(); 
+        public DataTransformerManager DataTransformerManager { get; } = new DataTransformerManager();
         private readonly LedgerTransformationManager ledgerTransformationManager = new LedgerTransformationManager();
         private readonly ConcurrentQueue<SignedLedgerState> queue = new ConcurrentQueue<SignedLedgerState>();
-        public Action<SignedLedgerState> onTransform;
 
         protected override void OnInitialize()
         {
-            DatabaseService.InitializedHandle.WaitOne();
+            DataTransformationService.OnTransform(Transform);
 
+            DatabaseService.InitializedHandle.WaitOne();
+            
             DataTransformerManager.Initialize();
             ledgerTransformationManager.Initialize(Logger);
         }
 
         protected override void OnStart()
         {
+
+            DataTransformationService.WaitTransformationCompleted();
+
             DataTransformerManager.Start();
             ledgerTransformationManager.Start();
             // we run at startup to be sure that SQL db is in a good state
@@ -53,14 +56,8 @@ namespace Caasiope.Node.Services
 
         public void Transform(SignedLedgerState ledger)
         {
-            onTransform(ledger);
             queue.Enqueue(ledger);
             trigger.Set();
-        }
-
-        public void OnTransform(Action<SignedLedgerState> callback)
-        {
-            onTransform += callback;
         }
 
         // TODO May be should be more complex

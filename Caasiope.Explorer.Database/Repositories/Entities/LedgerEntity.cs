@@ -1,7 +1,7 @@
 ﻿using Caasiope.Protocol.MerkleTrees;
 using Caasiope.Protocol.Types;
 
-namespace Caasiope.Database.Repositories.Entities
+namespace Caasiope.Explorer.Database.Repositories.Entities
 {
     public class LedgerEntity
     {

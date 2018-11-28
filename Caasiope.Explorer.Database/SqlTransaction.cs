@@ -15,11 +15,11 @@ namespace Caasiope.Explorer.Database
             this.logger = logger;
         }
 
-        protected abstract void Populate(RepositoryManager repositories, BlockchainEntities entities);
+        protected abstract void Populate(RepositoryManager repositories, ExplorerEntities entities);
 
         public void Save(RepositoryManager repositories)
         {
-            using (var entities = new BlockchainEntities())
+            using (var entities = new ExplorerEntities())
             {
                 using (new PerformanceLogger(logger, "PopulateEntitiesLogger"))
                 {

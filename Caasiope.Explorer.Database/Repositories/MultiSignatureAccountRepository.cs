@@ -53,7 +53,7 @@ namespace Caasiope.Explorer.Database.Repositories
             return new MultiSignatureEntity(entity.declaration_id, new MultiSignatureHash(entity.hash), new MultiSignatureAccount(address, entity.required));
         }
 
-        protected override DbSet<multisignatureaccount> GetDbSet(BlockchainEntities entities)
+        protected override DbSet<multisignatureaccount> GetDbSet(ExplorerEntities entities)
         {
             return entities.multisignatureaccounts;
         }

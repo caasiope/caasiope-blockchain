@@ -43,8 +43,11 @@
   <ItemGroup>
     <Compile Include="BlockchainExplorer.cs" />
     <Compile Include="Dispatcher.cs" />
-    <Compile Include="ExplorerConnectionService.cs" />
-    <Compile Include="ExplorerDatabaseService.cs" />
+    <Compile Include="Managers\DataTransformerManager.cs" />
+    <Compile Include="Services\ExplorerConnectionService.cs" />
+    <Compile Include="Services\ExplorerDatabaseService.cs" />
+    <Compile Include="Services\ExplorerDataTransformationService.cs" />
+    <Compile Include="Managers\LedgerTransformationManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transformers\BlockTransformerService.cs" />
@@ -72,6 +75,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Caasiope.Explorer.Database\Caasiope.Explorer.Database.csproj">
+      <Project>{d35a9db7-390c-4bc2-a9a3-edba8bcb9e4a}</Project>
+      <Name>Caasiope.Explorer.Database</Name>
+    </ProjectReference>
     <ProjectReference Include="..\helios-common\Helios.Common\Helios.Common\Helios.Common.csproj">
       <Project>{7487A6DB-300E-482A-888F-50AFF822DF69}</Project>
       <Name>Helios.Common</Name>

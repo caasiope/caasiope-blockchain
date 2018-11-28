@@ -3,13 +3,11 @@ using Caasiope.Explorer.JSON.API;
 using Caasiope.Log;
 using Caasiope.Node;
 using Caasiope.Node.Connections;
-using Caasiope.Node.Services;
 using Helios.Common.Concepts.Services;
 using Helios.Common.Logs;
 using Helios.JSON;
-using ResultCode = Caasiope.Node.ResultCode;
 
-namespace Caasiope.Explorer
+namespace Caasiope.Explorer.Services
 {
 	public interface IExplorerConnectionService : IService { }
 
@@ -20,12 +18,11 @@ namespace Caasiope.Explorer
 
 	public class WebSocketServerService : Service
 	{
-		private readonly WebSocketServer server;
+	    [Injected] public IExplorerDataTransformationService ExplorerDataTransformationService;
+        private readonly WebSocketServer server;
 		private IDispatcher<ISession> dispatcher;
 		private readonly JsonMessageFactory factory;
 		
-		[Injected] public ILiveService LiveService;
-
 		public WebSocketServerService(WebSocketServer server, JsonMessageFactory factory)
 		{
 		    Logger = new LoggerAdapter(Name);
@@ -110,7 +107,9 @@ namespace Caasiope.Explorer
 
 		protected override void OnStart()
 		{
-			server.Start();
+            ExplorerDataTransformationService.WaitTransformationCompleted();
+
+		    server.Start();
 		}
 
 		protected override void OnStop()

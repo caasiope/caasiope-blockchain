@@ -57,11 +57,9 @@
     <Compile Include="Repositories\Entities\TransactionDeclarationEntity.cs" />
     <Compile Include="Repositories\Entities\TableLedgerHeight.cs" />
     <Compile Include="Repositories\Entities\LedgerEntity.cs" />
-    <Compile Include="Repositories\Entities\TxDeclarationEntity.cs" />
     <Compile Include="Repositories\Entities\LedgerStateChangeSimple.cs" />
     <Compile Include="Repositories\LedgerRepository.cs" />
     <Compile Include="Repositories\TableLedgerHeightRepository.cs" />
-    <Compile Include="Repositories\Entities\LedgerSignature.cs" />
     <Compile Include="Repositories\LedgerStateChangeRepository.cs" />
     <Compile Include="Repository.cs" />
     <Compile Include="Transaction.cs" />

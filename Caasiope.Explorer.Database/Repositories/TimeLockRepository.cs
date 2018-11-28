@@ -52,7 +52,7 @@ namespace Caasiope.Explorer.Database.Repositories
             return new TimeLockEntity(entity.declaration_id, new TimeLockAccount(address, entity.timestamp));
         }
 
-        protected override DbSet<timelock> GetDbSet(BlockchainEntities entities)
+        protected override DbSet<timelock> GetDbSet(ExplorerEntities entities)
         {
             return entities.timelocks;
         }

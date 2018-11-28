@@ -21,7 +21,7 @@ namespace Caasiope.Explorer.Database.SqlTransactions
             this.logger = logger;
         }
 
-        protected override void Populate(RepositoryManager repositories, BlockchainEntities entities)
+        protected override void Populate(RepositoryManager repositories, ExplorerEntities entities)
         {
             // get transformed data
             foreach (var entity in Data)

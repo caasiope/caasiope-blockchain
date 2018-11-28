@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Caasiope.Database.Repositories.Entities
+namespace Caasiope.Explorer.Database.Repositories.Entities
 {
     public class TableLedgerHeight:IEquatable<TableLedgerHeight>
     {

@@ -22,7 +22,7 @@ namespace Caasiope.Explorer.Database.Repositories
             return new DeclarationEntity(entity.declaration_id, (DeclarationType)entity.type);
         }
 
-        protected override DbSet<declaration> GetDbSet(BlockchainEntities entities)
+        protected override DbSet<declaration> GetDbSet(ExplorerEntities entities)
         {
             return entities.declarations;
         }

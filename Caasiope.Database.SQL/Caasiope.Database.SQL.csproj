@@ -65,7 +65,6 @@
   <ItemGroup>
     <Compile Include="BlockchainEntities.cs" />
     <Compile Include="Entities\account.cs" />
-    <Compile Include="Entities\transactiondeclaration.cs" />
     <Compile Include="Entities\tableledgerheight.cs" />
     <Compile Include="Entities\ledger.cs" />
     <Compile Include="Entities\ledgerstatechange.cs" />

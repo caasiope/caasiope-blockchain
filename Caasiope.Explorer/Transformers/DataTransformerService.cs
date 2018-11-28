@@ -2,13 +2,12 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
-using Caasiope.Database;
-using Caasiope.Database.Managers;
-using Caasiope.Database.Repositories.Entities;
-using Caasiope.Database.SqlTransactions;
+using Caasiope.Explorer.Database;
+using Caasiope.Explorer.Database.Managers;
+using Caasiope.Explorer.Database.Repositories.Entities;
+using Caasiope.Explorer.Services;
 using Caasiope.Log;
 using Caasiope.Node;
-using Caasiope.Node.Services;
 using Caasiope.Protocol.Types;
 using Helios.Common.Concepts.Services;
 using Helios.Common.Extensions;
@@ -26,9 +25,9 @@ namespace Caasiope.Explorer.Transformers
 
     internal abstract class DataTransformerService : ThreadedService { }
 
-    internal abstract class DataTransformerService<TItem, TRepository> : DataTransformerService, IDataTransformerService where TItem : class where TRepository : Repository<TItem>, IRepository<TItem>
+    internal abstract class DataTransformerService<TItem, TRepository> : DataTransformerService, IDataTransformerService where TItem : class where TRepository : Repository<TItem>, Caasiope.Explorer.Database.IRepository<TItem>
     {
-        [Injected] public IDatabaseService DatabaseService;
+        [Injected] public IExplorerDatabaseService DatabaseService;
 
         public override ILogger Logger { get; }
 
@@ -79,7 +78,7 @@ namespace Caasiope.Explorer.Transformers
 
         private void ProcessSave(DataTransformationContext context)
         {
-            var transaction = new TransformerTransaction<TItem>(Transform(context), Repository, context.SignedLedgerState.Ledger.Ledger.LedgerLight.Height, Logger);
+            var transaction = new Database.SqlTransactions.TransformerSqlTransaction<TItem>(Transform(context), Repository, context.SignedLedgerState.Ledger.Ledger.LedgerLight.Height, Logger);
             DatabaseService.SqlTransactionManager.ExecuteTransaction(transaction);
         }
 

@@ -1,7 +1,7 @@
 using Caasiope.Protocol.Types;
 using Caasiope.Protocol;
 
-namespace Caasiope.Database.Repositories.Entities
+namespace Caasiope.Explorer.Database.Repositories.Entities
 {
     public class HashLockEntity
     {

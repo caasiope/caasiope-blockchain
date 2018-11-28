@@ -26,7 +26,7 @@ namespace Caasiope.Explorer.Database.Repositories
             return new TableLedgerHeight(entity.table_name, entity.processed_ledger_height);
         }
 
-        protected override DbSet<tableledgerheight> GetDbSet(BlockchainEntities entities)
+        protected override DbSet<tableledgerheight> GetDbSet(ExplorerEntities entities)
         {
             return entities.tableledgerheights;
         }

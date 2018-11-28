@@ -8,7 +8,7 @@ namespace Caasiope.Explorer.Database.Managers
     {
         public static void WipeDatabase()
         {
-            using (var context = new BlockchainEntities())
+            using (var context = new ExplorerEntities())
             {
                 var objectContext = ((IObjectContextAdapter)context).ObjectContext;
 
