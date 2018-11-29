@@ -1,5 +1,5 @@
 <pre>
-  CIP: 1
+  CIP: 3
   Title: Vending Machine
   Author: Guillaume Bonnot
   Status: Draft
@@ -19,17 +19,45 @@ The protocol already supports multi-currency transactions but another channel mu
 A new declaration type is introduced :
 * VendingMachine : 0x4
 
+A new account type is introduced :
+* VendingMachine : 0x5
+
+The vending machine has following field :
+* Owner : the address of the owner, who can withdraw the funds at anytime
+* Currency In : the currency the machine will receive
+* Currency Out : the currency the machine will send
+* Rate : the conversion rate between what is received and what is sent
+
+Example :
+
+* Currency In : LTC
+* Currency Out : BTC
+* Rate : 10
+
+For every LTC amount sent to the vending machine, you can receive amount/10 BTC from the vending machine.
+This amount sent is rounded down.
+
+===Transaction===
+
+The user must create a transaction with the inputs and outputs of both himself and the vending machine.
+
+Example :
+* INPUT : user 100 LTC
+* INPUT : machine 10 BTC
+
+* OUTPUT : machine 100 LTC
+* OUTPUT : user 10 BTC
 
 ===Verification===
-
-===Protocol Version===
-A new protocol version is introduced :
-* VendingMachine : 0x3
+when a transaction tries to spend from the vending machine,
+it is valid only in 2 cases :
+* the amount sent is exchanged against the amount received at the specified rate
+* the owner signed the transaction
 
 ==Rationale==
-The rate is used only to divide, so we dont have overflow;
+The rate is used only to multiply, so we dont have division by 0.
 
 ==Backwards compatibility==
-This proposal introduces a new account type.
+This proposal introduces a new account type and a new declaration type.
 Backwards compatibility is ok.
 Forwards compatibility is not possible, old versions are going to reject anything with the new account type.
