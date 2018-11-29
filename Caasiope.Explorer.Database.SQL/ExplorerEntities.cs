@@ -3,7 +3,7 @@ using Caasiope.Explorer.Database.SQL.Entities;
 
 namespace Caasiope.Explorer.Database.SQL
 {
-    [DbConfigurationType(typeof(MySql.Data.Entity.MySqlEFConfiguration))]
+    //[DbConfigurationType(typeof(MySql.Data.Entity.MySqlEFConfiguration))]
     public class ExplorerEntities: DbContext
     {
         public ExplorerEntities()

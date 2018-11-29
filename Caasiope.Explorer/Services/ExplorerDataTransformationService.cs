@@ -31,9 +31,6 @@ namespace Caasiope.Explorer.Services
 
         protected override void OnStart()
         {
-
-            DataTransformationService.WaitTransformationCompleted();
-
             DataTransformerManager.Start();
             ledgerTransformationManager.Start();
             // we run at startup to be sure that SQL db is in a good state
