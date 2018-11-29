@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using Caasiope.Database.Repositories.Entities;
+using Caasiope.Explorer.Database.Repositories.Entities;
 using Caasiope.Explorer.Services;
 using Caasiope.Explorer.Transformers;
 using Caasiope.Node;
@@ -24,6 +24,7 @@ namespace Caasiope.Explorer.Managers
     {
         [Injected] public IDatabaseService DatabaseService;
         [Injected] public IExplorerDataTransformationService ExplorerDataTransformationService;
+        [Injected] public IExplorerDatabaseService ExplorerDatabaseService;
 
         private readonly Dictionary<string, TableTransformationState> tableTransformationStates = new Dictionary<string, TableTransformationState>();
         private readonly MonitorLocker locker = new MonitorLocker();
@@ -78,7 +79,7 @@ namespace Caasiope.Explorer.Managers
 
         private void SetInitialTableHeights()
         {
-            var heightsFromDatabase = DatabaseService.ReadDatabaseManager.GetHeightTables();
+            var heightsFromDatabase = ExplorerDatabaseService.ReadDatabaseManager.GetHeightTables();
             var initials = ExplorerDataTransformationService.DataTransformerManager.GetInitialTableHeights();
             // This is in case of the cold start, or if an new table added so it will be indexed in heightTables
             foreach (var initialEntity in initials)

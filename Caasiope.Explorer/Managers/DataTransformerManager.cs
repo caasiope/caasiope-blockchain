@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Caasiope.Database.Repositories.Entities;
+using Caasiope.Explorer.Database.Repositories.Entities;
 using Caasiope.Explorer.Transformers;
 using Caasiope.Node;
 

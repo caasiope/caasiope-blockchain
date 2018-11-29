@@ -122,5 +122,10 @@ namespace Caasiope.Explorer.Database.Managers
             var hashLock = repositoryManager.GetRepository<HashLockRepository>().GetByKey(id);
             return new HashLock(hashLock.Account.SecretHash);
         }
+
+        public List<TableLedgerHeight> GetHeightTables()
+        {
+            return repositoryManager.GetRepository<TableLedgerHeightRepository>().GetEnumerable().ToList();
+        }
     }
 }
