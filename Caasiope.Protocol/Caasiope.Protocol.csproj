@@ -55,11 +55,13 @@
     <Compile Include="Types\SignedTransaction.cs" />
     <Compile Include="Types\TimeLockAccount.cs" />
     <Compile Include="Compression\Zipper.cs" />
+    <Compile Include="Types\VendingMachineAccount.cs" />
     <Compile Include="Validators\Transactions\AddressRequiredSignature.cs" />
     <Compile Include="Validators\LedgerValidationEngine.cs" />
     <Compile Include="Validators\Transactions\HashLockRequiredSignature.cs" />
     <Compile Include="Validators\Transactions\MultiAddressRequiredSignature.cs" />
     <Compile Include="Validators\Transactions\TimeLockRequiredSignature.cs" />
+    <Compile Include="Validators\Transactions\VendingMachineRequiredSignature.cs" />
     <Compile Include="Validators\TransactionValidationEngine.cs" />
     <Compile Include="Types\AccountBalanceFull.cs" />
     <Compile Include="Types\Network.cs" />

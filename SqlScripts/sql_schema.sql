@@ -132,3 +132,14 @@ CREATE TABLE `secretrevelations` (
 	`secret` BINARY(32) NOT NULL,
 	PRIMARY KEY(`declaration_id`)
 );
+
+
+CREATE TABLE `vendingmachines` (
+    `declaration_id` BIGINT NOT NULL,
+	`account` BINARY(21) NOT NULL,
+	`owner` BINARY(21) NOT NULL,
+	`currency_in` SMALLINT NOT NULL,
+	`currency_out` SMALLINT NOT NULL,
+	`rate` BIGINT NOT NULL,
+	PRIMARY KEY(`declaration_id`)
+);

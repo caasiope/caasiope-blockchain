@@ -14,6 +14,7 @@ namespace Caasiope.Node.Transformers
             public readonly Dictionary<MultiSignature, TransactionDeclarationEntity> MultiSignatures = new Dictionary<MultiSignature, TransactionDeclarationEntity>();
             public readonly Dictionary<HashLock, TransactionDeclarationEntity> HashLocks = new Dictionary<HashLock, TransactionDeclarationEntity>();
             public readonly Dictionary<TimeLock, TransactionDeclarationEntity> TimeLocks = new Dictionary<TimeLock, TransactionDeclarationEntity>();
+            public readonly Dictionary<VendingMachine, TransactionDeclarationEntity> VendingMachines = new Dictionary<VendingMachine, TransactionDeclarationEntity>();
 
             public void Add(TransactionDeclarationEntity declarationEntity, TxDeclaration declaration)
             {
@@ -30,6 +31,10 @@ namespace Caasiope.Node.Transformers
                     case DeclarationType.TimeLock:
                         var timelock = (TimeLock)declaration;
                         TimeLocks[timelock] = declarationEntity;
+                        break;
+                    case DeclarationType.VendingMachine:
+                        var machine = (VendingMachine)declaration;
+                        VendingMachines[machine] = declarationEntity;
                         break;
                 }
             }
@@ -108,6 +113,19 @@ namespace Caasiope.Node.Transformers
 
                     // Case 2 the original declaration was submitted before this batch (ledger)
                     id = repositoryManager.GetRepository<TimeLockRepository>().GetByAddress(timelock.Address)?.DeclarationId;
+                    break;
+                case DeclarationType.VendingMachine:
+                    var machine = (VendingMachine)declaration;
+
+                    // case 1 transactions in this batch (ledger) has same declaration several times. We take id of the first occurence
+                    if (processed.VendingMachines.TryGetValue(machine, out processedDeclaration))
+                    {
+                        id = processedDeclaration.DeclarationId;
+                        break;
+                    }
+
+                    // Case 2 the original declaration was submitted before this batch (ledger)
+                    id = repositoryManager.GetRepository<VendingMachineRepository>().GetByAddress(machine.Address)?.DeclarationId;
                     break;
             }
 

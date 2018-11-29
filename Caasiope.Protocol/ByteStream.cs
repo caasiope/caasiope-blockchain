@@ -129,6 +129,9 @@ namespace Caasiope.Protocol
                 case DeclarationType.Secret:
                     Write((SecretRevelation) declaration);
                     break;
+                case DeclarationType.VendingMachine:
+                    Write((VendingMachine) declaration);
+                    break;
                 default:
                     throw new NotImplementedException();
             }
@@ -185,6 +188,14 @@ namespace Caasiope.Protocol
         private void Write(SecretRevelation secret)
         {
             Write(secret.Secret.Bytes);
+        }
+
+        protected void Write(VendingMachine machine)
+        {
+            Write(machine.Owner);
+            Write(machine.CurrencyIn);
+            Write(machine.CurrencyOut);
+            Write(machine.Rate);
         }
 
         protected void Write(byte data)
@@ -458,9 +469,16 @@ namespace Caasiope.Protocol
                     return ReadTimeLock();
                 case DeclarationType.Secret:
                     return ReadSecretRevelation();
+                case DeclarationType.VendingMachine:
+                    return ReadVendingMachine();
                     default:
                         throw new NotImplementedException();
             }
+        }
+
+        private VendingMachine ReadVendingMachine()
+        {
+            return new VendingMachine(ReadAddress(), ReadCurrency(), ReadCurrency(), ReadAmount());
         }
 
         private TimeLock ReadTimeLock()
@@ -490,7 +508,7 @@ namespace Caasiope.Protocol
 
         public LedgerStateChange ReadLedgerStateChange()
         {
-            return new LedgerStateChange(ReadList(ReadAccountEntity), ReadList(ReadAccountBalanceFull), ReadList(ReadMultiSignature), ReadList(ReadHashLock), ReadList(ReadTimeLock));
+            return new LedgerStateChange(ReadList(ReadAccountEntity), ReadList(ReadAccountBalanceFull), ReadList(ReadMultiSignature), ReadList(ReadHashLock), ReadList(ReadTimeLock), ReadList(ReadVendingMachine));
         }
 
         private AccountBalanceFull ReadAccountBalanceFull()

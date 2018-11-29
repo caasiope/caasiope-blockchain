@@ -61,6 +61,7 @@
     <Compile Include="Entities\transactioninputoutput.cs" />
     <Compile Include="Entities\transactionmessage.cs" />
     <Compile Include="Entities\transactionsignature.cs" />
+    <Compile Include="Entities\vendingmachine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

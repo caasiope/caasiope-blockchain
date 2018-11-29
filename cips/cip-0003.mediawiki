@@ -1,0 +1,35 @@
+<pre>
+  CIP: 1
+  Title: Vending Machine
+  Author: Guillaume Bonnot
+  Status: Draft
+  Created: 2018-11-28
+</pre>
+
+==Abstract==
+The new account type vending machine allows to automatically exchange a currency for another, at a rate fixed by the owner.
+
+==Motivation==
+The protocol already supports multi-currency transactions but another channel must be used to negociate and sign the exchange transaction, this proposal would handle the most frequent uses cases.
+
+==Specification==
+
+===Declaration===
+
+A new declaration type is introduced :
+* VendingMachine : 0x4
+
+
+===Verification===
+
+===Protocol Version===
+A new protocol version is introduced :
+* VendingMachine : 0x3
+
+==Rationale==
+The rate is used only to divide, so we dont have overflow;
+
+==Backwards compatibility==
+This proposal introduces a new account type.
+Backwards compatibility is ok.
+Forwards compatibility is not possible, old versions are going to reject anything with the new account type.

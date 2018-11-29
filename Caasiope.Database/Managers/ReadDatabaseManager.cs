@@ -57,6 +57,12 @@ namespace Caasiope.Database.Managers
         }
 
         // This we load to the state on initialization
+        public List<VendingMachineAccount> GetVendingMachineAccounts()
+        {
+            return repositoryManager.GetRepository<VendingMachineRepository>().GetEnumerable().Select(_ => _.Account).ToList();
+        }
+
+        // This we load to the state on initialization
         public List<Account> GetAccounts()
         {
             var list = new Dictionary<Address, MutableAccount>();
@@ -84,6 +90,11 @@ namespace Caasiope.Database.Managers
             foreach (var timelock in GetTimeLockAccounts())
             {
                 list[timelock.Address].SetDeclaration(new TimeLock(timelock.Timestamp));
+            }
+
+            foreach (var machine in GetVendingMachineAccounts())
+            {
+                list[machine.Address].SetDeclaration(new VendingMachine(machine.Owner, machine.CurrencyIn, machine.CurrencyOut, machine.Rate));
             }
 
             return list.Values.Select(mutable => mutable.Finalize()).ToList(); // TODO ugly
@@ -160,6 +171,9 @@ namespace Caasiope.Database.Managers
                 else if (type == DeclarationType.Secret)
                     declarations.Add(GetSecret(declaration.DeclarationId));
 
+                else if (type == DeclarationType.VendingMachine)
+                    declarations.Add(GetVendingMachine(declaration.DeclarationId));
+
                 else throw new NotImplementedException();
             }
 
@@ -217,6 +231,12 @@ namespace Caasiope.Database.Managers
         {
             var hashLock = repositoryManager.GetRepository<HashLockRepository>().GetByKey(id);
             return new HashLock(hashLock.Account.SecretHash);
+        }
+
+        private VendingMachine GetVendingMachine(long id)
+        {
+            var machine = repositoryManager.GetRepository<VendingMachineRepository>().GetByKey(id);
+            return new VendingMachine(machine.Account.Owner, machine.Account.CurrencyIn, machine.Account.CurrencyOut, machine.Account.Rate);
         }
 
         public Transaction GetTransaction(TransactionHash hash)

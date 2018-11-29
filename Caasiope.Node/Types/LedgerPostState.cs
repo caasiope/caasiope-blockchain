@@ -34,6 +34,7 @@ namespace Caasiope.Node.Types
         private readonly List<MultiSignature> multisigToInclude = new List<MultiSignature>();
         private readonly List<HashLock> hashLocksToInclude = new List<HashLock>();
         private readonly List<TimeLock> timeLocksToInclude = new List<TimeLock>();
+        private readonly List<VendingMachine> machinesToInclude = new List<VendingMachine>();
         
         // TODO we need to store a wrapper that contains both the mutable account and the changes
         private readonly Dictionary<Address, MutableAccount> accounts = new Dictionary<Address, MutableAccount>();
@@ -41,7 +42,7 @@ namespace Caasiope.Node.Types
         public LedgerStateChange GetStateChange()
         {
             var accountes = accounts.Values.Select(account => new AccountEntity(account.Address, account.CurrentLedger, account.Declaration != null)).ToList();
-            return new LedgerStateChange(accountes, balances.Values.ToList(), multisigToInclude, hashLocksToInclude, timeLocksToInclude);
+            return new LedgerStateChange(accountes, balances.Values.ToList(), multisigToInclude, hashLocksToInclude, timeLocksToInclude, machinesToInclude);
         }
 
         public virtual void RemoveTransaction(Dictionary<TransactionHash, SignedTransaction> pendingTransactions, TransactionHash hash)
@@ -81,6 +82,17 @@ namespace Caasiope.Node.Types
             if (TrySetDeclaration(account))
             {
                 timeLocksToInclude.Add(account);
+                return true;
+            }
+            return false;
+        }
+
+        // bad naming
+        public virtual bool DeclareAccount(VendingMachine account)
+        {
+            if (TrySetDeclaration(account))
+            {
+                machinesToInclude.Add(account);
                 return true;
             }
             return false;

@@ -27,6 +27,7 @@ namespace Caasiope.UnitTest
 	    protected static Network Network;
 
         protected readonly PrivateKeyNotWallet BTC_ISSUER = PrivateKeyNotWallet.FromBase64("n6uPVvs4x8A80yt3yw/KTUSEZQpqsu0FM/gSm7EPmXs=");
+        protected readonly PrivateKeyNotWallet LTC_ISSUER = PrivateKeyNotWallet.FromBase64("msRuhiXplYumwhmC5n3MwELmiM6mnGrtvokiAiUsDiw=");
 
         protected static string[] keys =
         {
@@ -168,6 +169,40 @@ namespace Caasiope.UnitTest
             return signed;
         }
 
+        // account 2 is vending machine
+        protected SignedTransaction Exchange(PrivateKeyNotWallet account1, Currency currency1, Amount amount1, Address account2, Currency currency2, Amount amount2)
+        {
+            return Exchange(account1, currency1, amount1, account2, currency2, amount2, account1);
+        }
+
+        // account 1 is vending machine
+        protected SignedTransaction Exchange(Address account1, Currency currency1, Amount amount1, PrivateKeyNotWallet account2, Currency currency2, Amount amount2)
+        {
+            return Exchange(account1, currency1, amount1, account2, currency2, amount2, account2);
+        }
+
+        protected SignedTransaction Exchange(Address account1, Currency currency1, Amount amount1, Address account2, Currency currency2, Amount amount2, PrivateKeyNotWallet signer)
+        {
+            var inputs = new List<TxInput>()
+            {
+                new TxInput(account1, currency1, amount1),
+                new TxInput(account2, currency2, amount2),
+            };
+
+            var outputs = new List<TxOutput>()
+            {
+                new TxOutput(account2, currency1, amount1),
+                new TxOutput(account1, currency2, amount2),
+            };
+
+            var transaction = new Transaction(new List<TxDeclaration>(), inputs, outputs, null, DateTime.UtcNow.AddMinutes(1).ToUnixTimestamp());
+
+            var signed = new SignedTransaction(transaction);
+            Assert.IsTrue(signer.SignTransaction(signed, Network));
+
+            return signed;
+        }
+
         protected bool CheckSignatures(SignedTransaction signed, long timestamp = 0)
         {
             if (timestamp == 0)
@@ -214,14 +249,15 @@ namespace Caasiope.UnitTest
 
                 var block = Block.CreateBlock(light.Height, pendingTransactions);
 
-                var state = new LedgerPostState(ledgerService.LedgerManager.LedgerState, light.Height);
+                var poststate = new PostStateHolder(ledgerService.LedgerManager.LedgerState, ledgerService.LedgerManager.GetNextHeight());
 
                 foreach (var transaction in pendingTransactions)
                 {
-                    ledgerService.SignedTransactionManager.Execute(state, transaction.Transaction);
+                    if (!poststate.ProcessTransaction(transaction))
+                        return null;
                 }
 
-                var finalized = state.Finalize(HasherFactory.CreateHasher(light.Version));
+                var finalized = poststate.Finalize(light.Version);
 
                 var ledger = new Ledger(light, block, ledgerService.LedgerManager.GetMerkleRootHash(finalized, light.Version));
                 var signed = new SignedLedger(ledger);
@@ -233,12 +269,21 @@ namespace Caasiope.UnitTest
 
             public bool TryCreateNextLedger()
             {
-                var evt = new AutoResetEvent(false);
-                ledgerService.SetNextLedger(GetLedger(), () => evt.Set());
-                if (!evt.WaitOne(3000))
-                    return false;
+                var success = CreateNextLedger();
 
                 pendingTransactions.Clear();
+                return success;
+            }
+
+            private bool CreateNextLedger()
+            {
+                var evt = new AutoResetEvent(false);
+                var ledger = GetLedger();
+                if (ledger == null)
+                    return false;
+                ledgerService.SetNextLedger(ledger, () => evt.Set());
+                if (!evt.WaitOne(3000))
+                    return false;
                 return true;
             }
         }

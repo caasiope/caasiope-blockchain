@@ -46,6 +46,7 @@
     <Compile Include="Repositories\BlockRepository.cs" />
     <Compile Include="Repositories\DeclarationRepository.cs" />
     <Compile Include="Repositories\Entities\AccountEntity.cs" />
+    <Compile Include="Repositories\Entities\VendingMachineEntity.cs" />
     <Compile Include="Repositories\TransactionDeclarationRepository.cs" />
     <Compile Include="Repositories\Entities\BlockEntity.cs" />
     <Compile Include="Repositories\Entities\AccountBalanceFull.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="Repositories\TransactionInputOutputRepository.cs" />
     <Compile Include="Repositories\TransactionMessageRepository.cs" />
     <Compile Include="Repositories\TransactionRepository.cs" />
+    <Compile Include="Repositories\VendingMachineRepository.cs" />
     <Compile Include="Repository.cs" />
     <Compile Include="SqlTransaction.cs" />
     <Compile Include="SqlTransactions\MultiSignatureSqlTransaction.cs" />

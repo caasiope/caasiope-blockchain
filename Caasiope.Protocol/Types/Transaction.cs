@@ -82,6 +82,7 @@ namespace Caasiope.Protocol.Types
         HashLock = 0x1,
         Secret = 0x2,
         TimeLock = 0x3,
+        VendingMachine = 0x4,
     }
 
     public abstract class TxDeclaration : IEquatable<TxDeclaration>
@@ -519,5 +520,42 @@ namespace Caasiope.Protocol.Types
             Transaction = transaction;
             LedgerTimestamp = ledgerTimestamp;
         }
+    }
+
+    public class VendingMachine : TxAddressDeclaration
+    {
+        public readonly Address Owner;
+        public readonly Currency CurrencyIn;
+        public readonly Currency CurrencyOut;
+        public readonly Amount Rate;
+
+        public readonly VendingMachineHash Hash;
+
+        public VendingMachine(Address owner, Currency @in, Currency @out, Amount rate) : base(DeclarationType.VendingMachine)
+        {
+            Owner = owner;
+            CurrencyIn = @in;
+            CurrencyOut = @out;
+            Rate = rate;
+            Hash = ComputeHash();
+            Address = new Address(AddressType.VendingMachine, Hash.Bytes.SubArray(0, Address.RAW_SIZE - 1));
+        }
+
+        private VendingMachineHash ComputeHash()
+        {
+            using (var stream = new ByteStream())
+            {
+                stream.Write(this);
+                var message = stream.GetBytes();
+
+                var hasher = HashFactory.Crypto.SHA3.CreateKeccak256();
+                return new VendingMachineHash(hasher.ComputeBytes(message).GetBytes());
+            }
+        }
+    }
+
+    public class VendingMachineHash : TxDeclarationHash
+    {
+        public VendingMachineHash(byte[] bytes) : base(bytes) { }
     }
 }

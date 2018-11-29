@@ -742,5 +742,90 @@ namespace Caasiope.UnitTest
                 }
             }
         }
+
+        [TestMethod]
+        public void TestVendingMachine()
+        {
+            using (var context = CreateContext())
+            {
+                var owner = CreateAccount();
+                var notowner = CreateAccount();
+
+                // create vending machine
+                var declaration = new VendingMachine(owner, Currency.LTC, Currency.BTC, Amount.FromWholeDecimal(10m)); // exchange 1 BTC for 10 LTC
+                var machine = declaration.Address;
+
+                // fill the vending machine
+                {
+                    var signed = Transfer(BTC_ISSUER, machine, Currency.BTC, 2, null, null, new List<TxDeclaration> {declaration});
+                    context.SendTransaction(signed);
+                    Assert.IsTrue(context.TryCreateNextLedger());
+
+                    Assert.IsTrue(context.TryGetAccount(machine.Encoded, out var machineAccount));
+
+                    // check that the money has been sent
+                    Assert.IsTrue(machineAccount.GetBalance(Currency.BTC) == 2);
+                }
+
+                // less than required amount
+                {
+                    var signed = Exchange(LTC_ISSUER, Currency.LTC, 9, machine, Currency.BTC, 1);
+                    context.SendTransaction(signed, ResultCode.TransactionValidationFailed);
+                }
+
+                // exact amount
+                {
+                    var signed = Exchange(LTC_ISSUER, Currency.LTC, 10, machine, Currency.BTC, 1);
+                    context.SendTransaction(signed);
+                    Assert.IsTrue(context.TryCreateNextLedger());
+
+                    Assert.IsTrue(context.TryGetAccount(machine.Encoded, out var machineAccount));
+
+                    // check that the money has been sent
+                    Assert.IsTrue(machineAccount.GetBalance(Currency.BTC) == 1);
+                    Assert.IsTrue(machineAccount.GetBalance(Currency.LTC) == 10);
+                }
+
+                // try to get more than remaining
+                {
+                    var signed = Exchange(LTC_ISSUER, Currency.LTC, 20, machine, Currency.BTC, 2);
+                    context.SendTransaction(signed);
+                    Assert.IsFalse(context.TryCreateNextLedger());
+                }
+
+                // more than required amount
+                {
+                    var signed = Exchange(LTC_ISSUER, Currency.LTC, 11, machine, Currency.BTC, 1);
+                    context.SendTransaction(signed);
+                    Assert.IsTrue(context.TryCreateNextLedger());
+
+                    Assert.IsTrue(context.TryGetAccount(machine.Encoded, out var machineAccount));
+
+                    // check that the money has been sent
+                    Assert.IsTrue(machineAccount.GetBalance(Currency.BTC) == 0);
+                    Assert.IsTrue(machineAccount.GetBalance(Currency.LTC) == 21);
+                }
+
+                // withdraw from not owner
+                {
+                    var signed = Transfer(machine, new List<PrivateKeyNotWallet>{ notowner }, owner, Currency.LTC, 21);
+                    context.SendTransaction(signed, ResultCode.TransactionValidationFailed);
+                }
+
+                // withdraw from owner
+                {
+                    var signed = Transfer(machine, new List<PrivateKeyNotWallet> { owner }, owner, Currency.LTC, 21);
+                    context.SendTransaction(signed);
+                    Assert.IsTrue(context.TryCreateNextLedger());
+
+                    Assert.IsTrue(context.TryGetAccount(machine.Encoded, out var machineAccount));
+                    Assert.IsTrue(context.TryGetAccount(owner.Address.Encoded, out var ownerAccount));
+
+                    // check that the money has been sent
+                    Assert.IsTrue(machineAccount.GetBalance(Currency.LTC) == 0);
+                    Assert.IsTrue(ownerAccount.GetBalance(Currency.LTC) == 21);
+                }
+            }
+        }
     }
 }

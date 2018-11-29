@@ -58,6 +58,8 @@ namespace Caasiope.Explorer.JSON.API
                     return CreateSecret((Internals.SecretRevelation)declaration);
                     case DeclarationType.TimeLock:
                     return CreateTimeLock((Internals.TimeLock)declaration);
+                    case DeclarationType.VendingMachine:
+                    return CreateVendingMachine((Internals.VendingMachine)declaration);
                 default:
                     throw new NotImplementedException();
             }
@@ -83,6 +85,11 @@ namespace Caasiope.Explorer.JSON.API
         private static TxDeclaration CreateTimeLock(Internals.TimeLock declaration)
         {
             return new TimeLock(declaration.Timestamp);
+        }
+
+        private static TxDeclaration CreateVendingMachine(Internals.VendingMachine declaration)
+        {
+            return new VendingMachine(new Address(declaration.Owner), Currency.FromSymbol(declaration.CurrencyIn), Currency.FromSymbol(declaration.CurrencyOut), Amount.FromWholeDecimal(declaration.Rate));
         }
 
         public static Internals.Transaction GetTransaction(Transaction transaction)
@@ -153,6 +160,8 @@ namespace Caasiope.Explorer.JSON.API
                     return CreateSecret((SecretRevelation)declaration);
                 case DeclarationType.TimeLock:
                     return CreateTimeLock((TimeLock)declaration);
+                case DeclarationType.VendingMachine:
+                    return CreateVendingMachine((VendingMachine)declaration);
                 default:
                     throw new NotImplementedException();
             }
@@ -177,6 +186,11 @@ namespace Caasiope.Explorer.JSON.API
         private static Internals.TxDeclaration CreateTimeLock(TimeLock declaration)
         {
             return new Internals.TimeLock(declaration.Timestamp);
+        }
+
+        private static Internals.TxDeclaration CreateVendingMachine(VendingMachine declaration)
+        {
+            return new Internals.VendingMachine(declaration.Owner.Encoded, Currency.ToSymbol(declaration.CurrencyIn), Currency.ToSymbol(declaration.CurrencyOut), declaration.Rate);
         }
 
         public static IEnumerable<Internals.Signature> GetSignatures(List<Signature> signatures)

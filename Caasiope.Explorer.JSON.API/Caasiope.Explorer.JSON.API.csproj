@@ -46,6 +46,7 @@
     <Compile Include="Internals\TimeLock.cs" />
     <Compile Include="Internals\TxDeclaration.cs" />
     <Compile Include="Internals\TxInputOutput.cs" />
+    <Compile Include="Internals\VendingMachine.cs" />
     <Compile Include="TransactionConverter.cs" />
     <Compile Include="Internals\Transaction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

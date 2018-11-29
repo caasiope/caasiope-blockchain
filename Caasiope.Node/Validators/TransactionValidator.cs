@@ -141,6 +141,7 @@ namespace Caasiope.Node.Validators
             var hashlocks = new List<HashLock>();
             var timelocks = new List<TimeLock>();
             var secrets = new List<SecretRevelation>();
+            var machines = new List<VendingMachine>();
 
             foreach (var declaration in transaction.Declarations)
             {
@@ -165,6 +166,11 @@ namespace Caasiope.Node.Validators
                         var timeLock = (TimeLock)declaration;
                         timelocks.Add(timeLock);
                         break;
+                    case DeclarationType.VendingMachine:
+                        var machine = (VendingMachine)declaration;
+                        valid = machine.Rate > 0 && machine.CurrencyIn != machine.CurrencyOut;
+                        machines.Add(machine);
+                        break;
                     default:
                         throw new NotImplementedException();
                 }
@@ -174,6 +180,7 @@ namespace Caasiope.Node.Validators
             valid &= NoDuplicate(hashlocks, (a, b) => a.Equals(b));
             valid &= NoDuplicate(timelocks, (a, b) => a.Equals(b));
             valid &= NoDuplicate(secrets, (a, b) => a.Equals(b));
+            valid &= NoDuplicate(machines, (a, b) => a.Equals(b));
 
             return valid;
         }

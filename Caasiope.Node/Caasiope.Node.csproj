@@ -63,6 +63,7 @@
     <Compile Include="Managers\LedgerStateManager.cs" />
     <Compile Include="NodeConfiguration.cs" />
     <Compile Include="ConsoleCommands\NodeConsoleCommandProcessor.cs" />
+    <Compile Include="PostStateHolder.cs" />
     <Compile Include="Processors\CommandProcessor.cs" />
     <Compile Include="Processors\Commands\GetAccountCommand.cs" />
     <Compile Include="Processors\Commands\GetTransactionsCommand.cs" />
@@ -99,6 +100,7 @@
     <Compile Include="Transformers\TransactionSignatureTransformerService.cs" />
     <Compile Include="Transformers\TransactionTransformerService.cs" />
     <Compile Include="Transformers\TxInputOutputTransformerService.cs" />
+    <Compile Include="Transformers\VendingMachineTransformerService.cs" />
     <Compile Include="Types\LedgerStateFinal.cs" />
     <Compile Include="Types\LedgerPostState.cs" />
     <Compile Include="Validators\SignedLedgerValidator.cs" />
