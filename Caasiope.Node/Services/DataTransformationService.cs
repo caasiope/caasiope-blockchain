@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using Caasiope.Node.Managers;
 using Caasiope.Protocol.Types;
 using Helios.Common.Concepts.Services;
+using Helios.Common.Extensions;
 
 namespace Caasiope.Node.Services
 {
@@ -53,7 +54,7 @@ namespace Caasiope.Node.Services
 
         public void Transform(SignedLedgerState ledger)
         {
-            onTransform(ledger);
+            onTransform.Call(ledger);
             queue.Enqueue(ledger);
             trigger.Set();
         }
