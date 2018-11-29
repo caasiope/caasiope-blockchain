@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using Caasiope.Explorer.Managers;
+using Caasiope.Node;
 using Caasiope.Protocol.Types;
 using Helios.Common.Concepts.Services;
 using ThreadedService = Caasiope.Node.Services.ThreadedService;
@@ -15,6 +16,7 @@ namespace Caasiope.Explorer.Services
 
     public class ExplorerDataTransformationService : ThreadedService, IExplorerDataTransformationService
     {
+        [Injected] public IExplorerDatabaseService ExplorerDatabaseService;
         public DataTransformerManager DataTransformerManager { get; } = new DataTransformerManager();
         private readonly LedgerTransformationManager ledgerTransformationManager = new LedgerTransformationManager();
         private readonly ConcurrentQueue<SignedLedgerState> queue = new ConcurrentQueue<SignedLedgerState>();
@@ -24,7 +26,8 @@ namespace Caasiope.Explorer.Services
             DataTransformationService.OnTransform(Transform);
 
             DatabaseService.InitializedHandle.WaitOne();
-            
+            ExplorerDatabaseService.InitializedHandle.WaitOne();
+
             DataTransformerManager.Initialize();
             ledgerTransformationManager.Initialize(Logger);
         }

@@ -68,7 +68,7 @@ namespace Caasiope.Explorer.Managers
 
         private static IEnumerable<Type> GetAllServiceTypes()
         {
-            return typeof(Node.Managers.DataTransformerManager).Assembly
+            return typeof(Explorer.Managers.DataTransformerManager).Assembly
                 .GetTypes()
                 .Where(t => t.IsClass && !t.IsAbstract
                                       && t.Namespace == typeof(DeclarationTransformerService).Namespace
