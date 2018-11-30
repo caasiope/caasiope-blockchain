@@ -2,6 +2,7 @@
 using System.Linq;
 using Caasiope.Explorer.JSON.API;
 using Caasiope.Explorer.JSON.API.Requests;
+using Caasiope.Explorer.Services;
 using Caasiope.Node;
 using Caasiope.Node.Connections;
 using Caasiope.Node.Processors.Commands;
@@ -18,12 +19,10 @@ namespace Caasiope.Explorer
 {
     public class Dispatcher : IDispatcher<ISession>
     {
-        [Injected]
-        public ILiveService LiveService;
-        [Injected]
-        public ILedgerService LedgerService;
-        [Injected]
-        public IDatabaseService DatabaseService;
+        [Injected] public ILiveService LiveService;
+        [Injected] public ILedgerService LedgerService;
+        [Injected] public IDatabaseService DatabaseService;
+        [Injected] public INotificationService NotificationService;
 
         protected readonly ILogger Logger;
 
@@ -36,14 +35,14 @@ namespace Caasiope.Explorer
         {
             if (wrapper.Data is Request)
             {
-                DispatchRequest((Request)wrapper.Data, sendResponse);
+                DispatchRequest(session, (Request)wrapper.Data, sendResponse);
                 return true;
             }
 
             return false;
         }
 
-        private void DispatchRequest(Request request, Action<Response, ResultCode> sendResponse)
+        private void DispatchRequest(ISession session, Request request, Action<Response, ResultCode> sendResponse)
         {
             if (request is SendTransactionRequest)
             {
@@ -54,7 +53,12 @@ namespace Caasiope.Explorer
                     return;
                 }
 
-                LiveService.AddCommand(new SendTransactionCommand(signed, (r, rc) => sendResponse.Call(ResponseHelper.CreateSendTransactionResponse(signed.Hash), rc)));
+                LiveService.AddCommand(new SendTransactionCommand(signed, (r, rc) =>
+                {
+                    if(rc == ResultCode.Success)
+                        NotificationService.ListenTo(session, signed.Hash);
+                    sendResponse.Call(ResponseHelper.CreateSendTransactionResponse(signed.Hash), rc);
+                }));
             }
             else if (request is GetSignedLedgerRequest)
             {

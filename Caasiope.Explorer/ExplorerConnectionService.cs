@@ -7,15 +7,22 @@ using Caasiope.Node.Services;
 using Helios.Common.Concepts.Services;
 using Helios.Common.Logs;
 using Helios.JSON;
-using ResultCode = Caasiope.Node.ResultCode;
 
 namespace Caasiope.Explorer
 {
-	public interface IExplorerConnectionService : IService { }
+    public interface IExplorerConnectionService : IService
+    {
+        void SendNotification(ISession session, Notification notification);
+    }
 
 	public class ExplorerConnectionService : WebSocketServerService, IExplorerConnectionService
 	{
 		public ExplorerConnectionService(WebSocketServer server) : base(server, new BlockchainExplorerApi().JsonMessageFactory) { }
+
+	    public void SendNotification(ISession session, Notification notification)
+	    {
+	        throw new NotImplementedException();
+	    }
 	}
 
 	public class WebSocketServerService : Service
