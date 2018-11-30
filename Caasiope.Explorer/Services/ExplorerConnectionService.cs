@@ -107,6 +107,7 @@ namespace Caasiope.Explorer.Services
 
 		protected override void OnStart()
 		{
+		    ExplorerDataTransformationService.StartedHandle.WaitOne();
             ExplorerDataTransformationService.WaitTransformationCompleted();
 
 		    server.Start();
