@@ -77,8 +77,13 @@ namespace Helios.JSON
 			ClientRequestID = crid;
 			Type = type;
 			Data = request;
-		}
-	}
+	    }
+
+	    public T GetData<T>() where T : JsonMessage
+	    {
+	        return (T)Data;
+	    }
+    }
 
     public enum ResultCode : byte
     {
