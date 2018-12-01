@@ -2,7 +2,6 @@
 using System.Linq;
 using Caasiope.Explorer.JSON.API;
 using Caasiope.Explorer.JSON.API.Requests;
-using Caasiope.Explorer.Services;
 using Caasiope.Node;
 using Caasiope.Node.Connections;
 using Caasiope.Node.Processors.Commands;
@@ -22,7 +21,7 @@ namespace Caasiope.Explorer
         [Injected] public ILiveService LiveService;
         [Injected] public ILedgerService LedgerService;
         [Injected] public IDatabaseService DatabaseService;
-        [Injected] public INotificationService NotificationService;
+        [Injected] public IExplorerConnectionService ExplorerConnectionService;
 
         protected readonly ILogger Logger;
 
@@ -56,7 +55,7 @@ namespace Caasiope.Explorer
                 LiveService.AddCommand(new SendTransactionCommand(signed, (r, rc) =>
                 {
                     if(rc == ResultCode.Success)
-                        NotificationService.ListenTo(session, signed.Hash);
+                        ExplorerConnectionService.NotificationManager.ListenTo(session, signed.Hash);
                     sendResponse.Call(ResponseHelper.CreateSendTransactionResponse(signed.Hash), rc);
                 }));
             }

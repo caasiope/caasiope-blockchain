@@ -1,5 +1,6 @@
 ﻿using System;
 using Caasiope.Explorer.JSON.API;
+using Caasiope.Explorer.Managers;
 using Caasiope.Log;
 using Caasiope.Node;
 using Caasiope.Node.Connections;
@@ -12,11 +13,13 @@ namespace Caasiope.Explorer
 {
     public interface IExplorerConnectionService : IWebSocketServerService
     {
+        NotificationManager NotificationManager { get; }
     }
 
 	public class ExplorerConnectionService : WebSocketServerService, IExplorerConnectionService
 	{
-		public ExplorerConnectionService(WebSocketServer server) : base(server, new BlockchainExplorerApi().JsonMessageFactory) { }
+        public NotificationManager NotificationManager { get; } = new NotificationManager();
+        public ExplorerConnectionService(WebSocketServer server) : base(server, new BlockchainExplorerApi().JsonMessageFactory) { }
 	}
 
     public interface IWebSocketServerService : IService
