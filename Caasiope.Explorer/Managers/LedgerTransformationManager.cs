@@ -60,6 +60,10 @@ namespace Caasiope.Explorer.Managers
             // determine which height still need to be transformed
             var minimal = GetMinimalHeight(tableTransformationStates.Values);
 
+            // TODO Do we want this?
+            //if (targetHeight < minimal)
+            //    throw new ApplicationException("Explorer ledger height is higher than current ledger height. Please wipe the Explorer database!");
+
             //TODO use batch
             var ledgers = DatabaseService.ReadDatabaseManager.GetLedgersFromHeight(minimal).ToDictionary(_ => _.Ledger.Ledger.LedgerLight.Height);
 
@@ -158,7 +162,7 @@ namespace Caasiope.Explorer.Managers
             foreach (var state in tableTransformationStates.Values)
             {
                 // Debug.Assert(currentHeight == state.TargetHeight); // TODO find why it doesnt work
-                if (state.CurrentHeight != currentHeight)
+                if (state.CurrentHeight < currentHeight)
                     return false;
             }
 
