@@ -8,6 +8,7 @@ using Helios.Common.Concepts.Services;
 using Helios.Common.Extensions;
 using Helios.Common.Logs;
 using Helios.Common.Synchronization;
+using Helios.JSON;
 
 namespace Caasiope.Explorer.Services
 {
@@ -57,7 +58,7 @@ namespace Caasiope.Explorer.Services
                     Timestamp = ledger.GetTimestamp(),
                     Transactions = GetTransactions(subscriptor.Value, ledger)
                 };
-                ExplorerConnectionService.SendNotification(subscriptor.Key, notification);
+                ExplorerConnectionService.Send(subscriptor.Key, new NotificationMessage(notification));
             }
         }
 

@@ -10,22 +10,21 @@ using Helios.JSON;
 
 namespace Caasiope.Explorer
 {
-    public interface IExplorerConnectionService : IService
+    public interface IExplorerConnectionService : IWebSocketServerService
     {
-        void SendNotification(ISession session, Notification notification);
     }
 
 	public class ExplorerConnectionService : WebSocketServerService, IExplorerConnectionService
 	{
 		public ExplorerConnectionService(WebSocketServer server) : base(server, new BlockchainExplorerApi().JsonMessageFactory) { }
-
-	    public void SendNotification(ISession session, Notification notification)
-	    {
-	        throw new NotImplementedException();
-	    }
 	}
 
-	public class WebSocketServerService : Service
+    public interface IWebSocketServerService : IService
+    {
+        void Send(ISession session, NotificationMessage message);
+    }
+
+    public class WebSocketServerService : Service
 	{
 		private readonly WebSocketServer server;
 		private IDispatcher<ISession> dispatcher;
