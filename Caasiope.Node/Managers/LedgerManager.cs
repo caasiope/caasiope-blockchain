@@ -29,12 +29,18 @@ namespace Caasiope.Node.Managers
 
         public LedgerStateFinal LedgerState { get; private set; }
         public SignedLedger LastLedger { get; private set; }
+        public Action<SignedLedger> onNewLedger { get; set; }
 
         public LedgerManager(Network network, ILogger logger)
         {
             Network = network;
             this.logger = logger;
             merkleLogger = new LoggerAdapter("StartupMerkleLogger");
+        }
+
+        public void SubscribeOnNewLedger(Action<SignedLedger> callback)
+        {
+            onNewLedger += callback;
         }
 
         public void Initialize(SignedLedger lastLedger, bool needToSetInitial)
@@ -210,7 +216,7 @@ namespace Caasiope.Node.Managers
 
             LedgerState = ledgerState;
 
-            BroadcastNewLedger(LastLedger);
+            onNewLedger(LastLedger);
         }
 
         private bool CheckMerkleRoot(LedgerStateFinal ledgerState, SignedLedger ledger)
@@ -224,13 +230,6 @@ namespace Caasiope.Node.Managers
             return CheckMerkleRoot(LedgerState, LastLedger);
         }
 
-        private void BroadcastNewLedger(SignedLedger signedLedger)
-        {
-            var message = NotificationHelper.CreateSignedNewLedgerNotification(signedLedger);
-            // broadcast the hash of the new ledger with the signature.
-            ConnectionService.BlockchainChannel.Broadcast(message);
-            logger.Log("Broadcast Signed New Ledger");
-        }
 
         public SignedLedger GetSignedLedger()
         {

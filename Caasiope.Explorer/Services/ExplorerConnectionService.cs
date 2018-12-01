@@ -4,6 +4,7 @@ using Caasiope.Explorer.Managers;
 using Caasiope.Log;
 using Caasiope.Node;
 using Caasiope.Node.Connections;
+using Caasiope.Node.Services;
 using Helios.Common.Concepts.Services;
 using Helios.Common.Logs;
 using Helios.JSON;
@@ -18,8 +19,15 @@ namespace Caasiope.Explorer.Services
 	public class ExplorerConnectionService : WebSocketServerService, IExplorerConnectionService
 	{
         public NotificationManager NotificationManager { get; } = new NotificationManager();
-        public ExplorerConnectionService(WebSocketServer server) : base(server, new BlockchainExplorerApi().JsonMessageFactory) { }
-	}
+
+	    public ExplorerConnectionService(WebSocketServer server) : base(server, new BlockchainExplorerApi().JsonMessageFactory) { }
+
+	    protected override void OnInitialize()
+	    {
+	        base.OnInitialize();
+	        LedgerService.LedgerManager.SubscribeOnNewLedger(NotificationManager.Notify);
+        }
+    }
 
     public interface IWebSocketServerService : IService
     {
@@ -29,6 +37,8 @@ namespace Caasiope.Explorer.Services
     public class WebSocketServerService : Service
 	{
 	    [Injected] public IExplorerDataTransformationService ExplorerDataTransformationService;
+	    [Injected] public ILedgerService LedgerService;
+
         private readonly WebSocketServer server;
 		private IDispatcher<ISession> dispatcher;
 		private readonly JsonMessageFactory factory;
@@ -48,7 +58,6 @@ namespace Caasiope.Explorer.Services
         protected override void OnInitialize()
 		{
             server.OnReceive(OnReceive);
-
             Injector.Inject(this);
 			Injector.Inject(dispatcher);
 			server.Initialize();
