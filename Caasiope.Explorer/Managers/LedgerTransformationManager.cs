@@ -135,7 +135,8 @@ namespace Caasiope.Explorer.Managers
             var context = new DataTransformationContext(ledger);
             foreach (var table in tableTransformationStates.Values)
             {
-                Debug.Assert(table.TargetHeight + 1 == target);
+                if(table.TargetHeight + 1 > target)
+                    continue;
                 TransformLedgerState(context, table.TableName, target);
             }
             current = target;
