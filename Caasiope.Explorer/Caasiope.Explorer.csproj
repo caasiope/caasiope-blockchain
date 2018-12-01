@@ -94,6 +94,10 @@
       <Project>{d35a9db7-390c-4bc2-a9a3-edba8bcb9e4a}</Project>
       <Name>Caasiope.Explorer.Database</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Caasiope.Node\Caasiope.Node.csproj">
+      <Project>{1b8b43ce-4853-4f43-a4f5-94e0b292b28d}</Project>
+      <Name>Caasiope.Node</Name>
+    </ProjectReference>
     <ProjectReference Include="..\helios-common\Helios.Common\Helios.Common\Helios.Common.csproj">
       <Project>{7487A6DB-300E-482A-888F-50AFF822DF69}</Project>
       <Name>Helios.Common</Name>
@@ -125,10 +129,6 @@
     <ProjectReference Include="..\Caasiope.Log\Caasiope.Log.csproj">
       <Project>{FFBEAAF4-F3A2-45FC-BB5D-58E7E84FD6B9}</Project>
       <Name>Caasiope.Log</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Caasiope.Node\Caasiope.Node.csproj">
-      <Project>{1B8B43CE-4853-4F43-A4F5-94E0B292B28D}</Project>
-      <Name>Caasiope.Node</Name>
     </ProjectReference>
     <ProjectReference Include="..\Caasiope.Protocol\Caasiope.Protocol.csproj">
       <Project>{DFABEDBB-6E62-4D28-9761-9B35CABA33A0}</Project>

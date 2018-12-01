@@ -13,7 +13,7 @@ namespace Caasiope.Explorer.Transformers
             var transactions = signedLedgerState.Ledger.Ledger.Block.Transactions;
             foreach (var transaction in transactions)
             {
-                list.Add(new SignedTransactionSimple(transaction.Hash, signedLedgerState.Ledger.Ledger.LedgerLight.Height, transaction.Transaction.Expire));
+                list.Add(new SignedTransactionSimple(transaction.Hash, signedLedgerState.Ledger.Ledger.LedgerLight.Height, transaction.Transaction.Expire, signedLedgerState.Ledger.Ledger.LedgerLight.Timestamp));
             }
             return list;
         }

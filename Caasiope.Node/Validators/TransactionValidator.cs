@@ -188,7 +188,7 @@ namespace Caasiope.Node.Validators
         */
 
         // validates the inputs are spending money that exists
-        public bool ValidateBalance(LedgerState state, IEnumerable<TxInput> inputs)
+        public bool ValidateBalance(ILedgerState state, IEnumerable<TxInput> inputs)
         {
             // we cannot have duplicate (account + currency). In fact we can since we use fees in input
             var amounts = new Dictionary<AddressCurrency, Amount>();

@@ -83,16 +83,18 @@ namespace Caasiope.UnitTest
                 var signed5 = Transfer(sender, timeLock.Address, Currency.BTC, 10, null, null, new List<TxDeclaration>() {new TimeLock(777)});
                 context.SendTransaction(signed5);
 
-
                 Assert.IsTrue(context.TryCreateNextLedger());
 
                 context.DataTransformationService.WaitTransformationCompleted();
 
-                var last = context.LedgerService.LedgerManager.GetMerkleRoot();
+                var last = context.LedgerService.LedgerManager.GetMerkleRootHash();
 
                 var fromDb = context.DatabaseService.ReadDatabaseManager.GetLastLedger();
 
-                Assert.IsTrue(last.Hash.Equals(fromDb.Ledger.MerkleHash));
+                if(fromDb.GetHeight() != context.LedgerService.LedgerManager.LastLedger.GetHeight())
+                    Assert.Inconclusive();
+
+                Assert.IsTrue(last.Equals(fromDb.Ledger.MerkleHash));
             }
         }
     }

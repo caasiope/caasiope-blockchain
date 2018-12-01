@@ -22,14 +22,13 @@ namespace Caasiope.Node.Managers
         [Injected] public IConnectionService ConnectionService;
 
         public SignedLedgerValidator SignedLedgerValidator;
-        // TODO remove what is already in the ledger state
-        public ProtocolVersion Version;
         public readonly Network Network;
         private readonly ILogger logger;
         private readonly ILogger merkleLogger;
         private bool needSetInitialLedger;
 
-        public ImmutableLedgerState LedgerState { get; private set; }
+        public LedgerStateFinal LedgerState { get; private set; }
+        public SignedLedger LastLedger { get; private set; }
 
         public LedgerManager(Network network, ILogger logger)
         {
@@ -50,23 +49,38 @@ namespace Caasiope.Node.Managers
 
         private void InitializeLedger(SignedLedger lastLedger)
         {
-            LedgerState = new ImmutableLedgerState(lastLedger, LiveService.AccountManager.GetAccounts());
+            var accounts = new Trie<Account>(Address.RAW_SIZE);
+            foreach (var account in LiveService.AccountManager.GetAccounts())
+                accounts.Add(account.Key.ToRawBytes(), account.Value);
+            // TODO compute hash
+            accounts.ComputeHash(HasherFactory.CreateHasher(lastLedger.GetVersion()));
+
+            LedgerState = new LedgerStateFinal(accounts);
+            LastLedger = lastLedger;
             // Debug.Assert(SignedLedgerValidator.Validate(this.lastLedger) == LedgerValidationStatus.Ok, "Last Ledger is not valid"); // Most likely not enough signatures (see quorum)
-            Version = GetLedgerLight().Version;
         }
 
-        public LedgerMerkleRoot GetMerkleRoot()
+        public LedgerMerkleRootHash GetMerkleRootHash()
         {
-            return GetMerkleRootInternal(LedgerState);
+            return GetMerkleRootHash(LedgerState, LastLedger.GetVersion());
         }
 
-        private LedgerMerkleRoot GetMerkleRootInternal(ImmutableLedgerState ledgerState)
+        public LedgerMerkleRootHash GetMerkleRootHash(LedgerStateFinal ledgerState, ProtocolVersion version)
         {
-            return new LedgerMerkleRoot(ledgerState.GetAccounts(), GetDeclarations(ledgerState), merkleLogger, HasherFactory.CreateHasher(Network, ledgerState.Height));
+            return GetMerkleRootHash(ledgerState, version, merkleLogger);
+        }
+
+        public static LedgerMerkleRootHash GetMerkleRootHash(LedgerStateFinal ledgerState, ProtocolVersion version, ILogger logger)
+        {
+            // backward compatibility
+            if (version == ProtocolVersion.InitialVersion)
+                return new LedgerMerkleRoot(ledgerState.GetAccounts().Where(account => account.Balances.Any()), GetDeclarations(ledgerState), logger, HasherFactory.CreateHasher(version)).Hash;
+
+            return ledgerState.GetHash();
         }
 
         // for merkle root
-        private IEnumerable<TxDeclaration> GetDeclarations(ImmutableLedgerState ledgerState)
+        private static IEnumerable<TxDeclaration> GetDeclarations(LedgerStateFinal ledgerState)
         {
             return ledgerState.GetAccounts().Where(account => account.Declaration != null).Select(account => (TxDeclaration) account.Declaration);
         }
@@ -99,7 +113,7 @@ namespace Caasiope.Node.Managers
             Debug.Assert(ValidateSignedLedgerInternal(signed));
             Debug.Assert(ValidateSignatures(signed));
 
-            Finalize(CreateLedgerState(signed));
+            Finalize(signed, CreateLedgerState(signed));
 
             needSetInitialLedger = false;
             logger.Log($"Ledger Finalized. Height : {signed.Ledger.LedgerLight.Height} Transactions : {signed.Ledger.Block.Transactions.Count()} ");
@@ -159,19 +173,18 @@ namespace Caasiope.Node.Managers
 
         public LedgerHash GetLastLedgerHash()
         {
-            return LedgerState.LastLedger.Hash;
+            return LastLedger.Hash;
         }
 
         public long GetNextHeight()
         {
-            return GetLedgerLight().Height + 1;
+            return GetSignedLedger().GetHeight() + 1;
         }
 
         // we create a new ledger state based on the current state and the new ledger
-        private MutableLedgerState CreateLedgerState(SignedLedger signedLedger)
+        private LedgerPostState CreateLedgerState(SignedLedger signedLedger)
         {
-            var state = new MutableLedgerState(LedgerState) {AccountCreated = account => LiveService.AccountManager.AddAccount(account.Address, new ExtendedAccount(account))};
-            state.SignedLedger = signedLedger;
+            var state = new LedgerPostState(LedgerState, signedLedger.GetHeight()) {AccountCreated = account => LiveService.AccountManager.AddAccount(account.Address, new ExtendedAccount(account))};
 
             byte index = 0;
             foreach (var signed in signedLedger.Ledger.Block.Transactions)
@@ -179,39 +192,36 @@ namespace Caasiope.Node.Managers
                 // TODO make a better validation
                 // Debug.Assert(signed.Transaction.Expire > signedLedger.Ledger.LedgerLight.BeginTime);
                 Debug.Assert(signedLedger.Ledger.Block.FeeTransactionIndex == index++ || LiveService.TransactionManager.TransactionValidator.ValidateBalance(state, signed.Transaction.GetInputs()));
-                LiveService.SignedTransactionManager.Execute(state, signed.Transaction);
+                LedgerService.SignedTransactionManager.Execute(state, signed.Transaction);
             }
 
             return state;
         }
 
         // we finalize the ledger and create a new immutable ledger state
-        private void Finalize(MutableLedgerState state)
+        private void Finalize(SignedLedger signed, LedgerPostState state)
         {
-            var ledgerState = state.Finalize();
+            var ledgerState = state.Finalize(HasherFactory.CreateHasher(signed.GetVersion()));
             
-            if (!CheckMerkleRootInternal(ledgerState))
+            if (!CheckMerkleRoot(ledgerState, signed))
                 throw new Exception("Merkle root is not valid");
 
-            LiveService.PersistenceManager.Save(state.GetLedgerStateChange());
+            LiveService.PersistenceManager.Save(new SignedLedgerState(signed, state.GetLedgerStateChange()));
 
             LedgerState = ledgerState;
 
-            BroadcastNewLedger(LedgerState.LastLedger);
+            BroadcastNewLedger(LastLedger);
         }
 
-        private bool CheckMerkleRootInternal(ImmutableLedgerState ledgerState)
+        private bool CheckMerkleRoot(LedgerStateFinal ledgerState, SignedLedger ledger)
         {
-            var merkle = GetMerkleRootInternal(ledgerState);
-            var ledger = ledgerState.LastLedger;
-
-            return ledger.Ledger.MerkleHash.Equals(merkle.Hash);
+            var hash = GetMerkleRootHash(ledgerState, ledger.GetVersion());
+            return ledger.Ledger.MerkleHash.Equals(hash);
         }
-
 
         public bool CheckMerkleRoot()
         {
-            return CheckMerkleRootInternal(LedgerState);
+            return CheckMerkleRoot(LedgerState, LastLedger);
         }
 
         private void BroadcastNewLedger(SignedLedger signedLedger)
@@ -222,19 +232,14 @@ namespace Caasiope.Node.Managers
             logger.Log("Broadcast Signed New Ledger");
         }
 
-        public LedgerLight GetLedgerLight()
-        {
-            return GetSignedLedger().Ledger.LedgerLight;
-        }
-
         public SignedLedger GetSignedLedger()
         {
-            return LedgerState.LastLedger;
+            return LastLedger;
         }
 
         public long GetLedgerBeginTime()
         {
-            return GetLedgerLight().Timestamp; // TODO beginTime or beginTime + 1 ?
+            return GetSignedLedger().GetTimestamp(); // TODO beginTime or beginTime + 1 ?
         }
     }
 }

@@ -34,19 +34,6 @@ namespace Caasiope.Protocol.Types
             Block = block;
             MerkleHash = merkleHash;
         }
-
-        public LedgerHash GetHash()
-        {
-            using (var stream = new ByteStream())
-            {
-                stream.Write(this);
-                var message = stream.GetBytes();
-
-                var hasher = HashFactory.Crypto.SHA3.CreateKeccak256();
-                var hash = hasher.ComputeBytes(message).GetBytes();
-                return new LedgerHash(hash);
-            }
-        }
     }
 
     public class ProtocolVersion
@@ -56,6 +43,38 @@ namespace Caasiope.Protocol.Types
         public ProtocolVersion(byte version)
         {
             VersionNumber = version;
+        }
+
+        public static ProtocolVersion InitialVersion = new ProtocolVersion(0x1);
+        public static ProtocolVersion ImmutableState = new ProtocolVersion(0x2);
+
+        public static ProtocolVersion CURRENT_VERSION = ImmutableState;
+
+        public static bool operator ==(ProtocolVersion a, ProtocolVersion b)
+        {
+            return a.VersionNumber == b.VersionNumber;
+        }
+
+        public static bool operator !=(ProtocolVersion a, ProtocolVersion b)
+        {
+            return !(a == b);
+        }
+        protected bool Equals(ProtocolVersion other)
+        {
+            return VersionNumber == other.VersionNumber;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((ProtocolVersion)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return VersionNumber.GetHashCode();
         }
     }
 
@@ -90,5 +109,18 @@ namespace Caasiope.Protocol.Types
                 return stream.ReadSignedLedger();
             }
         }
+    }
+
+    public static class LedgerExtensions
+    {
+        public static long GetHeight(this Ledger ledger) { return ledger.LedgerLight.Height; }
+        public static long GetTimestamp(this Ledger ledger) { return ledger.LedgerLight.Timestamp; }
+        public static LedgerHash GetLastLedger(this Ledger ledger) { return ledger.LedgerLight.Lastledger; }
+        public static ProtocolVersion GetVersion(this Ledger ledger) { return ledger.LedgerLight.Version; }
+
+        public static long GetHeight(this SignedLedger signed) { return GetHeight(signed.Ledger); }
+        public static long GetTimestamp(this SignedLedger signed) { return GetTimestamp(signed.Ledger); }
+        public static LedgerHash GetLastLedger(this SignedLedger signed) { return GetLastLedger(signed.Ledger); }
+        public static ProtocolVersion GetVersion(this SignedLedger signed) { return GetVersion(signed.Ledger); }
     }
 }

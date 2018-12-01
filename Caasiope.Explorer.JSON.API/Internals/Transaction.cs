@@ -19,6 +19,7 @@ namespace Caasiope.Explorer.JSON.API.Internals
     public class HistoricalTransaction
     {
         public long Height;
+        public long LedgerTimestamp;
         public Transaction Transaction;
     }
 }

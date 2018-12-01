@@ -8,7 +8,7 @@ namespace Caasiope.Node.Managers
 {
     public class TransactionRequiredValidationFactory : Protocol.Validators.TransactionRequiredValidationFactory
     {
-        public override bool TryGetRequiredValidations(LedgerState state, Address address, List<TxDeclaration> declarations, out TransactionRequiredValidation required)
+        public override bool TryGetRequiredValidations(ILedgerState state, Address address, List<TxDeclaration> declarations, out TransactionRequiredValidation required)
         {
             return TryGetRequiredValidationsRecursive(state, address, declarations, out required, 0);
         }
@@ -17,7 +17,7 @@ namespace Caasiope.Node.Managers
         private const int MAX_DEPTH = 5;
         private const int MAX_CHILDREN = 20;
         // returns false if over the limit
-        private bool TryGetRequiredValidationsRecursive(LedgerState state, Address address, List<TxDeclaration> declarations, out TransactionRequiredValidation required, int depth)
+        private bool TryGetRequiredValidationsRecursive(ILedgerState state, Address address, List<TxDeclaration> declarations, out TransactionRequiredValidation required, int depth)
         {
             // we check max depth to limit computation
             if(depth >= MAX_DEPTH)

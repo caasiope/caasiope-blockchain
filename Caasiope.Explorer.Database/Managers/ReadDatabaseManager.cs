@@ -21,7 +21,6 @@ namespace Caasiope.Explorer.Database.Managers
         {
             var transactions = repositoryManager.GetRepository<TransactionRepository>();
             var inputs = repositoryManager.GetRepository<TransactionInputOutputRepository>().GetByAddress(address);
-
             var list = new Dictionary<TransactionHash, HistoricalTransaction>();
             foreach (var input in inputs)
             {
@@ -32,8 +31,7 @@ namespace Caasiope.Explorer.Database.Managers
 
                     if (ledgerHeight == null || simple.LedgerHeight > ledgerHeight)
                     {
-
-                        list.Add(hash, new HistoricalTransaction(simple.LedgerHeight, GetTransaction(simple)));
+                        list.Add(hash, new HistoricalTransaction(simple.LedgerHeight, GetTransaction(simple), 0));
                     }
                 }
             }

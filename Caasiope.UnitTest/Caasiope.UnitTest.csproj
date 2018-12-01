@@ -59,6 +59,7 @@
     <Compile Include="FakeServices\FakeServiceFactory.cs" />
     <Compile Include="FakeServices\FakeP2PConnection.cs" />
     <Compile Include="LedgerTests.cs" />
+    <Compile Include="MerkleTreeTests.cs" />
     <Compile Include="MnemonicTest.cs" />
     <Compile Include="TestBase.cs" />
     <Compile Include="TransactionTests.cs" />

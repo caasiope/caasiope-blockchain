@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Caasiope.Explorer.JSON.API;
 using Caasiope.Explorer.JSON.API.Requests;
@@ -78,7 +79,7 @@ namespace Caasiope.Explorer
                     return;
                 }
 
-                var currentHeight = LedgerService.LedgerManager.GetLedgerLight().Height;
+                var currentHeight = LedgerService.LedgerManager.GetSignedLedger().GetHeight();
 
                 if (height > currentHeight)
                 {
@@ -165,7 +166,15 @@ namespace Caasiope.Explorer
 
                     raw = raw.Skip(message.Count * (message.Page - 1)).Take(message.Count).ToList();
 
-                    var transactions = raw.Select(TransactionConverter.GetHistoricalTransaction).ToList();
+                    var results = new List<HistoricalTransaction>();
+
+                    foreach (var transaction in raw)
+                    {
+                        var ledger = DatabaseService.ReadDatabaseManager.GetLedgerFromRaw(transaction.LedgerHeight);
+                        results.Add(new HistoricalTransaction(transaction.LedgerHeight, transaction.Transaction, ledger.GetTimestamp()));
+                    }
+
+                    var transactions = results.Select(TransactionConverter.GetHistoricalTransaction).ToList();
                     sendResponse.Call(ResponseHelper.CreateGetTransactionHistoryResponse(transactions, total), ResultCode.Success);
                 }
             }

@@ -117,6 +117,7 @@ namespace Caasiope.Explorer.JSON.API
             return new Internals.HistoricalTransaction
             {
                 Height = historical.LedgerHeight,
+                LedgerTimestamp = historical.LedgerTimestamp,
                 Transaction = new Internals.Transaction
                 {
                     Hash = transaction.GetHash().ToBase64(),

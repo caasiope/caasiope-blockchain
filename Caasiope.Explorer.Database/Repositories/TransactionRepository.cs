@@ -47,13 +47,14 @@ namespace Caasiope.Explorer.Database.Repositories
             {
                 hash = item.TransactionHash.Bytes,
                 ledger_height = item.LedgerHeight,
+                ledger_timestamp = item.LedgerTimestamp,
                 expire = item.Expire
             };
         }
 
         protected override SignedTransactionSimple ToItem(transaction entity)
         {
-            return new SignedTransactionSimple(new TransactionHash(entity.hash), entity.ledger_height, entity.expire);
+            return new SignedTransactionSimple(new TransactionHash(entity.hash), entity.ledger_height, entity.expire, entity.ledger_timestamp);
         }
 
         public IEnumerable<SignedTransactionSimple> GetByHeight(long height)

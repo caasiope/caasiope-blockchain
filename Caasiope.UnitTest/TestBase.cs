@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using Caasiope.Database.Managers;
 using Helios.Common;
@@ -8,8 +9,11 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Caasiope.NBitcoin;
 using Caasiope.JSON.Helpers;
 using Caasiope.Node;
+using Caasiope.Node.Managers;
 using Caasiope.Node.Services;
+using Caasiope.Node.Types;
 using Caasiope.Protocol;
+using Caasiope.Protocol.MerkleTrees;
 using Caasiope.Protocol.Types;
 using Caasiope.Protocol.Validators;
 using Caasiope.Protocol.Validators.Transactions;
@@ -175,7 +179,7 @@ namespace Caasiope.UnitTest
         {
             public static readonly TransactionRequiredValidationFactory Instance = new TransactionRequiredValidationFactory();
 
-            public override bool TryGetRequiredValidations(LedgerState state, Address address, List<TxDeclaration> declarations, out TransactionRequiredValidation required)
+            public override bool TryGetRequiredValidations(ILedgerState state, Address address, List<TxDeclaration> declarations, out TransactionRequiredValidation required)
             {
                 switch (address.Type)
                 {
@@ -206,11 +210,20 @@ namespace Caasiope.UnitTest
                     ledgerService.LedgerManager.GetNextHeight(),
                     DateTime.Now.ToUnixTimestamp() + 1, // TODO ? ledgerService.LedgerManager.GetLedgerBeginTime() + 10,
                     ledgerService.LedgerManager.GetLastLedgerHash(),
-                    ledgerService.LedgerManager.GetLedgerLight().Version);
+                    ProtocolVersion.CURRENT_VERSION);
 
                 var block = Block.CreateBlock(light.Height, pendingTransactions);
 
-                var ledger = new Ledger(light, block, ledgerService.LedgerManager.GetMerkleRoot().Hash);
+                var state = new LedgerPostState(ledgerService.LedgerManager.LedgerState, light.Height);
+
+                foreach (var transaction in pendingTransactions)
+                {
+                    ledgerService.SignedTransactionManager.Execute(state, transaction.Transaction);
+                }
+
+                var finalized = state.Finalize(HasherFactory.CreateHasher(light.Version));
+
+                var ledger = new Ledger(light, block, ledgerService.LedgerManager.GetMerkleRootHash(finalized, light.Version));
                 var signed = new SignedLedger(ledger);
 
                 validator.SignLedger(signed, NodeConfiguration.GetNetwork());

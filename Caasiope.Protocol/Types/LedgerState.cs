@@ -1,42 +1,37 @@
-﻿using System.Collections.Generic;
-using Caasiope.Protocol.Extensions;
+﻿using Caasiope.Protocol.Extensions;
+using Caasiope.Protocol.MerkleTrees;
 
 namespace Caasiope.Protocol.Types
 {
-    public class ImmutableLedgerState : LedgerState
+    public interface ILedgerState
     {
-        public readonly SignedLedger LastLedger;
-        public long Height => LastLedger.Ledger.LedgerLight.Height;
-
-        public ImmutableLedgerState(SignedLedger lastLedger, Dictionary<Address, Account> list)
-        {
-            LastLedger = lastLedger;
-            accounts = list;
-        }
-
-        private readonly IReadOnlyDictionary<Address, Account> accounts;
-
-        public IEnumerable<Account> GetAccounts()
-        {
-            // TODO Optimize
-            return accounts.Values;
-        }
-
-        public override bool TryGetAccount(Address address, out Account account)
-        {
-            return accounts.TryGetValue(address, out account);
-        }
+        bool TryGetAccount(Address address, out Account account);
     }
 
-    // TODO move in Node project
-    public abstract class LedgerState
+    public abstract class LedgerState : ILedgerState
     {
-        public abstract bool TryGetAccount(Address address, out Account account);
+        protected readonly Trie<Account> Tree;
 
-        public bool TryGetDeclaration<T>(Address address, out T declaration) where T : TxAddressDeclaration
+        protected LedgerState(Trie<Account> tree)
+        {
+            Tree = tree;
+        }
+
+        protected static Trie<Account> GetTree(LedgerState state)
+        {
+            return state.Tree;
+        }
+
+        public abstract bool TryGetAccount(Address address, out Account account);
+    }
+
+    public static class LedgerStateExtensions
+    {
+
+        public static bool TryGetDeclaration<T>(this ILedgerState state, Address address, out T declaration) where T : TxAddressDeclaration
         {
             // if the account does exists in the state
-            if (!TryGetAccount(address, out var account))
+            if (!state.TryGetAccount(address, out var account))
             {
                 declaration = null;
                 return false;
