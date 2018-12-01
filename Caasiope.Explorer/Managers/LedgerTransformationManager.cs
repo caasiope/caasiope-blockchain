@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -73,8 +74,42 @@ namespace Caasiope.Explorer.Managers
                 {
                     if (entity.CurrentHeight < height)
                         TransformLedgerState(context, entity.TableName, height);
+                    else if (entity.TableName == "declarations")
+                    {
+                        var declarations = CreateDeclarationContext(context.SignedLedgerState.Ledger, ExplorerDatabaseService.ReadDatabaseManager.GetDeclarations(height));
+                        context.SetDeclarations(declarations);
+                    }
                 }
             }
+        }
+
+        private TransactionDeclarationContext CreateDeclarationContext(SignedLedger signed, List<TransactionDeclarationEntity> declarations)
+        {
+            var context = new TransactionDeclarationContext();
+
+            foreach (var transaction in signed.Ledger.Block.Transactions)
+            {
+                var index = 0;
+                foreach (var declaration in transaction.Transaction.Declarations)
+                {
+                    if (!MatchInContext(context, declarations, declaration, transaction.Hash, index++))
+                        throw new NotImplementedException("It should match");
+                }
+            }
+            return context;
+        }
+
+        private bool MatchInContext(TransactionDeclarationContext context, List<TransactionDeclarationEntity> declarations, TxDeclaration declaration, TransactionHash hash, int index)
+        {
+            foreach (var entity in declarations)
+            {
+                if (entity.TransactionHash.Equals(hash) && entity.Index == index)
+                {
+                    context.TryAdd(entity, declaration);
+                    return true;
+                }
+            }
+            return false;
         }
 
         private void SetInitialTableHeights()

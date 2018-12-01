@@ -6,7 +6,7 @@ using Caasiope.Protocol.Types;
 namespace Caasiope.Explorer.Transformers
 {
     // only transform after declaration was transformed
-    internal class MultiSignatureAccountTransformerService : DataTransformerService<MultiSignatureEntity, MultiSignatureAccountRepository>
+    internal class MultiSignatureAccountTransformerService : ExplorerDataTransformerService<MultiSignatureEntity, MultiSignatureAccountRepository>
     {
         protected override IEnumerable<MultiSignatureEntity> Transform(DataTransformationContext context)
         {

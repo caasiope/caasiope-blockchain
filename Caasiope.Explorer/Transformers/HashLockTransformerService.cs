@@ -5,7 +5,7 @@ using Caasiope.Protocol.Types;
 
 namespace Caasiope.Explorer.Transformers
 {
-    internal class HashLockTransformerService : DataTransformerService<HashLockEntity, HashLockRepository>
+    internal class HashLockTransformerService : ExplorerDataTransformerService<HashLockEntity, HashLockRepository>
     {
         protected override IEnumerable<HashLockEntity> Transform(DataTransformationContext context)
         {

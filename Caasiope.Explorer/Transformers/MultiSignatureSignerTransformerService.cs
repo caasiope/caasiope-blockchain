@@ -4,7 +4,7 @@ using Caasiope.Protocol.Types;
 
 namespace Caasiope.Explorer.Transformers
 {
-    internal class MultiSignatureSignerTransformerService : DataTransformerService<MultiSignatureSigner, MultiSignatureSignerRepository>
+    internal class MultiSignatureSignerTransformerService : ExplorerDataTransformerService<MultiSignatureSigner, MultiSignatureSignerRepository>
     {
         protected override IEnumerable<MultiSignatureSigner> Transform(DataTransformationContext context)
         {

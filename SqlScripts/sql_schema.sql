@@ -73,24 +73,6 @@ CREATE TABLE `blocks` (
 	PRIMARY KEY(`ledger_height`)
 );
 
-CREATE TABLE `ledgers` (
-	`height` BIGINT NOT NULL,
-	`timestamp` BIGINT NOT NULL,
-	`hash` BINARY(32) NOT NULL,
-	`merkle_root_hash` BINARY(32) NOT NULL,
-	`previous_hash` BINARY(32) NOT NULL,    
-    `version` TINYINT UNSIGNED NOT NULL,
-	`raw` MEDIUMBLOB NOT NULL,
-	PRIMARY KEY(`height`)
-);
-
-CREATE TABLE `ledgersignatures` (
-	`ledger_height` BIGINT NOT NULL,
-	`validator_publickey` BINARY(65) NOT NULL,
-	`validator_signature` BINARY(65) NOT NULL,   
-	PRIMARY KEY(`ledger_height`, `validator_publickey`)
-);
-
 CREATE TABLE `transactionmessages` (
 	`transaction_hash` BINARY(32) NOT NULL,
 	`message` BINARY(10) NOT NULL,
@@ -103,11 +85,6 @@ CREATE TABLE `tableledgerheights` (
 	PRIMARY KEY(`table_name`)
 );
 
-CREATE TABLE `ledgerstatechanges` (
-	`ledger_height` BIGINT NOT NULL,
-	`raw` MEDIUMBLOB NOT NULL,
-	PRIMARY KEY(`ledger_height`)
-);
 
 CREATE TABLE `hashlocks` (
     `declaration_id` BIGINT NOT NULL,

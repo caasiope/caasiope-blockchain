@@ -5,7 +5,7 @@ using Caasiope.Protocol.Types;
 
 namespace Caasiope.Explorer.Transformers
 {
-    internal class TransactionDeclarationTransformerService : DataTransformerService<TransactionDeclarationEntity, TransactionDeclarationRepository>
+    internal class TransactionDeclarationTransformerService : ExplorerDataTransformerService<TransactionDeclarationEntity, TransactionDeclarationRepository>
     {
         private class ProcessedDeclarations
         {

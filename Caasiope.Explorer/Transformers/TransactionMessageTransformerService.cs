@@ -5,7 +5,7 @@ using Caasiope.Protocol.Types;
 
 namespace Caasiope.Explorer.Transformers
 {
-    internal class TransactionMessageTransformerService : DataTransformerService<TransactionMessageEntity, TransactionMessageRepository>
+    internal class TransactionMessageTransformerService : ExplorerDataTransformerService<TransactionMessageEntity, TransactionMessageRepository>
     {
         protected override IEnumerable<TransactionMessageEntity> Transform(DataTransformationContext context)
         {

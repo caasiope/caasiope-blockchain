@@ -25,7 +25,7 @@ namespace Caasiope.Explorer.Transformers
 
     internal abstract class DataTransformerService : ThreadedService { }
 
-    internal abstract class DataTransformerService<TItem, TRepository> : DataTransformerService, IDataTransformerService where TItem : class where TRepository : Repository<TItem>, Caasiope.Explorer.Database.IRepository<TItem>
+    internal abstract class ExplorerDataTransformerService<TItem, TRepository> : DataTransformerService, IDataTransformerService where TItem : class where TRepository : Repository<TItem>, Caasiope.Explorer.Database.IRepository<TItem>
     {
         [Injected] public IExplorerDatabaseService DatabaseService;
 
@@ -33,7 +33,7 @@ namespace Caasiope.Explorer.Transformers
 
         private readonly ConcurrentQueue<DataTransformationContext> queue = new ConcurrentQueue<DataTransformationContext>();
 
-        protected DataTransformerService()
+        protected ExplorerDataTransformerService()
         {
             Logger = new LoggerAdapter(nameof(DataTransformerService)); // TODO may be change to Name
         }

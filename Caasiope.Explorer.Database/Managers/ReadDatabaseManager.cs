@@ -127,5 +127,14 @@ namespace Caasiope.Explorer.Database.Managers
         {
             return repositoryManager.GetRepository<TableLedgerHeightRepository>().GetEnumerable().ToList();
         }
+
+        public List<TransactionDeclarationEntity> GetDeclarations(long height)
+        {
+            var list = new List<TransactionDeclarationEntity>();
+            var transactions = repositoryManager.GetRepository<TransactionRepository>().GetByHeight(height);
+            foreach (var transaction in transactions)
+                list.AddRange(repositoryManager.GetRepository<TransactionDeclarationRepository>().GetEnumerable(transaction.TransactionHash));
+            return list;
+        }
     }
 }

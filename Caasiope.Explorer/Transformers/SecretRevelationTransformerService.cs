@@ -5,7 +5,7 @@ using Caasiope.Protocol.Types;
 
 namespace Caasiope.Explorer.Transformers
 {
-    internal class SecretRevelationTransformerService : DataTransformerService<SecretRevelationEntity, SecretRevelationRepository>
+    internal class SecretRevelationTransformerService : ExplorerDataTransformerService<SecretRevelationEntity, SecretRevelationRepository>
     {
         protected override IEnumerable<SecretRevelationEntity> Transform(DataTransformationContext context)
         {

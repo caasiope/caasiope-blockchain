@@ -6,7 +6,7 @@ using TransactionDeclarationEntity = Caasiope.Explorer.Database.Repositories.Ent
 
 namespace Caasiope.Explorer.Transformers
 {
-    internal class TimeLockTransformerService : DataTransformerService<TimeLockEntity, TimeLockRepository>
+    internal class TimeLockTransformerService : ExplorerDataTransformerService<TimeLockEntity, TimeLockRepository>
     {
         protected override IEnumerable<TimeLockEntity> Transform(DataTransformationContext context)
         {

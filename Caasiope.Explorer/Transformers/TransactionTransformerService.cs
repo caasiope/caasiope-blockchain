@@ -4,7 +4,7 @@ using Caasiope.Explorer.Database.Repositories.Entities;
 
 namespace Caasiope.Explorer.Transformers
 {
-    internal class TransactionTransformerService : DataTransformerService<SignedTransactionSimple, TransactionRepository>
+    internal class TransactionTransformerService : ExplorerDataTransformerService<SignedTransactionSimple, TransactionRepository>
     {
         protected override IEnumerable<SignedTransactionSimple> Transform(DataTransformationContext context)
         {

@@ -5,7 +5,7 @@ using Caasiope.Explorer.Database.Repositories.Entities;
 
 namespace Caasiope.Explorer.Transformers
 {
-    internal class DeclarationTransformerService : DataTransformerService<DeclarationEntity, DeclarationRepository>
+    internal class DeclarationTransformerService : ExplorerDataTransformerService<DeclarationEntity, DeclarationRepository>
     {
         protected override IEnumerable<DeclarationEntity> Transform(DataTransformationContext context)
         {

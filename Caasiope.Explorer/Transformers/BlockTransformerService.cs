@@ -4,7 +4,7 @@ using Caasiope.Explorer.Database.Repositories.Entities;
 
 namespace Caasiope.Explorer.Transformers
 {
-    internal class BlockTransformerService : DataTransformerService<BlockEntity, BlockRepository>
+    internal class BlockTransformerService : ExplorerDataTransformerService<BlockEntity, BlockRepository>
     {
         protected override IEnumerable<BlockEntity> Transform(DataTransformationContext context)
         {

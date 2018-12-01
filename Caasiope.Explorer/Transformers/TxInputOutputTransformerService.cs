@@ -4,7 +4,7 @@ using Caasiope.Explorer.Database.Repositories.Entities;
 
 namespace Caasiope.Explorer.Transformers
 {
-    internal class TxInputOutputTransformerService : DataTransformerService<TxInputOutputFull, TransactionInputOutputRepository>
+    internal class TxInputOutputTransformerService : ExplorerDataTransformerService<TxInputOutputFull, TransactionInputOutputRepository>
     {
         protected override IEnumerable<TxInputOutputFull> Transform(DataTransformationContext context)
         {
