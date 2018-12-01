@@ -73,8 +73,10 @@ namespace Caasiope.Explorer.Managers
                 foreach (var entity in tableTransformationStates.Values)
                 {
                     if (entity.CurrentHeight < height)
+                    {
                         TransformLedgerState(context, entity.TableName, height);
-                    else if (entity.TableName == "declarations")
+                    }
+                    else if (entity.TableName == "transactiondeclarations")
                     {
                         var declarations = CreateDeclarationContext(context.SignedLedgerState.Ledger, ExplorerDatabaseService.ReadDatabaseManager.GetDeclarations(height));
                         context.SetDeclarations(declarations);
