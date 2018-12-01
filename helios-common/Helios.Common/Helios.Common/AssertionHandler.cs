@@ -24,6 +24,9 @@ namespace Helios.Common
 		[DebuggerStepThrough]
 		public override void WriteLine(string message)
 		{
+            // FUCK YOU SQLITE !
+		    if (message != null && message.StartsWith("Native library pre-loader is trying to load native"))
+		        return;
 			var exception = new AssertionFailedException(message);
 			throw exception;
 		}

@@ -5,13 +5,8 @@ using Caasiope.Database.SQL.Entities;
 
 namespace Caasiope.Database.Repositories
 {
-    public class LedgerStateChangeRepository : Repository<LedgerStateChangeSimple, ledgerstatechange, long>
+    public class LedgerStateChangeRepository : Repository<LedgerStateChangeSimple, ledgerstatechange>
     {
-        protected override long GetKey(LedgerStateChangeSimple item)
-        {
-            return item.LedgerHeight;
-        }
-
         protected override ledgerstatechange ToEntity(LedgerStateChangeSimple item)
         {
             return new ledgerstatechange
@@ -24,6 +19,11 @@ namespace Caasiope.Database.Repositories
         protected override LedgerStateChangeSimple ToItem(ledgerstatechange entity)
         {
             return new LedgerStateChangeSimple(entity.ledger_height, entity.raw);
+        }
+
+        protected override bool CheckIsNew(BlockchainEntities entities, ledgerstatechange item)
+        {
+            return true;
         }
 
         protected override DbSet<ledgerstatechange> GetDbSet(BlockchainEntities entities)

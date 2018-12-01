@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using Caasiope.Node.Managers;
 using Caasiope.Protocol.Types;
 using Helios.Common.Concepts.Services;
+using Helios.Common.Extensions;
 
 namespace Caasiope.Node.Services
 {
@@ -10,6 +11,7 @@ namespace Caasiope.Node.Services
     {
         void Transform(SignedLedgerState ledger);
         void WaitTransformationCompleted();
+        void OnTransform(Action<SignedLedgerState> callback);
         DataTransformerManager DataTransformerManager { get; }
     }
 
@@ -18,6 +20,7 @@ namespace Caasiope.Node.Services
         public DataTransformerManager DataTransformerManager { get; } = new DataTransformerManager(); 
         private readonly LedgerTransformationManager ledgerTransformationManager = new LedgerTransformationManager();
         private readonly ConcurrentQueue<SignedLedgerState> queue = new ConcurrentQueue<SignedLedgerState>();
+        public Action<SignedLedgerState> onTransform;
 
         protected override void OnInitialize()
         {
@@ -51,8 +54,14 @@ namespace Caasiope.Node.Services
 
         public void Transform(SignedLedgerState ledger)
         {
+            onTransform.Call(ledger);
             queue.Enqueue(ledger);
             trigger.Set();
+        }
+
+        public void OnTransform(Action<SignedLedgerState> callback)
+        {
+            onTransform += callback;
         }
 
         // TODO May be should be more complex

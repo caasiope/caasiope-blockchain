@@ -43,6 +43,8 @@ namespace Caasiope.UnitTest
             }
         }
 
+
+        // TODO move to explorer
         [TestMethod]
         public void LedgerTransformationTestMerkleHash()
         {
