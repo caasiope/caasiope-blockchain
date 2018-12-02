@@ -153,7 +153,7 @@
     <PostBuildEvent>powershell -ExecutionPolicy ByPass -File "$(ProjectDir)..\pre-build-scripts\InjectGitVersion.ps1" "$(ProjectDir)." "revert"
 
 
-xcopy "$(SolutionDir)Packages\System.Data.SQLite.Core.1.0.109.2\build\net451\*.*" "$(ProjectDir)bin\$(Configuration)\" /Y /I /E</PostBuildEvent>
+xcopy "$(SolutionDir)Packages\System.Data.SQLite.Core.1.0.109.2\build\net451\*.dll" "$(ProjectDir)bin\$(Configuration)\" /Y /I /E</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
