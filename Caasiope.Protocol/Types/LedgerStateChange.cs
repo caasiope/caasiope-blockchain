@@ -9,13 +9,15 @@ namespace Caasiope.Protocol.Types
         public readonly List<MultiSignature> MultiSignatures;
         public readonly List<HashLock> HashLocks;
         public readonly List<TimeLock> TimeLocks;
+        public readonly List<VendingMachine> VendingMachines;
 
-        public LedgerStateChange(List<Account> accounts, List<MultiSignature> multiSignatures, List<HashLock> hashLocks, List<TimeLock> timeLocks)
+        public LedgerStateChange(List<Account> accounts, List<MultiSignature> multiSignatures, List<HashLock> hashLocks, List<TimeLock> timeLocks, List<VendingMachine> machines)
         {
             Accounts = accounts;
             MultiSignatures = multiSignatures;
             HashLocks = hashLocks;
             TimeLocks = timeLocks;
+            VendingMachines = machines;
         }
     }
 

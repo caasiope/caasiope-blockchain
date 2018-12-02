@@ -63,6 +63,9 @@ namespace Caasiope.Explorer.Database.Managers
                 else if (type == DeclarationType.Secret)
                     declarations.Add(GetSecret(declaration.DeclarationId));
 
+                else if (type == DeclarationType.VendingMachine)
+                    declarations.Add(GetVendingMachine(declaration.DeclarationId));
+
                 else throw new NotImplementedException();
             }
 
@@ -119,6 +122,12 @@ namespace Caasiope.Explorer.Database.Managers
         {
             var hashLock = repositoryManager.GetRepository<HashLockRepository>().GetByKey(id);
             return new HashLock(hashLock.Account.SecretHash);
+        }
+
+        public VendingMachine GetVendingMachine(long id)
+        {
+            var machine = repositoryManager.GetRepository<VendingMachineRepository>().GetByKey(id);
+            return new VendingMachine(machine.Account.Owner, machine.Account.CurrencyIn, machine.Account.CurrencyOut, machine.Account.Rate);
         }
 
         public List<TableLedgerHeight> GetHeightTables()

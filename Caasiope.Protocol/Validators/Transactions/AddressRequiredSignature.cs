@@ -14,7 +14,7 @@ namespace Caasiope.Protocol.Validators.Transactions
             this.address = address;
         }
 
-        public override bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, List<TxDeclaration> declarations, long timestamp)
+        public override bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, Transaction transaction, long timestamp)
         {
             // try to find a signature where the public key matches with the required address
             foreach (var signature in signatures)

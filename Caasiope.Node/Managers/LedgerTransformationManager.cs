@@ -88,7 +88,7 @@ namespace Caasiope.Node.Managers
         {
             var oldState = context.SignedLedgerState.State;
             var accounts = MarkNewAccounts(knownAccounts, oldState.Accounts);
-            var state = new LedgerStateChange(accounts, oldState.MultiSignatures, oldState.HashLocks, oldState.TimeLocks);
+            var state = new LedgerStateChange(accounts, oldState.MultiSignatures, oldState.HashLocks, oldState.TimeLocks, oldState.VendingMachines);
             var signedLedgerState = new SignedLedgerState(context.SignedLedgerState.Ledger, state);
             return new DataTransformationContext(signedLedgerState);
         }

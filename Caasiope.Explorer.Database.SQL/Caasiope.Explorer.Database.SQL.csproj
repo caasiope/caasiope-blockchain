@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\vendingmachine.cs" />
     <Compile Include="ExplorerEntities.cs" />
     <Compile Include="Entities\account.cs" />
     <Compile Include="Entities\balance.cs" />

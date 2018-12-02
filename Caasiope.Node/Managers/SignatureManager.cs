@@ -79,12 +79,26 @@ namespace Caasiope.Node.Managers
                     required = new TimeLockRequiredSignature(timelock);
                     //TODO
                     break;
+                case AddressType.VendingMachine:
+                    if (!state.TryGetDeclaration<VendingMachine>(address, out var machine))
+                    {
+                        if (!TryGetVendingMachineFromDeclarations(declarations, address, out machine))
+                        {
+                            required = NotDeclaredRequiredValidation.Instance;
+                            break;
+                        }
+                    }
+
+                    required = new VendingMachineRequiredSignature(machine);
+                    //TODO
+                    break;
                 default:
                     required = null;
                     return false;
             }
             return true;
         }
+
         private bool TryGetTimeLockFromDeclarations(List<TxDeclaration> declarations, Address address, out TimeLock timelock)
         {
             foreach (var txDeclaration in declarations)
@@ -100,6 +114,24 @@ namespace Caasiope.Node.Managers
                 }
             }
             timelock = null;
+            return false;
+        }
+
+        private bool TryGetVendingMachineFromDeclarations(List<TxDeclaration> declarations, Address address, out VendingMachine machine)
+        {
+            foreach (var txDeclaration in declarations)
+            {
+                if (txDeclaration.Type == DeclarationType.VendingMachine)
+                {
+                    var declaration = (VendingMachine)txDeclaration;
+                    if (declaration.Address == address)
+                    {
+                        machine = declaration;
+                        return true;
+                    }
+                }
+            }
+            machine = null;
             return false;
         }
 

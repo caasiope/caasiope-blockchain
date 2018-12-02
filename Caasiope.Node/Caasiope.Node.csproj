@@ -63,6 +63,7 @@
     <Compile Include="Managers\LedgerStateManager.cs" />
     <Compile Include="NodeConfiguration.cs" />
     <Compile Include="ConsoleCommands\NodeConsoleCommandProcessor.cs" />
+    <Compile Include="PostStateHolder.cs" />
     <Compile Include="Processors\CommandProcessor.cs" />
     <Compile Include="Processors\Commands\GetAccountCommand.cs" />
     <Compile Include="Processors\Commands\GetTransactionsCommand.cs" />

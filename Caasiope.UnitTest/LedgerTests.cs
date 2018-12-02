@@ -89,12 +89,15 @@ namespace Caasiope.UnitTest
 
                 var last = context.LedgerService.LedgerManager.GetMerkleRootHash();
 
+                Assert.Fail();
+                /*
                 var fromDb = context.DatabaseService.ReadDatabaseManager.GetLastLedger();
 
                 if(fromDb.GetHeight() != context.LedgerService.LedgerManager.LastLedger.GetHeight())
                     Assert.Inconclusive();
 
                 Assert.IsTrue(last.Equals(fromDb.Ledger.MerkleHash));
+                */
             }
         }
     }

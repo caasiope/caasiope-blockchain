@@ -52,7 +52,7 @@ namespace Caasiope.Database.Managers
                 list.Add(account.Address, account);
             }
 
-            return list.Values.ToList(); 
+            return list.Values.ToList();
         }
 
         public SignedLedger GetLastLedgerFromRaw()

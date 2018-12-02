@@ -69,6 +69,7 @@
     <Compile Include="Repositories\Entities\TransactionDeclarationEntity.cs" />
     <Compile Include="Repositories\Entities\TransactionMessageEntity.cs" />
     <Compile Include="Repositories\Entities\TxInputOutputFull.cs" />
+    <Compile Include="Repositories\Entities\VendingMachineEntity.cs" />
     <Compile Include="Repositories\HashLockRepository.cs" />
     <Compile Include="Repositories\LedgerRepository.cs" />
     <Compile Include="Repositories\LedgerSignatureRepository.cs" />
@@ -83,6 +84,7 @@
     <Compile Include="Repositories\TransactionMessageRepository.cs" />
     <Compile Include="Repositories\TransactionRepository.cs" />
     <Compile Include="Repositories\TransactionSignatureRepository.cs" />
+    <Compile Include="Repositories\VendingMachineRepository.cs" />
     <Compile Include="Repository.cs" />
     <Compile Include="SqlTransaction.cs" />
     <Compile Include="SqlTransactions\SignedLedgerSqlTransaction.cs" />

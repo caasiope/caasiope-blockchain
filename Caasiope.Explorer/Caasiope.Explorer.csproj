@@ -78,6 +78,7 @@
     <Compile Include="Transformers\TransactionSignatureTransformerService.cs" />
     <Compile Include="Transformers\TransactionTransformerService.cs" />
     <Compile Include="Transformers\TxInputOutputTransformerService.cs" />
+    <Compile Include="Transformers\VendingMachineTransformerService.cs" />
     <Compile Include="WebSocketServer.cs" />
   </ItemGroup>
   <ItemGroup>

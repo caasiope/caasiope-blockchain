@@ -79,6 +79,10 @@ namespace Caasiope.Explorer.Database.SQL
             {
                 u.declaration_id
             });
+            modelBuilder.Entity<vendingmachine>().HasKey(u => new
+            {
+                u.declaration_id
+            });
         }
 
         public virtual DbSet<account> accounts { get; set; }
@@ -96,5 +100,6 @@ namespace Caasiope.Explorer.Database.SQL
         public virtual DbSet<hashlock> hashlocks { get; set; }
         public virtual DbSet<timelock> timelocks { get; set; }
         public virtual DbSet<secretrevelation> secretrevelations { get; set; }
+        public virtual DbSet<vendingmachine> vendingmachines { get; set; }
     }
 }
