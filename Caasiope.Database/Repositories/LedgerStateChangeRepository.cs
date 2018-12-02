@@ -21,7 +21,7 @@ namespace Caasiope.Database.Repositories
             return new LedgerStateChangeSimple(entity.ledger_height, entity.raw);
         }
 
-        protected override bool CheckIsNew(BlockchainEntities entities, ledgerstatechange item)
+        protected override bool CheckIsNew(BlockchainEntities entities, LedgerStateChangeSimple item)
         {
             return true;
         }

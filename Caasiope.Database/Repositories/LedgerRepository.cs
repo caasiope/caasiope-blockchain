@@ -28,7 +28,7 @@ namespace Caasiope.Database.Repositories
             return new LedgerEntity(new LedgerHash(entity.hash), ledger, new LedgerMerkleRootHash(entity.merkle_root_hash), entity.raw);
         }
 
-        protected override bool CheckIsNew(BlockchainEntities entities, ledger item)
+        protected override bool CheckIsNew(BlockchainEntities entities, LedgerEntity item)
         {
             return true;
         }

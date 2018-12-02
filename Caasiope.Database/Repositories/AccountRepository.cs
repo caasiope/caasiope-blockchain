@@ -9,10 +9,9 @@ namespace Caasiope.Database.Repositories
 {
     public class AccountRepository : Repository<AccountEntity, account>
     {
-        protected override bool CheckIsNew(BlockchainEntities entities, account item)
+        protected override bool CheckIsNew(BlockchainEntities entities, AccountEntity item)
         {
-            // TODO this is a workaround!
-            return entities.accounts.AsNoTracking().SingleOrDefault(_ => _.address == item.address) == null;
+            return item.IsNew;
         }
 
         protected override DbSet<account> GetDbSet(BlockchainEntities entities)

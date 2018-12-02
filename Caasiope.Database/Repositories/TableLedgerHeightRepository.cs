@@ -21,9 +21,9 @@ namespace Caasiope.Database.Repositories
             return new TableLedgerHeight(entity.table_name, entity.processed_ledger_height);
         }
 
-        protected override bool CheckIsNew(BlockchainEntities entities, tableledgerheight item)
+        protected override bool CheckIsNew(BlockchainEntities entities, TableLedgerHeight item)
         {
-            return item.processed_ledger_height == 0;
+            return item.Height == 0;
         }
 
         protected override DbSet<tableledgerheight> GetDbSet(BlockchainEntities entities)

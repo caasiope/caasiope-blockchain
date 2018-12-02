@@ -93,8 +93,8 @@ namespace Caasiope.Node.Services
             var expected = LedgerService.LedgerManager.GetSignedLedger().Ledger.MerkleHash;
 
             // TODO why debug assert ?
-            Debug.Assert(expected.Equals(computed));
-            Debug.Assert(LedgerService.LedgerManager.CheckMerkleRoot());
+            Debug.Assert(expected.Equals(computed), "Ledger hash does not match with the loaded");
+            Debug.Assert(LedgerService.LedgerManager.CheckMerkleRoot(), "Merkle root is not valid!");
         }
 
         protected override void OnStop()

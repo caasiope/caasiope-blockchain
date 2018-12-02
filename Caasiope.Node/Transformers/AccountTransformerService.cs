@@ -14,7 +14,7 @@ namespace Caasiope.Node.Transformers
             var accounts = signedLedgerState.State.Accounts;
             foreach (var account in accounts)
             {
-                list.Add(new Database.Repositories.Entities.AccountEntity(account.Address, GetRaw(account)));
+                list.Add(new Database.Repositories.Entities.AccountEntity(account.Address, GetRaw(account), account.IsNew));
             }
             return list;
         }

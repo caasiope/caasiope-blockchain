@@ -57,10 +57,15 @@ namespace Caasiope.Node.Managers
             // determine which height still need to be transformed
             var minimal = GetMinimalHeight(tableTransformationStates.Values);
 
+            var min = tableTransformationStates.Values.Min(table => table.CurrentHeight);
+
+            if (targetHeight == min)
+                return;
+
             //TODO use batch
             var ledgers = DatabaseService.ReadDatabaseManager.GetLedgersFromHeight(minimal).ToDictionary(_ => _.Ledger.Ledger.LedgerLight.Height);
 
-            var min = tableTransformationStates.Values.Min(table => table.CurrentHeight);
+            var knownAddresses = DatabaseService.ReadDatabaseManager.GetAddresses();
 
             for (var height = min + 1; height <= targetHeight; height++)
             {
@@ -69,10 +74,43 @@ namespace Caasiope.Node.Managers
                 
                 foreach (var entity in tableTransformationStates.Values)
                 {
+                    if (entity.TableName == "accounts")
+                    {
+                        context = RebuildContext(context, knownAddresses);
+                    }
                     if(entity.CurrentHeight < height)
                         TransformLedgerState(context, entity.TableName, height);
                 }
             }
+        }
+
+        private DataTransformationContext RebuildContext(DataTransformationContext context, HashSet<Address> knownAccounts)
+        {
+            var oldState = context.SignedLedgerState.State;
+            var accounts = MarkNewAccounts(knownAccounts, oldState.Accounts);
+            var state = new LedgerStateChange(accounts, oldState.MultiSignatures, oldState.HashLocks, oldState.TimeLocks);
+            var signedLedgerState = new SignedLedgerState(context.SignedLedgerState.Ledger, state);
+            return new DataTransformationContext(signedLedgerState);
+        }
+
+        private static List<Account> MarkNewAccounts(HashSet<Address> knownAccounts, List<Account> accounts)
+        {
+            var results = new List<Account>();
+
+            foreach (var account in accounts)
+            {
+                if (knownAccounts.Add(account.Address))
+                {
+                    var mutable = new MutableAccount(account.Address, account.CurrentLedger);
+                    results.Add(mutable.SetBalances(account.Balances).SetDeclaration(account.Declaration));
+                }
+                else
+                {
+                    results.Add(account);
+                }
+            }
+
+            return results;
         }
 
         private void SetInitialTableHeights()

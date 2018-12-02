@@ -9,7 +9,7 @@ namespace Caasiope.Protocol.Types
     // TODO this should be a wrapper
     public class MutableAccount : Account
     {
-        public MutableAccount(Address address, long current) : base(address, current)
+        public MutableAccount(Address address, long current) : base(address, current, true)
         {
         }
 
@@ -49,14 +49,16 @@ namespace Caasiope.Protocol.Types
         public readonly Address Address;
         public IEnumerable<AccountBalance> Balances => balances.Values;
         public readonly long CurrentLedger;
+        public readonly bool IsNew;
         public TxAddressDeclaration Declaration { get; protected set; }
 
         protected readonly SortedDictionary<Currency, AccountBalance> balances = new SortedDictionary<Currency, AccountBalance>(new CurrencyComparer());
 
-        protected Account(Address address, long current)
+        protected Account(Address address, long current, bool isNew = false)
         {
             Address = address;
             CurrentLedger = current;
+            IsNew = isNew;
         }
 
         public Account(Address address, long current, IEnumerable<AccountBalance> balances, TxAddressDeclaration declaration = null) : this(address, current)

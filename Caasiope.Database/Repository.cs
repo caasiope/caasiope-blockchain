@@ -33,7 +33,7 @@ namespace Caasiope.Database
         public void CreateOrUpdate(BlockchainEntities entities, TItem item)
         {
             var entity = ToEntity(item);
-            var isNew = CheckIsNew(entities, entity);
+            var isNew = CheckIsNew(entities, item);
 
             if (!isNew)
             {
@@ -46,7 +46,7 @@ namespace Caasiope.Database
             }
         }
 
-        protected abstract bool CheckIsNew(BlockchainEntities entities, TEntity entity);
+        protected abstract bool CheckIsNew(BlockchainEntities entities, TItem entity);
 
         public string TableName { get; private set; }
 

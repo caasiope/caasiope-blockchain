@@ -114,5 +114,14 @@ namespace Caasiope.Database.Managers
         {
             return repositoryManager.GetRepository<TableLedgerHeightRepository>().GetEnumerable().ToList();
         }
+
+        public HashSet<Address> GetAddresses()
+        {
+            using (var entities = new BlockchainEntities())
+            {
+                var addresses = new HashSet<Address>(entities.accounts.Select(_ => _.address).ToList().Select(Address.FromRawBytes));
+                return addresses;
+            }
+        }
     }
 }
