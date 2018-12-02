@@ -215,6 +215,7 @@ namespace Caasiope.Node.Managers
             LiveService.PersistenceManager.Save(new SignedLedgerState(signed, state.GetLedgerStateChange()));
 
             LedgerState = ledgerState;
+            LastLedger = signed;
 
             onNewLedger(LastLedger);
         }
