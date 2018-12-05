@@ -33,7 +33,7 @@ namespace Caasiope.Explorer.Managers
             {
                 var notification = new LedgerNotification()
                 {
-                    Hash = ledger.Hash.ToString(),
+                    Hash = ledger.Hash.ToBase64(),
                     Height = ledger.GetHeight(),
                     Timestamp = ledger.GetTimestamp(),
                     Transactions = GetTransactions(subscriptor.Value, ledger)
