@@ -25,6 +25,7 @@ namespace Caasiope.Explorer.Services
 	    protected override void OnInitialize()
 	    {
 	        base.OnInitialize();
+	        NotificationManager.Send = Send;
 	        LedgerService.LedgerManager.SubscribeOnNewLedger(NotificationManager.Notify);
         }
     }
