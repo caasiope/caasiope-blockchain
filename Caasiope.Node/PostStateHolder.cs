@@ -54,5 +54,7 @@ namespace Caasiope.Node
         {
             return PostState.Finalize(HasherFactory.CreateHasher(version));
         }
+
+        public int NbTransactions => postStateTransactions.Count;
     }
 }

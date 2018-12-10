@@ -122,7 +122,8 @@ namespace Caasiope.Node.Managers
             Finalize(signed, CreateLedgerState(signed));
 
             needSetInitialLedger = false;
-            logger.Log($"Ledger Finalized. Height : {signed.Ledger.LedgerLight.Height} Transactions : {signed.Ledger.Block.Transactions.Count()} ");
+            var time = new DateTime(1970, 1, 1).AddSeconds(signed.GetTimestamp());
+            Console.WriteLine($"Ledger Finalized. Height : {signed.Ledger.LedgerLight.Height}  Timestamp : {time} Transactions : {signed.Ledger.Block.Transactions.Count()} ");
         }
 
         private bool ValidateSignedLedgerInternal(SignedLedger signed)
