@@ -4,6 +4,7 @@ using Caasiope.Explorer.JSON.API.Responses;
 using Caasiope.Protocol;
 using Caasiope.Protocol.Types;
 using Helios.JSON;
+using Ledger = Caasiope.Explorer.JSON.API.Internals.Ledger;
 
 namespace Caasiope.Explorer.JSON.API
 {
@@ -22,6 +23,11 @@ namespace Caasiope.Explorer.JSON.API
 		public static Response CreateGetTransactionHistoryResponse(List<Internals.HistoricalTransaction> transactions = null, int? total = null)
 		{
 		    return transactions == null ? new GetTransactionHistoryResponse() : new GetTransactionHistoryResponse { Transactions = transactions, Total = total};
+		}
+
+		public static Response CreateGetLedgerResponse(Ledger ledger = null)
+		{
+		    return ledger == null ? new GetLedgerResponse() : new GetLedgerResponse { Ledger = ledger };
 		}
 
 		private static Dictionary<string, decimal> FormatBalance(IEnumerable<AccountBalance> balances)

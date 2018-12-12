@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caasiope.Explorer.JSON.API;
+using Caasiope.Explorer.JSON.API.Internals;
 using Caasiope.Explorer.JSON.API.Requests;
 using Caasiope.Explorer.Services;
 using Caasiope.Node;
@@ -13,6 +14,7 @@ using Helios.Common.Extensions;
 using Helios.Common.Logs;
 using Helios.JSON;
 using GetSignedLedgerRequest = Caasiope.Explorer.JSON.API.Requests.GetSignedLedgerRequest;
+using HistoricalTransaction = Caasiope.Protocol.Types.HistoricalTransaction;
 using ResponseHelper = Caasiope.Explorer.JSON.API.ResponseHelper;
 using ResultCode = Caasiope.Node.ResultCode;
 
@@ -100,6 +102,7 @@ namespace Caasiope.Explorer
                 if (signed == null)
                 {
                     sendResponse.Call(ResponseHelper.CreateGetSignedLedgerResponse(), ResultCode.LedgerDoesnotExist);
+                    return;
                 }
 
                 sendResponse.Call(ResponseHelper.CreateGetSignedLedgerResponse(signed), ResultCode.Success);
@@ -180,6 +183,56 @@ namespace Caasiope.Explorer
                     sendResponse.Call(ResponseHelper.CreateGetTransactionHistoryResponse(transactions, total), ResultCode.Success);
                 }
             }
+            else if (request is GetLedgerRequest)
+            {
+                var message = (GetLedgerRequest) request;
+
+                if (message.Height != null && message.Height >= 0)
+                {
+                    var currentHeight = LedgerService.LedgerManager.GetSignedLedger().GetHeight();
+
+                    if (message.Height > currentHeight)
+                    {
+                        sendResponse.Call(ResponseHelper.CreateGetLedgerResponse(), ResultCode.LedgerDoesnotExist);
+                        return;
+                    }
+
+                    if (message.Height == currentHeight)
+                    {
+                        sendResponse.Call(ResponseHelper.CreateGetLedgerResponse(LedgerConverter.GetLedger(LedgerService.LedgerManager.GetSignedLedger())), ResultCode.Success);
+                        return;
+                    }
+
+                    var signed = DatabaseService.ReadDatabaseManager.GetLedgerFromRaw(message.Height.Value);
+                    if (signed == null)
+                    {
+                        sendResponse.Call(ResponseHelper.CreateGetLedgerResponse(), ResultCode.LedgerDoesnotExist);
+                        return;
+                    }
+
+                    var ledger = LedgerConverter.GetLedger(signed);
+                    sendResponse.Call(ResponseHelper.CreateGetLedgerResponse(ledger), ResultCode.Success);
+                    return;
+                }
+
+                if (!string.IsNullOrEmpty(message.Hash))
+                {
+                    try
+                    {
+                        var bytes = Convert.FromBase64String(message.Hash);
+                        var ledger = DatabaseService.ReadDatabaseManager.GetLedgerByHash(new LedgerHash(bytes));
+                        sendResponse.Call(ResponseHelper.CreateGetLedgerResponse(LedgerConverter.GetLedger(ledger)), ResultCode.Success);
+                        return;
+                    }
+                    catch (Exception e)
+                    {
+                        sendResponse.Call(ResponseHelper.CreateGetLedgerResponse(), ResultCode.InvalidInputParam);
+                        return;
+                    }
+                }
+                sendResponse.Call(ResponseHelper.CreateGetLedgerResponse(), ResultCode.InvalidInputParam);
+            }
+
             else
             {
                 sendResponse.Call(new Response(), ResultCode.UnknownMessage);

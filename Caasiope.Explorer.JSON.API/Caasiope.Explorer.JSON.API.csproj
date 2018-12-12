@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BlockchainExplorerApi.cs" />
+    <Compile Include="Internals\Ledger.cs" />
     <Compile Include="Internals\HashLock.cs" />
     <Compile Include="Internals\MultiSignature.cs" />
     <Compile Include="Internals\SecretRevelation.cs" />
@@ -49,6 +50,8 @@
     <Compile Include="Internals\VendingMachine.cs" />
     <Compile Include="NotificationHelper.cs" />
     <Compile Include="Notifications\LedgerNotification.cs" />
+    <Compile Include="Requests\GetLedgerRequest.cs" />
+    <Compile Include="Responses\GetLedgerResponse.cs" />
     <Compile Include="TransactionConverter.cs" />
     <Compile Include="Internals\Transaction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
