@@ -20,9 +20,9 @@ namespace Caasiope.Explorer.JSON.API
             return new Internals.Ledger(light.Height, ledger.Hash.ToBase64(), light.Timestamp, light.Lastledger.ToBase64(), light.Version.VersionNumber, transactions);
         }
 
-        private static Internals.TransactionHeader GetTransactionHeader(SignedTransaction signed)
+        private static Internals.TransactionHeader GetTransactionHeader(SignedTransaction signed, int index)
         {
-            return new Internals.TransactionHeader(signed.Hash.ToBase64(), GetFees(signed.Transaction.Fees), signed.Transaction.Declarations.Any());
+            return new Internals.TransactionHeader(index, signed.Hash.ToBase64(), GetFees(signed.Transaction.Fees), signed.Transaction.Declarations.Any());
         }
 
         private static decimal? GetFees(TxInput fees)

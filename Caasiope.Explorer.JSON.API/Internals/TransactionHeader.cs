@@ -4,6 +4,8 @@ namespace Caasiope.Explorer.JSON.API.Internals
 {
     public class TransactionHeader
     {
+        [JsonProperty(PropertyName = "i")]
+        public int Index;
         [JsonProperty(PropertyName = "h")]
         public string Hash;
         [JsonProperty(PropertyName = "f", NullValueHandling = NullValueHandling.Ignore)]
@@ -11,8 +13,9 @@ namespace Caasiope.Explorer.JSON.API.Internals
         [JsonProperty(PropertyName = "d")]
         public bool HasDeclaration;
 
-        public TransactionHeader(string hash, decimal? fee, bool hasDeclaration)
+        public TransactionHeader(int index, string hash, decimal? fee, bool hasDeclaration)
         {
+            Index = index;
             Hash = hash;
             Fee = fee;
             HasDeclaration = hasDeclaration;
