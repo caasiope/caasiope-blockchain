@@ -45,6 +45,7 @@
     <Compile Include="Internals\SecretRevelation.cs" />
     <Compile Include="Internals\Signature.cs" />
     <Compile Include="Internals\TimeLock.cs" />
+    <Compile Include="Internals\TransactionHeader.cs" />
     <Compile Include="Internals\TxDeclaration.cs" />
     <Compile Include="Internals\TxInputOutput.cs" />
     <Compile Include="Internals\VendingMachine.cs" />

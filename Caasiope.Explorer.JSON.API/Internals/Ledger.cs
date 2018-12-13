@@ -9,9 +9,9 @@ namespace Caasiope.Explorer.JSON.API.Internals
         public long Timestamp;
         public string Lastledger;
         public byte Version;
-        public List<string> Transactions;
+        public List<TransactionHeader> Transactions;
 
-        public Ledger(long height, string hash, long timestamp, string lastledger, byte version, List<string> transactions)
+        public Ledger(long height, string hash, long timestamp, string lastledger, byte version, List<TransactionHeader> transactions)
         {
             Height = height;
             Hash = hash;

@@ -15,8 +15,19 @@ namespace Caasiope.Explorer.JSON.API
                 return null;
 
             var light = ledger.Ledger.LedgerLight;
-            var transactions = ledger.Ledger.Block.Transactions.Select(_ => _.Hash.ToBase64()).ToList();
+            var txs = ledger.Ledger.Block.Transactions;
+            var transactions = txs.Select(GetTransactionHeader).ToList();
             return new Internals.Ledger(light.Height, ledger.Hash.ToBase64(), light.Timestamp, light.Lastledger.ToBase64(), light.Version.VersionNumber, transactions);
+        }
+
+        private static Internals.TransactionHeader GetTransactionHeader(SignedTransaction signed)
+        {
+            return new Internals.TransactionHeader(signed.Hash.ToBase64(), GetFees(signed.Transaction.Fees), signed.Transaction.Declarations.Any());
+        }
+
+        private static decimal? GetFees(TxInput fees)
+        {
+            return fees == null ? (decimal?)null : Amount.ToWholeDecimal(fees.Amount);
         }
     }
 
