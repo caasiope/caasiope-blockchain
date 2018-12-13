@@ -6,11 +6,11 @@ namespace Caasiope.Protocol.Validators.Transactions
 {
     public class VendingMachineRequiredSignature : TransactionRequiredValidation
     {
-        private readonly VendingMachine machine;
+        public readonly VendingMachine Machine;
 
         public VendingMachineRequiredSignature(VendingMachine machine)
         {
-            this.machine = machine;
+            Machine = machine;
         }
 
         public override bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, Transaction transaction, long timestamp)
@@ -22,7 +22,7 @@ namespace Caasiope.Protocol.Validators.Transactions
             // require the signature from the owner
             foreach (var signature in signatures)
             {
-                if (signature.CheckAddress(machine.Owner))
+                if (signature.CheckAddress(Machine.Owner))
                 {
                     signature.Require();
                     return true;
@@ -37,9 +37,9 @@ namespace Caasiope.Protocol.Validators.Transactions
             // what the machine sends
             foreach (var input in transaction.Inputs)
             {
-                if (input.Address.Encoded == machine.Address.Encoded)
+                if (input.Address.Encoded == Machine.Address.Encoded)
                 {
-                    if (input.Currency == machine.CurrencyOut)
+                    if (input.Currency == Machine.CurrencyOut)
                     {
                         send = input;
                     }
@@ -57,9 +57,9 @@ namespace Caasiope.Protocol.Validators.Transactions
             // what the machine receives
             foreach (var output in transaction.Outputs)
             {
-                if (output.Address.Encoded == machine.Address.Encoded)
+                if (output.Address.Encoded == Machine.Address.Encoded)
                 {
-                    if (output.Currency == machine.CurrencyIn)
+                    if (output.Currency == Machine.CurrencyIn)
                     {
                         receive = output;
                     }
@@ -72,7 +72,7 @@ namespace Caasiope.Protocol.Validators.Transactions
             // verify it matches
             try
             {
-                var maximum = Amount.Multiply(send.Amount, machine.Rate);
+                var maximum = Amount.Multiply(send.Amount, Machine.Rate);
                 return receive.Amount >= maximum;
             }
             catch (OverflowException)

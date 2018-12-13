@@ -55,5 +55,11 @@ namespace Caasiope.Protocol.Types
             var result = new decimal(amount) * ToWholeDecimal(rate);
             return new Amount((long)result);
         }
+
+        public static Amount Divide(Amount amount, Amount rate)
+        {
+            var result = new decimal(amount) / ToWholeDecimal(rate);
+            return new Amount((long)result);
+        }
     }
 }

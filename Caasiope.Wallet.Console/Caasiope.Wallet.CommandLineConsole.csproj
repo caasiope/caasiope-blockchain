@@ -50,10 +50,13 @@
     <Compile Include="Commands\AddInputTransaction.cs" />
     <Compile Include="Commands\AddOutputTransaction.cs" />
     <Compile Include="Commands\CreateAccountCommand.cs" />
+    <Compile Include="Commands\CreateVendingMachineCommand.cs" />
     <Compile Include="Commands\DecryptPrivateKeyCommand.cs" />
     <Compile Include="Commands\EncryptPrivateKeyCommand.cs" />
+    <Compile Include="Commands\ExchangeCommand.cs" />
     <Compile Include="Commands\GenerateCertificateCommand.cs" />
     <Compile Include="Commands\GeneratePrivateKeyCommand.cs" />
+    <Compile Include="Commands\GetAccountCommand.cs" />
     <Compile Include="Commands\GetSubmissionsCommand.cs" />
     <Compile Include="Commands\HashTextCommand.cs" />
     <Compile Include="Commands\InitializeWalletCommand.cs" />

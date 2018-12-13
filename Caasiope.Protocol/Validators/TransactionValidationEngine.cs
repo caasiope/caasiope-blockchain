@@ -66,7 +66,7 @@ namespace Caasiope.Protocol.Validators
             return true;
         }
 
-        private static bool TryGetRequiredValidations(ILedgerState state, TransactionRequiredValidationFactory factory, Transaction transaction, out List<TransactionRequiredValidation> validations)
+        public static bool TryGetRequiredValidations(ILedgerState state, TransactionRequiredValidationFactory factory, Transaction transaction, out List<TransactionRequiredValidation> validations)
         {
             var dictionary = new Dictionary<Address, TransactionRequiredValidation>();
             foreach (var input in transaction.GetInputs())
