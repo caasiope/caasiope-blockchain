@@ -7,6 +7,30 @@ using Caasiope.NBitcoin;
 
 namespace Caasiope.Explorer.JSON.API
 {
+    public class LedgerConverter
+    {
+        public static Internals.Ledger GetLedger(SignedLedger ledger)
+        {
+            if (ledger == null)
+                return null;
+
+            var light = ledger.Ledger.LedgerLight;
+            var txs = ledger.Ledger.Block.Transactions;
+            var transactions = txs.Select(GetTransactionHeader).ToList();
+            return new Internals.Ledger(light.Height, ledger.Hash.ToBase64(), light.Timestamp, light.Lastledger.ToBase64(), light.Version.VersionNumber, transactions);
+        }
+
+        private static Internals.TransactionHeader GetTransactionHeader(SignedTransaction signed, int index)
+        {
+            return new Internals.TransactionHeader(index, signed.Hash.ToBase64(), GetFees(signed.Transaction.Fees), signed.Transaction.Declarations.Any());
+        }
+
+        private static decimal? GetFees(TxInput fees)
+        {
+            return fees == null ? (decimal?)null : Amount.ToWholeDecimal(fees.Amount);
+        }
+    }
+
     public class TransactionConverter
     {
         public static SignedTransaction GetSignedTransaction(Internals.Transaction transaction, List<Internals.Signature> signatures)

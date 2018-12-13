@@ -123,5 +123,15 @@ namespace Caasiope.Database.Managers
                 return addresses;
             }
         }
+
+        public SignedLedger GetLedgerByHash(LedgerHash hash)
+        {
+            using (var entities = new BlockchainEntities())
+            {
+                var ledger = entities.ledgers.FirstOrDefault(_ => _.hash == hash.Bytes);
+                var raw = ledger?.raw;
+                return LedgerCompressionEngine.ReadZippedLedger(raw);
+            }
+        }
     }
 }
