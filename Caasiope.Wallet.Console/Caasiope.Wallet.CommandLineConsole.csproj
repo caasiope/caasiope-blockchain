@@ -57,7 +57,9 @@
     <Compile Include="Commands\GenerateCertificateCommand.cs" />
     <Compile Include="Commands\GeneratePrivateKeyCommand.cs" />
     <Compile Include="Commands\GetAccountCommand.cs" />
+    <Compile Include="Commands\GetBlockCommand.cs" />
     <Compile Include="Commands\GetSubmissionsCommand.cs" />
+    <Compile Include="Commands\GetTransactionCommand.cs" />
     <Compile Include="Commands\HashTextCommand.cs" />
     <Compile Include="Commands\InitializeWalletCommand.cs" />
     <Compile Include="Commands\InjectedConsoleCommand.cs" />
@@ -69,6 +71,7 @@
     <Compile Include="Commands\ImportSecretRevelation.cs" />
     <Compile Include="Commands\ImportTimeLock.cs" />
     <Compile Include="Commands\InitializeTransaction.cs" />
+    <Compile Include="Commands\LastLedgerCommand.cs" />
     <Compile Include="Commands\ListPrivateKeysCommand.cs" />
     <Compile Include="Commands\LoadInstructionsCommand.cs" />
     <Compile Include="Commands\Send2Command.cs" />

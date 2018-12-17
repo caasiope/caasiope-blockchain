@@ -41,6 +41,7 @@
     <Compile Include="Extensions\AccountExtensions.cs" />
     <Compile Include="Formats\EncryptedPrivateKeyFormat.cs" />
     <Compile Include="Formats\MnemonicPrivateKeyFormat.cs" />
+    <Compile Include="Formats\TimeFormat.cs" />
     <Compile Include="MerkleTrees\Trie.cs" />
     <Compile Include="MerkleTrees\Hasher.cs" />
     <Compile Include="Types\AccountEntity.cs" />

@@ -7,6 +7,7 @@ using Caasiope.Log;
 using Caasiope.Node.Services;
 using Caasiope.Node.Types;
 using Caasiope.Node.Validators;
+using Caasiope.Protocol.Formats;
 using Caasiope.Protocol.MerkleTrees;
 using Caasiope.Protocol.Types;
 using Caasiope.Protocol.Validators;
@@ -122,7 +123,7 @@ namespace Caasiope.Node.Managers
             Finalize(signed, CreateLedgerState(signed));
 
             needSetInitialLedger = false;
-            var time = new DateTime(1970, 1, 1).AddSeconds(signed.GetTimestamp());
+            var time = TimeFormat.ToDateTime(signed.GetTimestamp());
             Console.WriteLine($"Ledger Finalized. Height : {signed.Ledger.LedgerLight.Height}  Timestamp : {time} Transactions : {signed.Ledger.Block.Transactions.Count()} ");
         }
 
