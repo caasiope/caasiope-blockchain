@@ -51,7 +51,12 @@ namespace Caasiope.Node.Managers
         {
             var accounts = new Trie<Account>(Address.RAW_SIZE);
             foreach (var account in LiveService.AccountManager.GetAccounts())
-                accounts.Add(account.Key.ToRawBytes(), account.Value);
+                accounts.CreateOrUpdate(account.Key.ToRawBytes(), old =>
+                {
+                    if(old != null)
+                        throw new Exception("The ledger's account states are duplicated !");
+                    return account.Value;
+                });
             // TODO compute hash
 
             LedgerState = new LedgerStateFinal(accounts);

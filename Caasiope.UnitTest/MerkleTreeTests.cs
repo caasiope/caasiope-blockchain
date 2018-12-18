@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Caasiope.UnitTest
 {
     [TestClass]
-    public class MerkleTreeTests
+    public class MerkleTreeTests : TestBase
     {
         private static readonly List<Address> addresses1;
         private static readonly List<Address> addresses2;
@@ -61,10 +61,7 @@ namespace Caasiope.UnitTest
             Assert.AreEqual(count, tree.GetEnumerable().Count());
 
             // try add same objects
-            foreach (var account in accounts1)
-            {
-                Assert.IsFalse(tree.Add(account.Address.ToRawBytes(), account));
-            }
+            FillTree(tree, accounts1, false);
 
             Assert.AreEqual(count, tree.Count);
             Assert.AreEqual(count, tree.GetEnumerable().Count());
@@ -88,11 +85,19 @@ namespace Caasiope.UnitTest
             return new Trie<Account>(Address.RAW_SIZE);
         }
 
-        private void FillTree(Trie<Account> tree, List<Account> accounts)
+        private void FillTree(Trie<Account> tree, List<Account> accounts, bool expected = true)
         {
             foreach (var account in accounts)
             {
-                Assert.IsTrue(tree.Add(account.Address.ToRawBytes(), account));
+                bool result = false;
+                tree.CreateOrUpdate(account.Address.ToRawBytes(), old =>
+                {
+                    if (old == null)
+                        result = true;
+                    return account;
+                });
+                Assert.IsTrue(result == expected);
+                Assert.IsTrue(tree.Verify());
             }
         }
 
@@ -110,7 +115,7 @@ namespace Caasiope.UnitTest
             var tree2 = tree1.Clone();
             var address = addresses1[0].ToRawBytes();
             Assert.IsTrue(tree1.TryGetValue(address, out var account));
-            tree2.Update(address, new MutableAccount(account.Address, account.CurrentLedger + 1));
+            tree2.CreateOrUpdate(address, old => new MutableAccount(account.Address, account.CurrentLedger + 1));
 
             // compute second hash
             var hash2 = tree2.ComputeHash();
@@ -213,7 +218,7 @@ namespace Caasiope.UnitTest
             // try update
             try
             {
-                tree.Update(address, new MutableAccount(account.Address, account.CurrentLedger + 1));
+                tree.CreateOrUpdate(address, old => new MutableAccount(account.Address, account.CurrentLedger + 1));
                 Assert.Fail("Did not throw expected exception !");
             }
             catch (TrieFinalizedException e) { }
@@ -312,9 +317,17 @@ namespace Caasiope.UnitTest
         private void AddHexa(Trie<int> tree, int value)
         {
             var expected = tree.Count + 1;
-            Assert.IsTrue(tree.Add(BitConverter.GetBytes(value).Reverse().ToArray(), value));
+            bool result = false;
+            tree.CreateOrUpdate(BitConverter.GetBytes(value).Reverse().ToArray(), old =>
+            {
+                if (old == 0)
+                    result = true;
+                return value;
+            });
+            Assert.IsTrue(result);
             Assert.AreEqual(expected, tree.Count);
             Assert.AreEqual(expected, tree.GetEnumerable().Count());
+            Assert.IsTrue(tree.Verify());
         }
     }
 }

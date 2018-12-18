@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Caasiope.NBitcoin;
 using Caasiope.NBitcoin.Crypto;
 
@@ -24,7 +25,6 @@ namespace Caasiope.Protocol.MerkleTrees
     // each nodes have 16 children
 
     // TODO
-    // use compact trie
     // use loop instead of recursion
     // optimize get enumerable or use foreach callback
 
@@ -76,7 +76,7 @@ namespace Caasiope.Protocol.MerkleTrees
             private Node CloneCompact()
             {
                 var compact = (CompactNode) this;
-                return new CompactNode(Children[0].CloneNode(), compact.Path);
+                return new CompactNode(Depth, Children[0], compact.Path);
             }
 
             public bool IsLeaf()
@@ -87,6 +87,12 @@ namespace Caasiope.Protocol.MerkleTrees
             public bool IsCompact()
             {
                 return Children.Length == 1;
+            }
+
+            public void SetChild(byte index, Node child)
+            {
+                Debug.Assert(Hash == null);
+                Children[index] = child;
             }
         }
 
@@ -104,10 +110,13 @@ namespace Caasiope.Protocol.MerkleTrees
         {
             public readonly byte[] Path;
 
-            public CompactNode(Node child, byte[] path) : base(child.Depth, new[]{child})
+            public CompactNode(byte depth, Node child, byte[] path) : base(depth, new[]{child})
             {
+                Debug.Assert(child.Depth > depth);
                 Path = path;
             }
+
+            public Node Child => Children[0];
         }
 
         private readonly Node root;
@@ -130,99 +139,14 @@ namespace Caasiope.Protocol.MerkleTrees
         // used to create an empty trie
         public Trie(int length) : this(length, new Node(0), 0) { }
 
-        // return false if it has already been added
-        public bool Add(byte[] key, T item)
+        private Node GetCompactOrNode(byte depth, Node child, byte[] path)
         {
-            CheckFinalized();
-            CheckKey(key);
-            return Add(root, key, item) != null;
-        }
-
-        // TODO use a loop and an array to store the parents instead of recursive
-        private Node Add(Node parent, byte[] key, T item)
-        {
-            var next = (byte) (parent.Depth + 1); // pass this as argument ? i would say no, it should not be in the stack
-            var index = parent.GetIndex(key);
-            var child = parent.Children[index];
-
-            // check if we have child
-            if (child != null)
+            // used for leaf
+            if (child.Depth == depth)
             {
-                child = CreateChild(child, key, item, next);
-                // failed
-                if (child == null)
-                    return null;
-            }
-            else
-            {
-                var leaf  = new Leaf(max_depth, item);
-                if (IsLeafDepth(next))
-                    child = leaf;
-                else
-                    child = new CompactNode(leaf, key);
-                Count++;
-            }
-
-            // the node is immutable
-            if (IsFinalized(parent))
-                parent = parent.Clone();
-
-            // we dont check, those operations are not costly
-            parent.Children[index] = child;
-            return parent;
-        }
-
-        private Node CreateChild(Node child, byte[] key, T item, byte next)
-        {
-            // we already have this item
-            if (IsLeafDepth(next))
-                // failed
-                return null;
-
-            if (IsCompact(next, child.Depth))
-            {
-                var compactor = (CompactNode)child;
-                var depth = FindDivergence(key, compactor.Path, next, child.Depth);
-                // we are on same path
-                Node node;
-                if (depth > 0)
-                {
-                    // is it really a compactor ?
-                    node = new Node(depth);
-
-                    if (depth == next)
-                    {
-                        child = node;
-                    }
-                    else
-                    {
-                        child = new CompactNode(node, key);
-                        // attach old compact to the new node
-                    }
-                    node.Children[child.GetIndex(compactor.Path)] = GetCompactorOrNode(compactor, depth);
-                }
-                else
-                {
-                    node = compactor.Children[0];
-                    if (node.IsLeaf())
-                    {
-                        return null;
-                    }
-                }
-                // attach children to node
-                if(Add(node, key, item) == null)
-                    return null;
                 return child;
             }
-            return Add(child, key, item);
-        }
-
-        // TODO create generic ?
-        private Node GetCompactorOrNode(CompactNode compact, byte depth)
-        {
-            if (compact.Depth == depth + 1)
-                return compact.Children[0];
-            return compact;
+            return new CompactNode(depth, child, path);
         }
 
         // return 0 if no divergence ?
@@ -235,16 +159,6 @@ namespace Caasiope.Protocol.MerkleTrees
             }
 
             return 0;
-        }
-
-        private bool IsCompact(byte next, byte depth)
-        {
-            return next != depth;
-        }
-
-        private void AddNoReplace(Node child, byte[] key, T item)
-        {
-            throw new NotImplementedException();
         }
 
         public bool IsFinalized()
@@ -280,45 +194,39 @@ namespace Caasiope.Protocol.MerkleTrees
         // TODO use a loop and an array to store the parents instead of recursive
         private bool TryGetValue(Node parent, byte[] key, out T item)
         {
-            var index = parent.GetIndex(key);
-            var child = parent.Children[index];
+            Node child;
 
-            // check if we can continue
-            if (child == null)
+            if (IsCompact(parent))
             {
-                item = default(T);
-                return false;
-            }
-
-            // check if next node is leaf
-            if (child.IsLeaf())
-            {
-                item = ((Leaf)child).Item;
-                return true;
-            }
-
-            // if compact
-            if (IsCompact(child))
-            {
-                // look if shortcut matches
+                var compact = (CompactNode) parent;
+                child = compact.Child;
                 var begin = parent.Depth;
                 var end = child.Depth;
-                var compactor = (CompactNode) child;
-                child = child.Children[0];
-                // not on the path
-                if (FindDivergence(compactor.Path, key, begin, end) != 0)
+
+                // not on our path
+                if (FindDivergence(compact.Path, key, begin, end) != 0)
                 {
                     item = default(T);
                     return false;
                 }
+            }
+            else
+            {
+                var index = parent.GetIndex(key);
+                child = parent.Children[index];
 
-                if (child.IsLeaf())
+                // dead end
+                if (child == null)
                 {
-                    item = ((Leaf) child).Item;
-                    return true;
+                    item = default(T);
+                    return false;
                 }
+            }
 
-                return TryGetValue(child, key, out item);
+            if (child.IsLeaf())
+            {
+                item = ((Leaf)child).Item;
+                return true;
             }
 
             // recursively call on children
@@ -419,46 +327,14 @@ namespace Caasiope.Protocol.MerkleTrees
                 throw new TrieFinalizedException("The trie has already been finalized !");
         }
 
-        public bool Update(byte[] key, T item)
+        private Node SetChild(Node parent, byte index, Node child)
         {
-            CheckFinalized();
-            CheckKey(key);
-            return Update(root, key, item) != null;
-        }
-
-        // TODO use a loop and an array to store the parents instead of recursive
-        private Node Update(Node parent, byte[] key, T item)
-        {
-            var next = (byte)(parent.Depth + 1); // pass this as argument ? i would say no, it should not be in the stack
-            var index = parent.GetIndex(key);
-            var child = parent.Children[index];
-
-            // does not exists
-            if (child == null)
-                return null;
-
-            // check if next node is leaf
-            if (IsLeafDepth(next))
-            {
-                // add the item
-                 child =  new Leaf(next, item);
-            }
-            else
-            {
-                // recursively call on children
-                child = Update(child, key, item);
-
-                // check if null
-                if (child == null)
-                    return null;
-            }
-
             // the node is immutable
             if (IsFinalized(parent))
                 parent = parent.Clone();
 
             // we dont check, those operations are not costly
-            parent.Children[index] = child;
+            parent.SetChild(index, child);
             return parent;
         }
 
@@ -479,8 +355,7 @@ namespace Caasiope.Protocol.MerkleTrees
                 {
                     if (child != null)
                     {
-                        var next = IsCompact((byte) (node.Depth + 1), child.Depth) ? child.Children[0] : child;
-                        GetEnumerable(next, list);
+                        GetEnumerable(child, list);
                     }
                 }
             }
@@ -489,49 +364,134 @@ namespace Caasiope.Protocol.MerkleTrees
         // the callback will give the old item and get the new item
         public void CreateOrUpdate(byte[] key, Func<T,T> get)
         {
+            CheckFinalized();
+            CheckKey(key);
             CreateOrUpdate(root, key, get);
         }
 
-        private void CreateOrUpdate(Node parent, byte[] key, Func<T, T> get)
+        private Node CreateOrUpdate(Node parent, byte[] key, Func<T, T> get)
         {
-            var next = (byte)(parent.Depth + 1); // pass this as argument ? i would say no, it should not be in the stack
-            var index = parent.GetIndex(key);
-            var child = parent.Children[index];
-
-            // check if next node is leaf
-            if (IsLeafDepth(next))
+            byte index;
+            Node child;
+            if (parent.IsCompact())
             {
-                T old;
-                if (child == null)
+                var compact = (CompactNode)parent;
+                child = compact.Child;
+                index = 0;
+                var depth = FindDivergence(key, compact.Path, parent.Depth, child.Depth);
+
+                // we are on same path
+                if (depth == 0)
                 {
-                    old = default(T);
-                    Count++;
+                    // we already have the value
+                    if (child.IsLeaf())
+                    {
+                        child = CreateOrUpdateLeaf(child, get);
+                    }
+                    else
+                    {
+                        child = CreateOrUpdate(child, key, get);
+                    }
                 }
+                // we have to branch
                 else
                 {
-                    old = ((Leaf)child).Item;
-                }
+                    // create the branching
+                    var node = new Node(depth);
 
-                var item = get(old);
-                // add the item
-                child = new Leaf(next, item);
+                    // add the previous one 
+                    node.SetChild(node.GetIndex(compact.Path), GetCompactOrNode((byte)(depth + 1), compact.Child, compact.Path));
+                    // add the new one
+                    CreateOrUpdate(node, key, get);
+
+                    // handle the case where we need to replace the compact node to a simple node
+                    if (parent.Depth == depth)
+                    {
+                        return node;
+                    }
+                    else
+                    {
+                        // TODO shall we reuse the compact node ?
+                        return new CompactNode(compact.Depth, node, compact.Path);
+                    }
+                }
             }
             else
             {
+                var next = (byte) (parent.Depth + 1);
+                index = parent.GetIndex(key);
+                child = parent.Children[index];
+
+                // no child
                 if (child == null)
                 {
-                    child = new Node(next);
+                    var leaf = CreateOrUpdateLeaf(null, get);
+                    if (IsLeafDepth(next))
+                        child = leaf;
+                    else
+                        child = new CompactNode(next, leaf, key);
                 }
-                // recursively call on children
-                CreateOrUpdate(child, key, get);
+                else
+                {
+                    // recursively call on children
+                    child = CreateOrUpdate(child, key, get);
+                }
             }
 
-            // the node is immutable
-            if (IsFinalized(parent))
-                parent = parent.Clone();
+            return SetChild(parent, index, child);
+        }
 
-            // we dont check, those operations are not costly
-            parent.Children[index] = child;
+        private Node CreateOrUpdateLeaf(Node node, Func<T, T> get)
+        {
+            T old;
+            if (node == null)
+            {
+                old = default(T);
+                Count++;
+            }
+            else
+            {
+                old = ((Leaf)node).Item;
+            }
+
+            var item = get(old);
+            // add the item
+            return new Leaf(max_depth, item);
+        }
+
+        public bool Verify()
+        {
+            return Verify(root);
+        }
+
+        private bool Verify(Node node)
+        {
+            if (node.IsLeaf())
+            {
+                var leaf = (Leaf) node;
+                return leaf.Item != null;
+            }
+
+            if (node.IsCompact())
+            {
+                var compact = (CompactNode) node;
+                if (compact.Child == null)
+                    return false;
+                return Verify(compact.Child);
+            }
+
+            var children = node.Children.Where(child => child != null).ToList();
+            if (children.Count < 2 && node.Depth != 0)
+                return false;
+            foreach (var child in children)
+            {
+                if (child.Depth != node.Depth + 1)
+                    return false;
+                if (!Verify(child))
+                    return false;
+            }
+
+            return true;
         }
     }
 
