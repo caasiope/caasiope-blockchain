@@ -98,7 +98,8 @@ namespace Caasiope.P2P
             {
                 if (nodes.ContainsKey(endpoint))
                 {
-                    nodes[endpoint].Node.SetEndPoint(peerSession.Peer.Node.EndPoint);
+                    if(peerSession.Peer.Node.HasServer)
+                        nodes[endpoint].Node.SetEndPoint(peerSession.Peer.Node.EndPoint);
                 }
                 else
                 {

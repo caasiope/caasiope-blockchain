@@ -36,8 +36,7 @@ namespace Helios.Common.Configurations
 
 		public string GetValue(string key)
 		{
-			string value;
-			return Lines.TryGetValue(key, out value) ? value : string.Empty;
+		    return Lines.TryGetValue(key, out var value) ? value : string.Empty;
 		}
 	}
 }

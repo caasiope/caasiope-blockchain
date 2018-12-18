@@ -1,0 +1,1 @@
+﻿DatabasePath=%AppData%\Caasiope\
