@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
@@ -10,7 +9,7 @@ namespace Caasiope.P2P
 {
     public class P2PServerConfiguration
     {
-        public static P2PConfiguration LoadConfiguration(string path, string defaultPath)
+        public static P2PConfiguration LoadConfiguration(string path, string certsPath, string defaultPath)
         {
             var lines = new DictionaryConfiguration(path);
 
@@ -18,10 +17,11 @@ namespace Caasiope.P2P
             IPEndPoint endpoint = null;
             try
             {
-                var certPath = lines.GetValue("TLS_CERT");
+                var certFileName = lines.GetValue("TLS_CERT");
                 var pwd = lines.GetValue("TLS_PWD");
-                if (File.Exists(certPath))
-                    cert = new X509Certificate2(certPath, pwd);
+                var certificate = Path.Combine(certsPath, certFileName);
+                if (File.Exists(certificate))
+                    cert = new X509Certificate2(certificate, pwd);
             }
             catch (Exception e)
             {

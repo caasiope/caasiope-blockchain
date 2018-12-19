@@ -42,7 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BlockchainNode.cs" />
-    <Content Include="config\zodiac\node_config.txt">
+    <Content Include="config\config.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Compile Include="ConsoleCommands\Commands\AnalyzeAddressCommand.cs" />

@@ -33,19 +33,9 @@ namespace Caasiope.Node
 
         public IDatabaseService CreateDatabaseService()
         {
-            var configuration = new DictionaryConfiguration(NodeConfiguration.GetPath("node_config.txt"));
-            var path = GetFullDatabasePath(configuration.GetValue("DatabasePath"));
+            var path = NodeConfiguration.GetDataPath();
             AppDomain.CurrentDomain.SetData("DataDirectory", path);
             return new DatabaseService();
-        }
-
-        private string GetFullDatabasePath(string settingsPath)
-        {
-            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var path = Regex.Replace(settingsPath, "%AppData%", appData, RegexOptions.IgnoreCase);
-            if (path.Contains('%'))
-                throw new Exception($"Alias is not supported. Database path is not valid {path}");
-            return Path.Combine(path, network.Name + Path.DirectorySeparatorChar);
         }
 
         public virtual ILiveService CreateLiveService()
@@ -76,7 +66,7 @@ namespace Caasiope.Node
 
         public IConnectionService CreateConnectionService()
         {
-	        var config = NodeBuilder.BuildConfiguration(NodeConfiguration.GetPath("node_server.txt"), NodeConfiguration.GetPath("node_id.pem"));
+	        var config = NodeBuilder.BuildConfiguration(NodeConfiguration.GetPath("node_server.txt"), NodeConfiguration.GetCertificatesPath(), "node_id.pem");
 	        var nodes = P2PServerConfiguration.ToIPEndpoints(new UrlConfiguration(NodeConfiguration.GetPath("nodes.txt")).Lines);
 	        var connection = new Connections.P2PConnection(config, nodes, 5, 20);
 
