@@ -110,7 +110,6 @@
     <Compile Include="Validators\TransactionValidator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="config\vice\initial.block">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
