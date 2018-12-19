@@ -7,7 +7,7 @@
 </pre>
 
 ==Abstract==
-The current implementation is using managers to store the current state of the ledger and because everything is mutable, the oject you get can be modified at anytime by another thread. We propose that the state of the ledger and the state of the accounts become immutable so it can be safely accessed by multiple threads.
+The current implementation is using managers to store the current state of the ledger and because everything is mutable, the object you get can be modified at anytime by another thread. We propose that the state of the ledger and the state of the accounts become immutable so it can be safely accessed by multiple threads.
 
 ==Motivation==
 In current implementation, the ledger state (acounts, declarations) is contained is several different places (managers) and can be accessed independently. There is also no notion of temporary poststate. The ledger state currently is a dynamic object, preventing it to be concurrently accessed by different threads.
@@ -50,7 +50,7 @@ A new protocol version is introduced :
 * ImmutableState : 0x2
 
 ===Hash Factory===
-The hash factory uses the protocol version to determine which implentation of the hashing function should be used.
+The hash factory uses the protocol version to determine which implementation of the hashing function should be used.
 
 ==Rationale==
 The blockchain is immutable, so should be a ledger state and by extension an account state.

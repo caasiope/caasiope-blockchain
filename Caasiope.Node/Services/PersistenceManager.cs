@@ -18,7 +18,7 @@ namespace Caasiope.Node.Services
         public void Save(SignedLedgerState state)
         {
             // ConsoleLogger.Instance.Log("Save Ledger", null);
-            DatabaseService.SqlTransactionManager.Save(new SignedLedgerSqlTransaction(state) { Callback = DataTransformationService.Transform });
+            DatabaseService.SqlTransactionManager.Save(new SignedLedgerTransaction(state) { Callback = DataTransformationService.Transform });
         }
     }
 }

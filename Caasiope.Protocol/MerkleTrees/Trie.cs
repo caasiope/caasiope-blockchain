@@ -248,8 +248,9 @@ namespace Caasiope.Protocol.MerkleTrees
         public Hash256 ComputeHash(IHasher<T> hasher)
         {
             CheckFinalized();
-            if(Count == 0)
-                return Hash256.Zero;
+            if (Count == 0)
+                return root.Hash = Hash256.Zero;
+
             ComputeHash(root, hasher);
             return root.Hash;
         }
@@ -366,7 +367,8 @@ namespace Caasiope.Protocol.MerkleTrees
         {
             CheckFinalized();
             CheckKey(key);
-            CreateOrUpdate(root, key, get);
+            var ret = CreateOrUpdate(root, key, get);
+            Debug.Assert(ret == root);
         }
 
         private Node CreateOrUpdate(Node parent, byte[] key, Func<T, T> get)

@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Web;
 using Caasiope.JSON;
 using Caasiope.Node.Connections;
 using Caasiope.Node.Services;
 using Caasiope.P2P;
 using Caasiope.Protocol.Types;
 using Helios.Common.Configurations;
-using P2PConnection = Caasiope.Node.Connections.P2PConnection;
 
 namespace Caasiope.Node
 {
@@ -30,7 +33,19 @@ namespace Caasiope.Node
 
         public IDatabaseService CreateDatabaseService()
         {
+            var configuration = new DictionaryConfiguration(NodeConfiguration.GetPath("node_config.txt"));
+            var path = GetFullDatabasePath(configuration.GetValue("DatabasePath"));
+            AppDomain.CurrentDomain.SetData("DataDirectory", path);
             return new DatabaseService();
+        }
+
+        private string GetFullDatabasePath(string settingsPath)
+        {
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var path = Regex.Replace(settingsPath, "%AppData%", appData, RegexOptions.IgnoreCase);
+            if (path.Contains('%'))
+                throw new Exception($"Alias is not supported. Database path is not valid {path}");
+            return Path.Combine(path, network.Name + Path.DirectorySeparatorChar);
         }
 
         public virtual ILiveService CreateLiveService()
@@ -38,7 +53,7 @@ namespace Caasiope.Node
             var nodes = new UrlConfiguration(NodeConfiguration.GetPath("validators.txt")).Lines;
             var quorum = int.Parse(nodes[0]);
             var validators = new List<PublicKey>();
-            for (int i = 1; i < nodes.Count; i++)
+            for (var i = 1; i < nodes.Count; i++)
             {
                 validators.Add(new PublicKey(Convert.FromBase64String(nodes[i])));
             }

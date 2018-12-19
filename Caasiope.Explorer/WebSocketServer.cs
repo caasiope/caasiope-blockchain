@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Helios.Common.Extensions;
 using Helios.WebSocket;
 
@@ -28,7 +29,17 @@ namespace Caasiope.Explorer
 		{
 			SendAsync(message, delegate {  });
 		}
-	}
+
+	    public override bool Equals(object obj)
+	    {
+	        return obj is Session session && SessionId == session.SessionId;
+	    }
+
+        public override int GetHashCode()
+        {
+            return SessionId.GetHashCode();
+        }
+    }
 
 	public class WebSocketServer : IWebSocketServer
 	{

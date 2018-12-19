@@ -37,6 +37,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caasiope.Wallet", "Caasiope
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caasiope.Log", "Caasiope.Log\Caasiope.Log.csproj", "{FFBEAAF4-F3A2-45FC-BB5D-58E7E84FD6B9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caasiope.Explorer.Database", "Caasiope.Explorer.Database\Caasiope.Explorer.Database.csproj", "{D35A9DB7-390C-4BC2-A9A3-EDBA8BCB9E4A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caasiope.Explorer.Database.SQL", "Caasiope.Explorer.Database.SQL\Caasiope.Explorer.Database.SQL.csproj", "{DF3D9BE1-D33E-44F1-AF9C-D29CA2B63309}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,6 +115,14 @@ Global
 		{FFBEAAF4-F3A2-45FC-BB5D-58E7E84FD6B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFBEAAF4-F3A2-45FC-BB5D-58E7E84FD6B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FFBEAAF4-F3A2-45FC-BB5D-58E7E84FD6B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D35A9DB7-390C-4BC2-A9A3-EDBA8BCB9E4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D35A9DB7-390C-4BC2-A9A3-EDBA8BCB9E4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D35A9DB7-390C-4BC2-A9A3-EDBA8BCB9E4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D35A9DB7-390C-4BC2-A9A3-EDBA8BCB9E4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF3D9BE1-D33E-44F1-AF9C-D29CA2B63309}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF3D9BE1-D33E-44F1-AF9C-D29CA2B63309}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF3D9BE1-D33E-44F1-AF9C-D29CA2B63309}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF3D9BE1-D33E-44F1-AF9C-D29CA2B63309}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

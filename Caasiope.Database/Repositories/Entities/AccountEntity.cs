@@ -5,14 +5,14 @@ namespace Caasiope.Database.Repositories.Entities
     public class AccountEntity
     {
         public readonly Address Address;
-        public readonly long CurrentLedgerHeight;
-        public readonly bool IsDeclared;
+        public readonly byte[] Raw;
+        public readonly bool IsNew;
 
-        public AccountEntity(Address address, long currentLedgerHeight, bool isDeclared)
+        public AccountEntity(Address address, byte[] raw, bool isNew = false)
         {
             Address = address;
-            CurrentLedgerHeight = currentLedgerHeight;
-            IsDeclared = isDeclared;
+            Raw = raw;
+            IsNew = isNew;
         }
     }
 }

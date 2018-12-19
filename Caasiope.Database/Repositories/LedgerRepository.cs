@@ -1,4 +1,4 @@
-﻿using System.Data.Entity;
+using System.Data.Entity;
 using Caasiope.Database.Repositories.Entities;
 using Caasiope.Database.SQL;
 using Caasiope.Database.SQL.Entities;
@@ -7,13 +7,8 @@ using Caasiope.Protocol.Types;
 
 namespace Caasiope.Database.Repositories
 {
-    internal class LedgerRepository : Repository<LedgerEntity, ledger, long>
+    internal class LedgerRepository : Repository<LedgerEntity, ledger>
     {
-        protected override long GetKey(LedgerEntity item)
-        {
-            return item.Ledger.Height;
-        }
-
         protected override ledger ToEntity(LedgerEntity item)
         {
             return new ledger
@@ -33,6 +28,10 @@ namespace Caasiope.Database.Repositories
             return new LedgerEntity(new LedgerHash(entity.hash), ledger, new LedgerMerkleRootHash(entity.merkle_root_hash), entity.raw);
         }
 
+        protected override bool CheckIsNew(BlockchainEntities entities, LedgerEntity item)
+        {
+            return true;
+        }
 
         protected override DbSet<ledger> GetDbSet(BlockchainEntities entities)
         {

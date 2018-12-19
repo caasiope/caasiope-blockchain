@@ -14,7 +14,6 @@ namespace Caasiope.Node.Services
         AccountManager AccountManager { get; }
         IssuerManager IssuerManager { get; }
         PersistenceManager PersistenceManager { get; }
-        SignedTransactionManager SignedTransactionManager { get; }
         TransactionManager TransactionManager { get; }
         SignatureManager SignatureManager { get; }
         ValidatorManager ValidatorManager { get; }
@@ -32,7 +31,6 @@ namespace Caasiope.Node.Services
         public AccountManager AccountManager { get; } = new AccountManager();
         public IssuerManager IssuerManager { get; } = new IssuerManager();
         public PersistenceManager PersistenceManager { get; } = new PersistenceManager();
-        public SignedTransactionManager SignedTransactionManager { get; } = new SignedTransactionManager();
         public TransactionManager TransactionManager { get; } = new TransactionManager();
         public SignatureManager SignatureManager { get; } = new SignatureManager();
         public ValidatorManager ValidatorManager { get; } = new ValidatorManager();
@@ -90,7 +88,6 @@ namespace Caasiope.Node.Services
             TransactionManager.Initialize();
             PersistenceManager.Initialize();
             CatchupManager.Initialize(Logger);
-            SignedTransactionManager.Initialize();
 
             TransactionManager.TransactionReceived += TransactionManager.SendTransactionReceivedNotification;
             ConnectionService.OnSessionConnected(SendSignedNewLedgerNotification);

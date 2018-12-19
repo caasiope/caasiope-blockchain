@@ -42,6 +42,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BlockchainNode.cs" />
+    <Content Include="config\zodiac\node_config.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Compile Include="ConsoleCommands\Commands\AnalyzeAddressCommand.cs" />
     <Compile Include="ConsoleCommands\Commands\GetAccountsCommand.cs" />
     <Compile Include="ConsoleCommands\Commands\GetHashLocksCommand.cs" />
@@ -63,6 +66,7 @@
     <Compile Include="Managers\LedgerStateManager.cs" />
     <Compile Include="NodeConfiguration.cs" />
     <Compile Include="ConsoleCommands\NodeConsoleCommandProcessor.cs" />
+    <Compile Include="PostStateHolder.cs" />
     <Compile Include="Processors\CommandProcessor.cs" />
     <Compile Include="Processors\Commands\GetAccountCommand.cs" />
     <Compile Include="Processors\Commands\GetTransactionsCommand.cs" />
@@ -84,23 +88,9 @@
     <Compile Include="Services\PersistenceManager.cs" />
     <Compile Include="Trackers\TransactionTracker.cs" />
     <Compile Include="Transformers\AccountTransformerService.cs" />
-    <Compile Include="Transformers\BlockTransformerService.cs" />
     <Compile Include="Transformers\DataTransformerService.cs" />
-    <Compile Include="Transformers\DeclarationTransformerService.cs" />
-    <Compile Include="Transformers\TransactionDeclarationTransformerService.cs" />
-    <Compile Include="Transformers\HashLockTransformerService.cs" />
-    <Compile Include="Transformers\LedgerSignatureTransformerService.cs" />
-    <Compile Include="Transformers\AccountBalanceTransformerService.cs" />
-    <Compile Include="Transformers\MultiSignatureAccountTransformerService.cs" />
-    <Compile Include="Transformers\MultiSignatureSignerTransformerService.cs" />
-    <Compile Include="Transformers\SecretRevelationTransformerService.cs" />
-    <Compile Include="Transformers\TimeLockTransformerService.cs" />
-    <Compile Include="Transformers\TransactionMessageTransformerService.cs" />
-    <Compile Include="Transformers\TransactionSignatureTransformerService.cs" />
-    <Compile Include="Transformers\TransactionTransformerService.cs" />
-    <Compile Include="Transformers\TxInputOutputTransformerService.cs" />
-    <Compile Include="Types\LedgerStateFinal.cs" />
     <Compile Include="Types\LedgerPostState.cs" />
+    <Compile Include="Types\LedgerStateFinal.cs" />
     <Compile Include="Validators\SignedLedgerValidator.cs" />
     <Compile Include="ConsoleLogger.cs" />
     <Compile Include="Managers\AccountManager.cs" />

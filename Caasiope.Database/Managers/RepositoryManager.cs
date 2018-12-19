@@ -42,7 +42,7 @@ namespace Caasiope.Database.Managers
             return typeof(RepositoryManager).Assembly
                 .GetTypes()
                 .Where(t => t.IsClass && !t.IsAbstract
-                && t.Namespace == typeof(BalanceRepository).Namespace
+                && t.Namespace == typeof(AccountRepository).Namespace
                 && (t.IsSubclassOf(typeof(Repository)))).ToArray();
         }
 

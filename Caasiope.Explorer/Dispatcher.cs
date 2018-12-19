@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Caasiope.Explorer.JSON.API;
+using Caasiope.Explorer.JSON.API.Internals;
 using Caasiope.Explorer.JSON.API.Requests;
+using Caasiope.Explorer.Services;
 using Caasiope.Node;
 using Caasiope.Node.Connections;
 using Caasiope.Node.Processors.Commands;
@@ -11,6 +14,7 @@ using Helios.Common.Extensions;
 using Helios.Common.Logs;
 using Helios.JSON;
 using GetSignedLedgerRequest = Caasiope.Explorer.JSON.API.Requests.GetSignedLedgerRequest;
+using HistoricalTransaction = Caasiope.Protocol.Types.HistoricalTransaction;
 using ResponseHelper = Caasiope.Explorer.JSON.API.ResponseHelper;
 using ResultCode = Caasiope.Node.ResultCode;
 
@@ -18,12 +22,11 @@ namespace Caasiope.Explorer
 {
     public class Dispatcher : IDispatcher<ISession>
     {
-        [Injected]
-        public ILiveService LiveService;
-        [Injected]
-        public ILedgerService LedgerService;
-        [Injected]
-        public IDatabaseService DatabaseService;
+        [Injected] public ILiveService LiveService;
+        [Injected] public ILedgerService LedgerService;
+        [Injected] public IDatabaseService DatabaseService;
+        [Injected] public IExplorerDatabaseService ExplorerDatabaseService;
+        [Injected] public IExplorerConnectionService ExplorerConnectionService;
 
         protected readonly ILogger Logger;
 
@@ -36,14 +39,14 @@ namespace Caasiope.Explorer
         {
             if (wrapper.Data is Request)
             {
-                DispatchRequest((Request)wrapper.Data, sendResponse);
+                DispatchRequest(session, (Request)wrapper.Data, sendResponse);
                 return true;
             }
 
             return false;
         }
 
-        private void DispatchRequest(Request request, Action<Response, ResultCode> sendResponse)
+        private void DispatchRequest(ISession session, Request request, Action<Response, ResultCode> sendResponse)
         {
             if (request is SendTransactionRequest)
             {
@@ -54,7 +57,12 @@ namespace Caasiope.Explorer
                     return;
                 }
 
-                LiveService.AddCommand(new SendTransactionCommand(signed, (r, rc) => sendResponse.Call(ResponseHelper.CreateSendTransactionResponse(signed.Hash), rc)));
+                LiveService.AddCommand(new SendTransactionCommand(signed, (r, rc) =>
+                {
+                    if(rc == ResultCode.Success)
+                        ExplorerConnectionService.NotificationManager.ListenTo(session, signed.Hash);
+                    sendResponse.Call(ResponseHelper.CreateSendTransactionResponse(signed.Hash), rc);
+                }));
             }
             else if (request is GetSignedLedgerRequest)
             {
@@ -94,6 +102,7 @@ namespace Caasiope.Explorer
                 if (signed == null)
                 {
                     sendResponse.Call(ResponseHelper.CreateGetSignedLedgerResponse(), ResultCode.LedgerDoesnotExist);
+                    return;
                 }
 
                 sendResponse.Call(ResponseHelper.CreateGetSignedLedgerResponse(signed), ResultCode.Success);
@@ -125,7 +134,7 @@ namespace Caasiope.Explorer
                     return;
                 }
 
-                var transaction = DatabaseService.ReadDatabaseManager.GetTransaction(new TransactionHash(hash));
+                var transaction = ExplorerDatabaseService.ReadDatabaseManager.GetTransaction(new TransactionHash(hash));
 
                 sendResponse.Call(ResponseHelper.CreateGetTransactionResponse(TransactionConverter.GetTransaction(transaction)), ResultCode.Success);
             }
@@ -157,15 +166,73 @@ namespace Caasiope.Explorer
 
                 // TODO this is a temporary hack
                 {
-                    var raw = DatabaseService.ReadDatabaseManager.GetTransactionHistory(address, message.Height).OrderByDescending(_ => _.LedgerHeight).ToList();
+                    var raw = ExplorerDatabaseService.ReadDatabaseManager.GetTransactionHistory(address, message.Height).OrderByDescending(_ => _.LedgerHeight).ToList();
                     var total = raw.Count;
 
                     raw = raw.Skip(message.Count * (message.Page - 1)).Take(message.Count).ToList();
 
-                    var transactions = raw.Select(TransactionConverter.GetHistoricalTransaction).ToList();
+                    var results = new List<HistoricalTransaction>();
+
+                    foreach (var transaction in raw)
+                    {
+                        var ledger = DatabaseService.ReadDatabaseManager.GetLedgerFromRaw(transaction.LedgerHeight);
+                        results.Add(new HistoricalTransaction(transaction.LedgerHeight, transaction.Transaction, ledger.GetTimestamp()));
+                    }
+
+                    var transactions = results.Select(TransactionConverter.GetHistoricalTransaction).ToList();
                     sendResponse.Call(ResponseHelper.CreateGetTransactionHistoryResponse(transactions, total), ResultCode.Success);
                 }
             }
+            else if (request is GetLedgerRequest)
+            {
+                var message = (GetLedgerRequest) request;
+
+                if (message.Height != null && message.Height >= 0)
+                {
+                    var currentHeight = LedgerService.LedgerManager.GetSignedLedger().GetHeight();
+
+                    if (message.Height > currentHeight)
+                    {
+                        sendResponse.Call(ResponseHelper.CreateGetLedgerResponse(), ResultCode.LedgerDoesnotExist);
+                        return;
+                    }
+
+                    if (message.Height == currentHeight)
+                    {
+                        sendResponse.Call(ResponseHelper.CreateGetLedgerResponse(LedgerConverter.GetLedger(LedgerService.LedgerManager.GetSignedLedger())), ResultCode.Success);
+                        return;
+                    }
+
+                    var signed = DatabaseService.ReadDatabaseManager.GetLedgerFromRaw(message.Height.Value);
+                    if (signed == null)
+                    {
+                        sendResponse.Call(ResponseHelper.CreateGetLedgerResponse(), ResultCode.LedgerDoesnotExist);
+                        return;
+                    }
+
+                    var ledger = LedgerConverter.GetLedger(signed);
+                    sendResponse.Call(ResponseHelper.CreateGetLedgerResponse(ledger), ResultCode.Success);
+                    return;
+                }
+
+                if (!string.IsNullOrEmpty(message.Hash))
+                {
+                    try
+                    {
+                        var bytes = Convert.FromBase64String(message.Hash);
+                        var ledger = DatabaseService.ReadDatabaseManager.GetLedgerByHash(new LedgerHash(bytes));
+                        sendResponse.Call(ResponseHelper.CreateGetLedgerResponse(LedgerConverter.GetLedger(ledger)), ResultCode.Success);
+                        return;
+                    }
+                    catch (Exception e)
+                    {
+                        sendResponse.Call(ResponseHelper.CreateGetLedgerResponse(), ResultCode.InvalidInputParam);
+                        return;
+                    }
+                }
+                sendResponse.Call(ResponseHelper.CreateGetLedgerResponse(), ResultCode.InvalidInputParam);
+            }
+
             else
             {
                 sendResponse.Call(new Response(), ResultCode.UnknownMessage);

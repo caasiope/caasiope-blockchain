@@ -48,6 +48,8 @@ namespace Caasiope.Protocol.Types
         public static ProtocolVersion InitialVersion = new ProtocolVersion(0x1);
         public static ProtocolVersion ImmutableState = new ProtocolVersion(0x2);
 
+        public static ProtocolVersion CURRENT_VERSION = ImmutableState;
+
         public static bool operator ==(ProtocolVersion a, ProtocolVersion b)
         {
             return a.VersionNumber == b.VersionNumber;

@@ -12,10 +12,10 @@ namespace Caasiope.Protocol.Validators.Transactions
             this.locker = locker;
         }
 
-        public override bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, List<TxDeclaration> declarations, long timestamp)
+        public override bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, Transaction transaction, long timestamp)
         {
             // TODO super false, we want to be able to spend when unlocked
-            foreach (var declaration in declarations)
+            foreach (var declaration in transaction.Declarations)
             {
                 if (declaration.Type == DeclarationType.Secret)
                 {

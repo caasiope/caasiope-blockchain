@@ -3,20 +3,6 @@ using Caasiope.Protocol.Types;
 
 namespace Caasiope.Database.Repositories.Entities
 {
-    public class TransactionDeclarationEntity
-    {
-        public readonly TransactionHash TransactionHash;
-        public readonly int Index;
-        public readonly long DeclarationId;
-
-        public TransactionDeclarationEntity(TransactionHash transactionHash, int index, long declarationId)
-        {
-            DeclarationId = declarationId;
-            TransactionHash = transactionHash;
-            Index = index;
-        }
-    }
-
     public class DeclarationEntity : IEquatable<DeclarationEntity>
     {
         public readonly long DeclarationId;

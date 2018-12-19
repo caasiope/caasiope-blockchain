@@ -1,11 +1,11 @@
 using System;
 using Caasiope.Node;
-using Caasiope.Node.Processors.Commands;
 using Caasiope.Protocol.Types;
 using Helios.Common;
 
 namespace Caasiope.Wallet.CommandLineConsole.Commands
 {
+    // OUTDATED use getaccount instead
     public class GetBalanceCommand : InjectedConsoleCommand
     {
         private readonly CommandArgument addressArgument;
@@ -20,7 +20,7 @@ namespace Caasiope.Wallet.CommandLineConsole.Commands
         {
             var address = WalletService.GetAddress(addressArgument.Value);
 
-            LiveService.AddCommand(new GetAccountCommand(address.Encoded, (account, code) =>
+            LiveService.AddCommand(new Node.Processors.Commands.GetAccountCommand(address.Encoded, (account, code) =>
             {
                 if (code == ResultCode.Success)
                 {

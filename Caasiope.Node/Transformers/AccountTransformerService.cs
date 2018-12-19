@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Caasiope.Database.Repositories;
+using Caasiope.Protocol;
 using Caasiope.Protocol.Types;
 
 namespace Caasiope.Node.Transformers
@@ -13,9 +14,18 @@ namespace Caasiope.Node.Transformers
             var accounts = signedLedgerState.State.Accounts;
             foreach (var account in accounts)
             {
-                list.Add(new Database.Repositories.Entities.AccountEntity(account.Address, account.CurrentLedgerHeight, account.IsDeclared));
+                list.Add(new Database.Repositories.Entities.AccountEntity(account.Address, GetRaw(account), account.IsNew));
             }
             return list;
+        }
+
+        private byte[] GetRaw(Account account)
+        {
+            using (var stream = new ByteStream())
+            {
+                stream.Write(account);
+                return stream.GetBytes();
+            }
         }
     }
 }

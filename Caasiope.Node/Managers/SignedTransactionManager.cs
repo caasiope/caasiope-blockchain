@@ -49,6 +49,11 @@ namespace Caasiope.Node.Managers
                 var timeLock = (TimeLock)declaration;
                 state.DeclareAccount(timeLock);
             }
+            else if(declaration.Type == DeclarationType.VendingMachine)
+            {
+                var machine = (VendingMachine)declaration;
+                state.DeclareAccount(machine);
+            }
         }
 
         private void UpdateBalance(LedgerPostState state, Address address, Currency currency, Amount amount)

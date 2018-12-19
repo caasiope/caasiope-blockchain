@@ -8,7 +8,7 @@ namespace Helios.Common.Concepts.Services
 {
     public abstract class Service : IService
 	{
-		public string Name { get; private set; }
+		public string Name { get; }
 
 		public abstract ILogger Logger { get; }
 
@@ -19,15 +19,15 @@ namespace Helios.Common.Concepts.Services
 		public Action Stopped { get; set; }
 
 		private readonly ManualResetEventSlim initialized = new ManualResetEventSlim();
-		public WaitHandle InitializedHandle { get { return initialized.WaitHandle; } }
+		public WaitHandle InitializedHandle => initialized.WaitHandle;
 
-		private readonly ManualResetEventSlim started = new ManualResetEventSlim();
-		public WaitHandle StartedHandle { get { return started.WaitHandle; } }
+	    private readonly ManualResetEventSlim started = new ManualResetEventSlim();
+		public WaitHandle StartedHandle => started.WaitHandle;
 
-		private readonly ManualResetEventSlim stopped = new ManualResetEventSlim();
-		public WaitHandle StoppedHandle { get { return stopped.WaitHandle; } }
+	    private readonly ManualResetEventSlim stopped = new ManualResetEventSlim();
+		public WaitHandle StoppedHandle => stopped.WaitHandle;
 
-		protected Service(string name = null)
+	    protected Service(string name = null)
 		{
 			Name = name ?? GetType().Name;
 		}

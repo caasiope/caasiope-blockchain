@@ -40,7 +40,7 @@ namespace Caasiope.Node.Managers
         {
             // cannot get it before
             // Update cache by latest data from height tables in the SQl db
-            var lastLedger = GetLastLedger();
+            var lastLedger = DatabaseService.ReadDatabaseManager.GetLastLedgerFromRaw();
             current = lastLedger?.Ledger.LedgerLight.Height ?? -1;
 
             SetInitialTableHeights(current);
@@ -57,10 +57,15 @@ namespace Caasiope.Node.Managers
             // determine which height still need to be transformed
             var minimal = GetMinimalHeight(tableTransformationStates.Values);
 
+            var min = tableTransformationStates.Values.Min(table => table.CurrentHeight);
+
+            if (targetHeight == min)
+                return;
+
             //TODO use batch
             var ledgers = DatabaseService.ReadDatabaseManager.GetLedgersFromHeight(minimal).ToDictionary(_ => _.Ledger.Ledger.LedgerLight.Height);
 
-            var min = tableTransformationStates.Values.Min(table => table.CurrentHeight);
+            var knownAddresses = DatabaseService.ReadDatabaseManager.GetAddresses();
 
             for (var height = min + 1; height <= targetHeight; height++)
             {
@@ -69,44 +74,43 @@ namespace Caasiope.Node.Managers
                 
                 foreach (var entity in tableTransformationStates.Values)
                 {
+                    if (entity.TableName == "accounts")
+                    {
+                        context = RebuildContext(context, knownAddresses);
+                    }
                     if(entity.CurrentHeight < height)
                         TransformLedgerState(context, entity.TableName, height);
-                    else if (entity.TableName == "declarations")
-                    {
-                        var declarations = CreateDeclarationContext(context.SignedLedgerState.Ledger, DatabaseService.ReadDatabaseManager.GetDeclarations(height));
-                        context.SetDeclarations(declarations);
-                    }
                 }
             }
         }
 
-        private TransactionDeclarationContext CreateDeclarationContext(SignedLedger signed, List<TransactionDeclarationEntity> declarations)
+        private DataTransformationContext RebuildContext(DataTransformationContext context, HashSet<Address> knownAccounts)
         {
-            var context = new TransactionDeclarationContext();
-
-            foreach (var transaction in signed.Ledger.Block.Transactions)
-            {
-                var index = 0;
-                foreach (var declaration in transaction.Transaction.Declarations)
-                {
-                    if (!MatchInContext(context, declarations, declaration, transaction.Hash, index++)) 
-                        throw new NotImplementedException("It should match"); 
-                }
-            }
-            return context;
+            var oldState = context.SignedLedgerState.State;
+            var accounts = MarkNewAccounts(knownAccounts, oldState.Accounts);
+            var state = new LedgerStateChange(accounts, oldState.MultiSignatures, oldState.HashLocks, oldState.TimeLocks, oldState.VendingMachines);
+            var signedLedgerState = new SignedLedgerState(context.SignedLedgerState.Ledger, state);
+            return new DataTransformationContext(signedLedgerState);
         }
 
-        private bool MatchInContext(TransactionDeclarationContext context, List<TransactionDeclarationEntity> declarations, TxDeclaration declaration, TransactionHash hash, int index)
+        private static List<Account> MarkNewAccounts(HashSet<Address> knownAccounts, List<Account> accounts)
         {
-            foreach (var entity in declarations)
+            var results = new List<Account>();
+
+            foreach (var account in accounts)
             {
-                if (entity.TransactionHash.Equals(hash) && entity.Index == index)
+                if (knownAccounts.Add(account.Address))
                 {
-                    context.TryAdd(entity, declaration);
-                    return true;
+                    var mutable = new MutableAccount(account.Address, account.CurrentLedger);
+                    results.Add(mutable.SetBalances(account.Balances).SetDeclaration(account.Declaration));
+                }
+                else
+                {
+                    results.Add(account);
                 }
             }
-            return false;
+
+            return results;
         }
 
         private void SetInitialTableHeights()
@@ -148,7 +152,7 @@ namespace Caasiope.Node.Managers
 
         private bool IsFinished()
         {
-            var currentHeight = GetCurrentHeight();
+            var currentHeight = current;
 
             foreach (var state in tableTransformationStates.Values)
             {
@@ -158,11 +162,6 @@ namespace Caasiope.Node.Managers
             }
 
             return true;
-        }
-
-        private long GetCurrentHeight()
-        {
-            return current;
         }
 
         // Called on run
@@ -176,12 +175,6 @@ namespace Caasiope.Node.Managers
                 TransformLedgerState(context, table.TableName, target);
             }
             current = target;
-        }
-
-        // Get lastLedger from No SQL
-        private SignedLedger GetLastLedger()
-        {
-            return DatabaseService.ReadDatabaseManager.GetLastLedgerFromRaw();
         }
         
         private void TransformLedgerState(DataTransformationContext context, string table, long height)

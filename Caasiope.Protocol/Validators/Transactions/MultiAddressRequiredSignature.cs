@@ -15,12 +15,12 @@ namespace Caasiope.Protocol.Validators.Transactions
             threshold = multi.Required;
         }
 
-        public override bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, List<TxDeclaration> declarations, long timestamp)
+        public override bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, Transaction transaction, long timestamp)
         {
             var count = 0;
             foreach (var required in signers)
             {
-                if(required.IsValid(signatures, declarations, timestamp))
+                if(required.IsValid(signatures, transaction, timestamp))
                     count++;
             }
             return count >= threshold;

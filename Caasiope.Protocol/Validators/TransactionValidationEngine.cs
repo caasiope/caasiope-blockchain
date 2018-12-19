@@ -46,7 +46,7 @@ namespace Caasiope.Protocol.Validators
             // check required signatures and declarations are set
             foreach (var required in requireds)
             {
-                if (!required.IsValid(signatures, transaction.Transaction.Declarations, timestamp))
+                if (!required.IsValid(signatures, transaction.Transaction, timestamp))
                 {
                     return false;
                 }
@@ -66,7 +66,7 @@ namespace Caasiope.Protocol.Validators
             return true;
         }
 
-        private static bool TryGetRequiredValidations(ILedgerState state, TransactionRequiredValidationFactory factory, Transaction transaction, out List<TransactionRequiredValidation> validations)
+        public static bool TryGetRequiredValidations(ILedgerState state, TransactionRequiredValidationFactory factory, Transaction transaction, out List<TransactionRequiredValidation> validations)
         {
             var dictionary = new Dictionary<Address, TransactionRequiredValidation>();
             foreach (var input in transaction.GetInputs())
@@ -163,14 +163,14 @@ namespace Caasiope.Protocol.Validators
     // TODO have one instance per type
     public abstract class TransactionRequiredValidation
     {
-        public abstract bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, List<TxDeclaration> declarations, long timestamp);
+        public abstract bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, Transaction transaction, long timestamp);
     }
 
     public class NotDeclaredRequiredValidation : TransactionRequiredValidation
     {
         public static readonly NotDeclaredRequiredValidation Instance = new NotDeclaredRequiredValidation();
 
-        public override bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, List<TxDeclaration> declarations, long timestamp)
+        public override bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, Transaction transaction, long timestamp)
         {
             return false;
         }

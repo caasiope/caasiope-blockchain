@@ -54,41 +54,40 @@ namespace Helios.JSON
 		{
 		    crid = null;
 		    string typeName = null;
-            string data = null;
+		    string data = null;
 		    var isResultEmpty = false;
 		    try
 		    {
 		        var jObject = JObject.Parse(message);
-		        crid = jObject["crid"].ToString();
 		        typeName = jObject["type"].ToString();
-		        Type objectType;
+		        if (NotificationTypes.TryGetValue(typeName, out var objectType))
+		        {
+		            data = jObject["data"].ToString();
+		            var json = JsonConvert.DeserializeObject(data, objectType);
+		            return new NotificationMessage((Notification)json, typeName);
+		        }
+		        crid = jObject["crid"].ToString();
 		        if (RequestTypes.TryGetValue(typeName, out objectType))
 		        {
 		            data = jObject["data"].ToString();
-                    var json = JsonConvert.DeserializeObject(data, objectType);
-		            return new RequestMessage((Request) json, typeName, crid);
-		        }
-		        if (NotificationTypes.TryGetValue(typeName, out objectType))
-		        {
-		            data = jObject["data"].ToString();
-                    var json = JsonConvert.DeserializeObject(data, objectType);
-		            return new NotificationMessage((Notification) json, typeName);
+		            var json = JsonConvert.DeserializeObject(data, objectType);
+		            return new RequestMessage((Request)json, typeName, crid);
 		        }
 		        if (ResponseTypes.TryGetValue(typeName, out objectType))
 		        {
 		            data = jObject["data"].ToString();
-                    var json = JsonConvert.DeserializeObject(data, objectType);
+		            var json = JsonConvert.DeserializeObject(data, objectType);
 		            isResultEmpty = jObject["result"] == null;
-                    return new ResponseMessage((Response) json, typeName, crid, (byte) jObject["result"]);
+		            return new ResponseMessage((Response)json, typeName, crid, (byte)jObject["result"]);
 		        }
 		        if (typeName == "error")
 		        {
 		            isError = true;
-                    isResultEmpty = jObject["result"] == null;
-                    return new ErrorMessage(crid, (byte) jObject["result"]);
+		            isResultEmpty = jObject["result"] == null;
+		            return new ErrorMessage(crid, (byte)jObject["result"]);
 		        }
 		    }
-		    catch (NullReferenceException)
+            catch (NullReferenceException)
 		    {
 		        var rc = ResultCode.Failed;
 
