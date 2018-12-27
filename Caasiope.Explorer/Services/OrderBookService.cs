@@ -170,11 +170,13 @@ namespace Caasiope.Explorer.Services
 
                 foreach (var input in transaction.Transaction.Outputs)
                 {
+                    if (accountsToUpdate.ContainsKey(input.Address))
+                        continue;
+
                     if (LiveService.AccountManager.TryGetAccount(input.Address, out var account))
                         if (account.Account.Address.Type == AddressType.VendingMachine)
                         {
-                            if (!accountsToUpdate.ContainsKey(account.Account.Address))
-                                accountsToUpdate.Add(account.Account.Address, account);
+                            accountsToUpdate.Add(account.Account.Address, account);
                         }
                 }
             }
