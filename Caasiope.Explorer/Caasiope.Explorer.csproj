@@ -64,6 +64,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Managers\NotificationManager.cs" />
+    <Compile Include="Services\OrderBookService.cs" />
     <Compile Include="Transformers\BlockTransformerService.cs" />
     <Compile Include="Transformers\ExplorerDataTransformerService.cs" />
     <Compile Include="Transformers\DeclarationTransformerService.cs" />

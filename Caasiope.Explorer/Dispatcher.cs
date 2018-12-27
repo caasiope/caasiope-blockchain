@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caasiope.Explorer.JSON.API;
-using Caasiope.Explorer.JSON.API.Internals;
 using Caasiope.Explorer.JSON.API.Requests;
 using Caasiope.Explorer.Services;
 using Caasiope.Node;
@@ -27,6 +26,7 @@ namespace Caasiope.Explorer
         [Injected] public IDatabaseService DatabaseService;
         [Injected] public IExplorerDatabaseService ExplorerDatabaseService;
         [Injected] public IExplorerConnectionService ExplorerConnectionService;
+        [Injected] public IOrderBookService OrderBookService;
 
         protected readonly ILogger Logger;
 
@@ -232,11 +232,33 @@ namespace Caasiope.Explorer
                 }
                 sendResponse.Call(ResponseHelper.CreateGetLedgerResponse(), ResultCode.InvalidInputParam);
             }
+            else if (request is GetOrderBookRequest)
+            {
+                var message = (GetOrderBookRequest)request;
+
+                var orderbook = OrderBookService.GetOrderBook(message.Symbol);
+                sendResponse(ResponseHelper.CreateGetOrderBookResponse(OrderConverter.GetOrders(orderbook), message.Symbol), ResultCode.Success);
+            }
 
             else
             {
                 sendResponse.Call(new Response(), ResultCode.UnknownMessage);
             }
+        }
+    }
+
+
+
+    public class OrderConverter
+    {
+        public static List<JSON.API.Internals.Order> GetOrders(List<Order> orders)
+        {
+            return orders.Select(_ => new JSON.API.Internals.Order(GetSide(_.Side), Amount.ToWholeDecimal(_.Size), _.Price)).ToList(); // TODO Price??
+        }
+
+        private static char GetSide(OrderSide side)
+        {
+            return side == OrderSide.Buy ? 'b' : 's';
         }
     }
 }

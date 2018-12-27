@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Caasiope.Explorer.JSON.API.Internals;
 using Caasiope.Explorer.JSON.API.Responses;
 using Caasiope.Protocol;
 using Caasiope.Protocol.Types;
@@ -20,17 +21,22 @@ namespace Caasiope.Explorer.JSON.API
 		    return transaction == null ? new GetTransactionResponse() : new GetTransactionResponse {Transaction = transaction};
 		}
 
-		public static Response CreateGetTransactionHistoryResponse(List<Internals.HistoricalTransaction> transactions = null, int? total = null)
+	    public static Response CreateGetTransactionHistoryResponse(List<Internals.HistoricalTransaction> transactions = null, int? total = null)
 		{
 		    return transactions == null ? new GetTransactionHistoryResponse() : new GetTransactionHistoryResponse { Transactions = transactions, Total = total};
 		}
 
-		public static Response CreateGetLedgerResponse(Ledger ledger = null)
+	    public static Response CreateGetLedgerResponse(Ledger ledger = null)
 		{
 		    return ledger == null ? new GetLedgerResponse() : new GetLedgerResponse { Ledger = ledger };
 		}
 
-		private static Dictionary<string, decimal> FormatBalance(IEnumerable<AccountBalance> balances)
+	    public static Response CreateGetOrderBookResponse(List<Order> orderbook, string symbol)
+	    {
+	        return new GetOrderBookResponse() {Orders = orderbook, Symbol = symbol};
+	    }
+
+	    private static Dictionary<string, decimal> FormatBalance(IEnumerable<AccountBalance> balances)
 		{
 			var dictionary = new Dictionary<string, decimal>();
 
@@ -77,7 +83,7 @@ namespace Caasiope.Explorer.JSON.API
 	        return true;
 	    }
 
-        private static string ToBase64<T>(Action<T> write) where T : ByteStream, new()
+	    private static string ToBase64<T>(Action<T> write) where T : ByteStream, new()
 	    {
 	        byte[] bytes;
 	        using (var stream = new T())
@@ -87,5 +93,5 @@ namespace Caasiope.Explorer.JSON.API
 	        }
 	        return Convert.ToBase64String(bytes);
 	    }
-    }
+	}
 }

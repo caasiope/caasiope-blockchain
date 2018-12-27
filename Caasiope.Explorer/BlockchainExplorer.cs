@@ -16,6 +16,7 @@ namespace Caasiope.Explorer
 		public readonly IExplorerConnectionService ExplorerConnectionService;
 		public readonly IExplorerDatabaseService ExplorerDatabaseService;
 		public readonly IExplorerDataTransformationService ExplorerDataTransformationService;
+		public readonly IOrderBookService OrderBookService;
 
         public BlockchainExplorer(ServiceManager services, IExplorerServiceFactory factory = null)
 		{
@@ -25,6 +26,7 @@ namespace Caasiope.Explorer
 			ExplorerConnectionService = services.Add(factory.CreateExplorerConnectionService());
 		    ExplorerDatabaseService = services.Add(factory.CreateExplorerDatabaseService());
 		    ExplorerDataTransformationService = services.Add(factory.CreateExplorerDataTransformationService());
+		    OrderBookService = services.Add(factory.CreateOrderBookService());
 		}
 	}
 
@@ -48,6 +50,11 @@ namespace Caasiope.Explorer
 	    {
 	        return new ExplorerDataTransformationService();
 	    }
+
+	    public IOrderBookService CreateOrderBookService()
+	    {
+	        return new OrderBookService();
+	    }
 	}
 
 	public interface IExplorerServiceFactory
@@ -55,5 +62,6 @@ namespace Caasiope.Explorer
 		IExplorerConnectionService CreateExplorerConnectionService();
 	    IExplorerDatabaseService CreateExplorerDatabaseService();
 	    IExplorerDataTransformationService CreateExplorerDataTransformationService();
+	    IOrderBookService CreateOrderBookService();
 	}
 }

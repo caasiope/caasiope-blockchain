@@ -29,7 +29,7 @@ namespace Caasiope.Explorer.Managers
 
         private readonly Dictionary<string, TableTransformationState> tableTransformationStates = new Dictionary<string, TableTransformationState>();
         private readonly MonitorLocker locker = new MonitorLocker();
-        private readonly AutoResetEvent finished = new AutoResetEvent(false);
+        private readonly ManualResetEvent finished = new ManualResetEvent(false);
         private long current;
         private ILogger logger;
 
