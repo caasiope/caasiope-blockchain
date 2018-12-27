@@ -78,8 +78,6 @@ namespace Caasiope.Node.Managers
     // represents an account in memory
     public class ExtendedAccount
     {
-        public TxAddressDeclaration Declaration { get; set; }
-
         // make it a node of the account history list
 
         // the initial account

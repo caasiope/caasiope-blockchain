@@ -183,7 +183,7 @@ namespace Caasiope.Explorer.Services
             {
                 foreach (var account in accountsToUpdate.Values)
                 {
-                    var machine = (VendingMachine) account.Declaration;
+                    var machine = (VendingMachine) account.Account.Declaration;
                     var symbol = GetSymbol(machine, out var side);
 
                     var oldOrders = orders.GetOrCreate(symbol, () => new Dictionary<Address, Order>() {{account.Account.Address, GetOrder(account.Account, machine, side)}});
