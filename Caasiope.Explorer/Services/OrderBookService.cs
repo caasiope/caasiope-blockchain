@@ -107,7 +107,7 @@ namespace Caasiope.Explorer.Services
         {
             var size = GetSize(account, machine);
             var rate = machine.Rate;
-            return new Order(side, size, rate);
+            return new Order(side, size, rate, machine.Address);
         }
 
         private static Amount GetSize(Account account, VendingMachine machine)
@@ -233,13 +233,15 @@ namespace Caasiope.Explorer.Services
         public readonly OrderSide Side;
         public Amount Size;
         public readonly Amount Price;
+        public readonly Address Address;
 
-        public Order(OrderSide side, Amount size, Amount price)
+        public Order(OrderSide side, Amount size, Amount price, Address address)
         {
             Debug.Assert(size != 0, "Size cannot be 0");
             Side = side;
             Size = size;
             Price = price;
+            Address = address;
         }
     }
 }

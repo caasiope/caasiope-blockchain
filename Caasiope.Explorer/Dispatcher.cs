@@ -253,7 +253,7 @@ namespace Caasiope.Explorer
     {
         public static List<JSON.API.Internals.Order> GetOrders(List<Order> orders)
         {
-            return orders.Select(_ => new JSON.API.Internals.Order(GetSide(_.Side), Amount.ToWholeDecimal(_.Size), _.Price)).ToList(); // TODO Price??
+            return orders.Select(_ => new JSON.API.Internals.Order(GetSide(_.Side), Amount.ToWholeDecimal(_.Size), _.Price, _.Address.Encoded)).ToList(); // TODO Price??
         }
 
         private static char GetSide(OrderSide side)
