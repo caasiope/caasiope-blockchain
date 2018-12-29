@@ -62,7 +62,7 @@ namespace Caasiope.P2P
 
             // todo GetNode(configuration.IPEndpoint)
             var self = new Persona(certificate);
-            nodeManager = new NodeManager(self, configuration.IPEndpoint.Address, configuration.ForwardedPort, nodes);
+            nodeManager = new NodeManager(self, configuration.IPEndpoint, configuration.ForwardedPort, nodes);
             peerManager = new PeerManager();
             nodeStorage = new NodeStorage(logger);
             connectionsManager = new ConnectionsManager(min, max);
@@ -100,7 +100,7 @@ namespace Caasiope.P2P
         {
             IEnumerable<IPEndPoint> list = endpoints;
 
-            if (nodeManager.ServerPort > 0)
+            if (nodeManager.ForwardedPort > 0)
             {
                 // TODO THIS works only on local networks. Need to resolve the public u
                 // nodeManager.UpdateSelfEndpoint(new IPEndPoint(session.LocalEndPoint.Address, nodeManager.ServerPort));
@@ -184,12 +184,25 @@ namespace Caasiope.P2P
             // send the url of the server
             OpenDiscoveryChannel(peer);
 
-            // TODO handle the case where we are on local network and need to send the local port instead of the forwarded port
             // TODO we should only send that when requested by the peer
-            var port = nodeManager.ServerPort;
-            if (port != 0)
+            SendPort(peer, remote);
+        }
+
+        private void SendPort(PeerSession peer, IPEndPoint remote)
+        {
+            // handle the case where we are on local network and need to send the local port instead of the forwarded port
+            if (remote.Address.IsPrivate())
             {
-                peer.Send(DISCOVER_CHANNEL, discovery.ServerPort(port));
+                peer.Send(DISCOVER_CHANNEL, discovery.ServerPort(nodeManager.ServerPort));
+                return;
+            }
+            else
+            {
+                var port = nodeManager.ForwardedPort;
+                if (port != 0)
+                {
+                    peer.Send(DISCOVER_CHANNEL, discovery.ServerPort(port));
+                }
             }
         }
 
