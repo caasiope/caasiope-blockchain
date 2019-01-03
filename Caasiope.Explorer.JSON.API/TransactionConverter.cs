@@ -118,7 +118,7 @@ namespace Caasiope.Explorer.JSON.API
 
         public static Internals.Transaction GetTransaction(SignedTransaction signed)
         {
-            return GetTransactionInternal(signed.Transaction, signed.Hash);
+            return GetTransactionInternal(signed?.Transaction, signed?.Hash);
         }
 
         public static Internals.Transaction GetTransaction(Transaction transaction)
