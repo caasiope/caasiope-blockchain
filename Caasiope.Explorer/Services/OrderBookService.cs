@@ -16,6 +16,7 @@ namespace Caasiope.Explorer.Services
     public interface IOrderBookService : IService
     {
         List<Order> GetOrderBook(string symbol);
+        IEnumerable<string> GetSymbols();
     }
 
     public class OrderBookService: ThreadedService, IOrderBookService
@@ -74,6 +75,11 @@ namespace Caasiope.Explorer.Services
             // todo use queue
             ledger = signed;
             trigger.Set();
+        }
+
+        public IEnumerable<string> GetSymbols()
+        {
+            return orderbooks.GetSymbols();
         }
     }
 
@@ -197,6 +203,11 @@ namespace Caasiope.Explorer.Services
                         oldOrder.Size = size;
                 }
             }
+        }
+
+        public IEnumerable<string> GetSymbols()
+        {
+            return symbols;
         }
     }
 

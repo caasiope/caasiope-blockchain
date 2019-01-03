@@ -116,7 +116,32 @@ namespace Caasiope.Explorer.JSON.API
             return new VendingMachine(new Address(declaration.Owner), Currency.FromSymbol(declaration.CurrencyIn), Currency.FromSymbol(declaration.CurrencyOut), Amount.FromWholeDecimal(declaration.Rate));
         }
 
+        public static Internals.Transaction GetTransaction(SignedTransaction signed)
+        {
+            return GetTransactionInternal(signed.Transaction, signed.Hash);
+        }
+
         public static Internals.Transaction GetTransaction(Transaction transaction)
+        {
+            return GetTransactionInternal(transaction, transaction.GetHash());
+        }
+
+        public static Internals.HistoricalTransaction GetHistoricalTransaction(HistoricalTransaction historical)
+        {
+            var transaction = historical?.Transaction;
+            if (transaction == null) return null;
+
+            var transactionInternal = GetTransactionInternal(transaction, transaction.GetHash());
+
+            return new Internals.HistoricalTransaction
+            {
+                Height = historical.LedgerHeight,
+                LedgerTimestamp = historical.LedgerTimestamp,
+                Transaction = transactionInternal
+            };
+        }
+
+        private static Internals.Transaction GetTransactionInternal(Transaction transaction, TransactionHash hash)
         {
             if (transaction == null) return null;
 
@@ -126,39 +151,13 @@ namespace Caasiope.Explorer.JSON.API
 
             return new Internals.Transaction
             {
-                Hash = transaction.GetHash().ToBase64(),
+                Hash = hash.ToBase64(),
                 Expire = transaction.Expire,
                 Message = transaction.Message == null || transaction.Message.Equals(TransactionMessage.Empty) ? null : Convert.ToBase64String(transaction.Message.GetBytes()),
                 Declarations = declarations,
                 Inputs = inputs,
                 Outputs = outputs,
                 Fees = transaction.Fees == null ? null : CreateInput(transaction.Fees)
-            };
-        }
-        
-        public static Internals.HistoricalTransaction GetHistoricalTransaction(HistoricalTransaction historical)
-        {
-            var transaction = historical?.Transaction;
-            if (transaction == null) return null;
-
-            var inputs = transaction.Inputs.Select(CreateInput).ToList();
-            var outputs = transaction.Outputs.Select(CreateOutput).ToList();
-            var declarations = transaction.Declarations.Select(CreateDeclaration).ToList();
-
-            return new Internals.HistoricalTransaction
-            {
-                Height = historical.LedgerHeight,
-                LedgerTimestamp = historical.LedgerTimestamp,
-                Transaction = new Internals.Transaction
-                {
-                    Hash = transaction.GetHash().ToBase64(),
-                    Expire = transaction.Expire,
-                    Message = transaction.Message == null || transaction.Message.Equals(TransactionMessage.Empty) ? null : Convert.ToBase64String(transaction.Message.GetBytes()),
-                    Declarations = declarations,
-                    Inputs = inputs,
-                    Outputs = outputs,
-                    Fees = transaction.Fees == null ? null : CreateInput(transaction.Fees)
-                }
             };
         }
 

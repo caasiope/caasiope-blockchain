@@ -53,8 +53,10 @@
     <Compile Include="Notifications\LedgerNotification.cs" />
     <Compile Include="Requests\GetLedgerRequest.cs" />
     <Compile Include="Requests\GetOrderBookRequest.cs" />
+    <Compile Include="Requests\SubscribeRequest.cs" />
     <Compile Include="Responses\GetLedgerResponse.cs" />
     <Compile Include="Responses\GetOrderBookResponse.cs" />
+    <Compile Include="Responses\SubscribeResponse.cs" />
     <Compile Include="TransactionConverter.cs" />
     <Compile Include="Internals\Transaction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

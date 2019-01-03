@@ -93,5 +93,10 @@ namespace Caasiope.Explorer.JSON.API
 	        }
 	        return Convert.ToBase64String(bytes);
 	    }
+
+	    public static Response CreateSubscribeResponse()
+	    {
+	        return new SubscribeResponse();
+	    }
 	}
 }

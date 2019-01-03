@@ -4,6 +4,7 @@ using System.Linq;
 using Caasiope.Explorer.JSON.API;
 using Caasiope.Explorer.JSON.API.Requests;
 using Caasiope.Explorer.Services;
+using Caasiope.Explorer.Types;
 using Caasiope.Node;
 using Caasiope.Node.Connections;
 using Caasiope.Node.Processors.Commands;
@@ -60,7 +61,7 @@ namespace Caasiope.Explorer
                 LiveService.AddCommand(new SendTransactionCommand(signed, (r, rc) =>
                 {
                     if(rc == ResultCode.Success)
-                        ExplorerConnectionService.NotificationManager.ListenTo(session, signed.Hash);
+                        ExplorerConnectionService.SubscriptionManager.ListenTo(session, new List<Topic>() { new TransactionTopic(signed.Hash) });
                     sendResponse.Call(ResponseHelper.CreateSendTransactionResponse(signed.Hash), rc);
                 }));
             }
@@ -239,6 +240,19 @@ namespace Caasiope.Explorer
                 var orderbook = OrderBookService.GetOrderBook(message.Symbol);
                 sendResponse(ResponseHelper.CreateGetOrderBookResponse(OrderConverter.GetOrders(orderbook), message.Symbol), ResultCode.Success);
             }
+            else if (request is SubscribeRequest)
+            {
+                var message = (SubscribeRequest) request;
+
+                if (TopicsConverter.TryGetTopics(message.Topics, OrderBookService.GetSymbols(), out var topics))
+                {
+                    ExplorerConnectionService.SubscriptionManager.ListenTo(session, topics);
+                    sendResponse(ResponseHelper.CreateSubscribeResponse(), ResultCode.Success);
+                    return;
+                }
+
+                sendResponse(ResponseHelper.CreateSubscribeResponse(), ResultCode.InvalidInputParam);
+            }
 
             else
             {
@@ -247,7 +261,53 @@ namespace Caasiope.Explorer
         }
     }
 
+    public class TopicsConverter
+    {
+        public static bool TryGetTopics(List<JSON.API.Internals.Topic> topics, IEnumerable<string> symbols, out List<Topic> results)
+        {
+            var list = new List<Topic>();
+            var isValid = topics.All(_ =>
+            {
+                var valid = GetTopic(_, symbols, out var result);
+                list.Add(result);
+                return valid;
+            });
 
+            results = list;
+            return isValid;
+        }
+
+        private static bool GetTopic(JSON.API.Internals.Topic topic, IEnumerable<string> symbols, out Topic topicResult)
+        {
+            try
+            {
+                if (topic is JSON.API.Internals.AddressTopic address)
+                    topicResult = new AddressTopic(new Address(address.Address));
+                if (topic is JSON.API.Internals.LedgerTopic)
+                    topicResult = new LedgerTopic();
+                if (topic is JSON.API.Internals.OrderBookTopic orderBook)
+                {
+                    if (!symbols.Contains(orderBook.Symbol))
+                    {
+                        topicResult = null;
+                        return false;
+                    }
+
+                    topicResult = new OrderBookTopic(orderBook.Symbol);
+                }
+                if (topic is JSON.API.Internals.TransactionTopic transaction)
+                    topicResult = new TransactionTopic(new TransactionHash(Convert.FromBase64String(transaction.Hash)));
+
+                throw new NotImplementedException();
+            }
+            catch (Exception e)
+            {
+                topicResult = null;
+                return false;
+            }
+
+        }
+    }
 
     public class OrderConverter
     {

@@ -13,20 +13,20 @@ namespace Caasiope.Explorer.Services
 {
     public interface IExplorerConnectionService : IWebSocketServerService
     {
-        NotificationManager NotificationManager { get; }
+        SubscriptionManager SubscriptionManager { get; }
     }
 
 	public class ExplorerConnectionService : WebSocketServerService, IExplorerConnectionService
 	{
-        public NotificationManager NotificationManager { get; } = new NotificationManager();
+        public SubscriptionManager SubscriptionManager { get; } = new SubscriptionManager();
 
 	    public ExplorerConnectionService(WebSocketServer server) : base(server, new BlockchainExplorerApi().JsonMessageFactory) { }
 
 	    protected override void OnInitialize()
 	    {
 	        base.OnInitialize();
-	        NotificationManager.Send = Send;
-	        LedgerService.LedgerManager.SubscribeOnNewLedger(NotificationManager.Notify);
+	        SubscriptionManager.Send = Send;
+	        LedgerService.LedgerManager.SubscribeOnNewLedger(SubscriptionManager.Notify);
         }
     }
 

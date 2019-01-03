@@ -63,7 +63,7 @@
     <Compile Include="Managers\LedgerTransformationManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Managers\NotificationManager.cs" />
+    <Compile Include="Managers\SubscriptionManager.cs" />
     <Compile Include="Services\OrderBookService.cs" />
     <Compile Include="Transformers\BlockTransformerService.cs" />
     <Compile Include="Transformers\ExplorerDataTransformerService.cs" />
@@ -80,6 +80,7 @@
     <Compile Include="Transformers\TransactionTransformerService.cs" />
     <Compile Include="Transformers\TxInputOutputTransformerService.cs" />
     <Compile Include="Transformers\VendingMachineTransformerService.cs" />
+    <Compile Include="Types\Topic.cs" />
     <Compile Include="WebSocketServer.cs" />
   </ItemGroup>
   <ItemGroup>
