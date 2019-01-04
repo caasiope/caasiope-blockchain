@@ -35,6 +35,10 @@ namespace Caasiope.Explorer.JSON.API.Internals
     {
     }
 
+    public class FundsTopic : Topic
+    {
+    }
+
     public class OrderBookTopic : Topic
     {
         public string Symbol;

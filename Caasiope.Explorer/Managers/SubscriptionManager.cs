@@ -4,6 +4,8 @@ using System.Linq;
 using Caasiope.Explorer.JSON.API;
 using Caasiope.Explorer.JSON.API.Notifications;
 using Caasiope.Explorer.Types;
+using Caasiope.Node;
+using Caasiope.Node.Services;
 using Caasiope.Protocol.Types;
 using Helios.Common.Extensions;
 using Helios.Common.Synchronization;
@@ -18,14 +20,11 @@ namespace Caasiope.Explorer.Managers
 
         public Action<ISession, NotificationMessage> Send;
 
-        public void ListenTo(ISession session, List<Topic> topics)
+        public void ListenTo(ISession session, Topic topic)
         {
-            foreach (var topic in topics)
-            {
-                // TODO may be use switch?
-                // TODO move lock here
-                managers.ForEach(_ => _.ListenTo(session, topic));
-            }
+            // TODO may be use switch?
+            // TODO move lock here
+            managers.ForEach(_ => _.ListenTo(session, topic));
         }
 
         public void Notify(SignedLedger ledger)
@@ -38,12 +37,96 @@ namespace Caasiope.Explorer.Managers
 
         public SubscriptionManager()
         {
-            managers.Add(new TransactionNotificationManager());
-            managers.Add(new LedgerNotificationManager());
-            managers.Add(new AddressNotificationManager());
-            managers.Add(new OrderBookNotificationManager());
+            AddManager(new TransactionNotificationManager());
+            AddManager(new LedgerNotificationManager());
+            AddManager(new AddressNotificationManager());
+            AddManager(new OrderBookNotificationManager());
+            fundsNotificationManager = AddManager(new FundsNotificationManager());
 
             managers.ForEach(_ => _.Send += Send);
+        }
+
+        private T AddManager<T>(T manager) where T : INotificationManager
+        {
+            managers.Add(manager);
+            return manager;
+        }
+
+        public void Initialize()
+        {
+            fundsNotificationManager.Initialize();
+        }
+
+        private readonly FundsNotificationManager fundsNotificationManager;
+    }
+
+    public class FundsNotificationManager : INotificationManager
+    {
+        [Injected] public ILiveService LiveService;
+
+        private readonly MonitorLocker locker = new MonitorLocker();
+
+        private readonly HashSet<ISession> subscriptors = new HashSet<ISession>();
+        private readonly Dictionary<string, decimal> funds =new Dictionary<string, decimal>();
+
+        public Action<ISession, NotificationMessage> Send { get; set; }
+
+        public void ListenTo(ISession session, Topic topic)
+        {
+            var ledgerFilter = (LedgerTopic)topic;
+            if (ledgerFilter == null)
+                return;
+
+            using (locker.CreateLock())
+            {
+                subscriptors.Add(session);
+            }
+        }
+
+        public void Notify(SignedLedger ledger)
+        {
+            foreach (var subscriptor in subscriptors)
+            {
+                var notification = new LedgerNotification()
+                {
+                    Hash = ledger.Hash.ToBase64(),
+                    Height = ledger.GetHeight(),
+                    Timestamp = ledger.GetTimestamp(),
+                    Funds = GetChanges()
+                };
+                Send(subscriptor, new NotificationMessage(notification));
+            }
+        }
+
+        private Dictionary<string, decimal> GetChanges()
+        {
+            var results = new Dictionary<string, decimal>();
+            foreach (var issuer in LiveService.IssuerManager.GetIssuers())
+            {
+                if (LiveService.AccountManager.TryGetAccount(issuer.Address, out var account))
+                {
+                    var newBalance = account.Account.GetBalance(issuer.Currency);
+                    var currency = Currency.ToSymbol(issuer.Currency);
+                    if (funds[currency] != newBalance)
+                    {
+                        funds[currency] = newBalance;
+                        results.Add(currency, Amount.ToWholeDecimal(newBalance));
+                    }
+                }
+            }
+
+            return results;
+        }
+
+        public void Initialize()
+        {
+            Injector.Inject(this);
+
+            foreach (var issuer in LiveService.IssuerManager.GetIssuers())
+            {
+                if(LiveService.AccountManager.TryGetAccount(issuer.Address, out var account))
+                    funds.Add(Currency.ToSymbol(issuer.Currency), account.Account.GetBalance(issuer.Currency));
+            }
         }
     }
 

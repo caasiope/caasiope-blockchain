@@ -63,7 +63,7 @@ namespace Caasiope.Node.Managers
                 return;
 
             //TODO use batch
-            var ledgers = DatabaseService.ReadDatabaseManager.GetLedgersFromHeight(minimal).ToDictionary(_ => _.Ledger.Ledger.LedgerLight.Height);
+            var ledgers = DatabaseService.ReadDatabaseManager.GetLedgersWithStateFromHeight(minimal).ToDictionary(_ => _.Ledger.Ledger.LedgerLight.Height);
 
             var knownAddresses = DatabaseService.ReadDatabaseManager.GetAddresses();
 

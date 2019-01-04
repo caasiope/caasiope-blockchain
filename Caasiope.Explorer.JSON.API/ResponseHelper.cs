@@ -31,6 +31,11 @@ namespace Caasiope.Explorer.JSON.API
 		    return ledger == null ? new GetLedgerResponse() : new GetLedgerResponse { Ledger = ledger };
 		}
 
+	    public static Response CreateGetLatestLedgersResponse(List<Ledger> ledgers = null)
+		{
+		    return ledgers == null ? new GetLatestLedgersResponse() : new GetLatestLedgersResponse { Ledgers = ledgers };
+		}
+
 	    public static Response CreateGetOrderBookResponse(List<Order> orderbook, string symbol)
 	    {
 	        return new GetOrderBookResponse() {Orders = orderbook, Symbol = symbol};

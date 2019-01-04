@@ -9,7 +9,7 @@ namespace Caasiope.Explorer.JSON.API.Notifications
         public long Height;
         public long Timestamp;
         public string Hash;
-
+        public Dictionary<string, decimal> Funds;
         public List<Transaction> Transactions;
     }
 }

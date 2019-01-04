@@ -61,7 +61,7 @@ namespace Caasiope.Explorer
                 LiveService.AddCommand(new SendTransactionCommand(signed, (r, rc) =>
                 {
                     if(rc == ResultCode.Success)
-                        ExplorerConnectionService.SubscriptionManager.ListenTo(session, new List<Topic>() { new TransactionTopic(signed.Hash) });
+                        ExplorerConnectionService.SubscriptionManager.ListenTo(session, new TransactionTopic(signed.Hash));
                     sendResponse.Call(ResponseHelper.CreateSendTransactionResponse(signed.Hash), rc);
                 }));
             }
@@ -244,14 +244,23 @@ namespace Caasiope.Explorer
             {
                 var message = (SubscribeRequest) request;
 
-                if (TopicsConverter.TryGetTopics(message.Topics, OrderBookService.GetSymbols(), out var topics))
+                if (TopicsConverter.TryGetTopic(message.Topic, OrderBookService.GetSymbols(), out var topic))
                 {
-                    ExplorerConnectionService.SubscriptionManager.ListenTo(session, topics);
+                    ExplorerConnectionService.SubscriptionManager.ListenTo(session, topic);
                     sendResponse(ResponseHelper.CreateSubscribeResponse(), ResultCode.Success);
                     return;
                 }
 
                 sendResponse(ResponseHelper.CreateSubscribeResponse(), ResultCode.InvalidInputParam);
+            }
+            else if (request is GetLatestLedgersRequest)
+            {
+                var height = LedgerService.LedgerManager.GetSignedLedger().GetHeight();
+
+                var ledgers = DatabaseService.ReadDatabaseManager.GetLedgersFromHeight(height - 10);
+
+                var results = ledgers.Select(LedgerConverter.GetLedger).ToList();
+                sendResponse.Call(ResponseHelper.CreateGetLatestLedgersResponse(results), ResultCode.Success);
             }
 
             else
@@ -263,21 +272,7 @@ namespace Caasiope.Explorer
 
     public class TopicsConverter
     {
-        public static bool TryGetTopics(List<JSON.API.Internals.Topic> topics, IEnumerable<string> symbols, out List<Topic> results)
-        {
-            var list = new List<Topic>();
-            var isValid = topics.All(_ =>
-            {
-                var valid = GetTopic(_, symbols, out var result);
-                list.Add(result);
-                return valid;
-            });
-
-            results = list;
-            return isValid;
-        }
-
-        private static bool GetTopic(JSON.API.Internals.Topic topic, IEnumerable<string> symbols, out Topic topicResult)
+        public static bool TryGetTopic(JSON.API.Internals.Topic topic, IEnumerable<string> symbols, out Topic topicResult)
         {
             try
             {
@@ -297,6 +292,8 @@ namespace Caasiope.Explorer
                 }
                 if (topic is JSON.API.Internals.TransactionTopic transaction)
                     topicResult = new TransactionTopic(new TransactionHash(Convert.FromBase64String(transaction.Hash)));
+                if (topic is JSON.API.Internals.FundsTopic)
+                    topicResult = new FundsTopic();
 
                 throw new NotImplementedException();
             }

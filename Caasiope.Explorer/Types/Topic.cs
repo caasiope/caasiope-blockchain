@@ -20,6 +20,10 @@ namespace Caasiope.Explorer.Types
     {
     }
 
+    public class FundsTopic : Topic
+    {
+    }
+
     public class OrderBookTopic : Topic
     {
         public readonly string Symbol;

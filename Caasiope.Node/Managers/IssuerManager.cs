@@ -1,20 +1,15 @@
 using System;
 using System.Collections.Generic;
-using Caasiope.Node.Services;
 using Caasiope.Protocol.Types;
 
 namespace Caasiope.Node.Managers
 {
     public class IssuerManager
     {
-        [Injected] public ILiveService LiveService;
-
         private readonly Dictionary<Currency, Address> issuers = new Dictionary<Currency, Address>();
 
         public void Initialize(List<Issuer> list)
         {
-            Injector.Inject(this);
-
             foreach (var issuer in list)
             {
                 // if(issuer.Currency == Currency.CAS) throw new ArgumentException($"{nameof(Currency.CAS)} cannot have issuer");

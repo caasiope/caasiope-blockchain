@@ -65,7 +65,7 @@ namespace Caasiope.Explorer.Managers
             //    throw new ApplicationException("Explorer ledger height is higher than current ledger height. Please wipe the Explorer database!");
 
             //TODO use batch
-            var ledgers = DatabaseService.ReadDatabaseManager.GetLedgersFromHeight(minimal).ToDictionary(_ => _.Ledger.Ledger.LedgerLight.Height);
+            var ledgers = DatabaseService.ReadDatabaseManager.GetLedgersWithStateFromHeight(minimal).ToDictionary(_ => _.Ledger.Ledger.LedgerLight.Height);
 
             var min = tableTransformationStates.Values.Min(table => table.CurrentHeight);
 

@@ -54,9 +54,11 @@
     <Compile Include="Internals\VendingMachine.cs" />
     <Compile Include="NotificationHelper.cs" />
     <Compile Include="Notifications\LedgerNotification.cs" />
+    <Compile Include="Requests\GetLatestLedgersRequest.cs" />
     <Compile Include="Requests\GetLedgerRequest.cs" />
     <Compile Include="Requests\GetOrderBookRequest.cs" />
     <Compile Include="Requests\SubscribeRequest.cs" />
+    <Compile Include="Responses\GetLatestLedgersResponse.cs" />
     <Compile Include="Responses\GetLedgerResponse.cs" />
     <Compile Include="Responses\GetOrderBookResponse.cs" />
     <Compile Include="Responses\SubscribeResponse.cs" />

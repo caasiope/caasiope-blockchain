@@ -28,7 +28,13 @@ namespace Caasiope.Explorer.Services
 	        SubscriptionManager.Send = Send;
 	        LedgerService.LedgerManager.SubscribeOnNewLedger(SubscriptionManager.Notify);
         }
-    }
+
+	    protected override void OnStart()
+	    {
+	        base.OnStart();
+	        SubscriptionManager.Initialize();
+	    }
+	}
 
     public interface IWebSocketServerService : IService
     {
