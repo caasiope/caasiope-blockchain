@@ -33,6 +33,14 @@ namespace Helios.JSON
             this.converters = converters;
 		}
 
+		public JsonMessageFactory(Assembly[] assemblies, JsonConverter[] converters)
+		{
+		    foreach (var assembly in assemblies)
+		        ImportTypesFromAssembly(assembly);
+
+            this.converters = converters;
+		}
+
 		private void ImportTypesFromAssembly(Assembly assembly, bool isClearing = false)
 		{
 			if (isClearing)
