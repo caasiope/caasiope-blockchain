@@ -19,6 +19,8 @@ namespace Caasiope.Explorer.JSON.API.Converters
                     return new OrderBookTopic();
                 case "Transaction":
                     return new TransactionTopic();
+                case "Funds":
+                    return new FundsTopic();
                 default:
                     throw new NotImplementedException();
             }
