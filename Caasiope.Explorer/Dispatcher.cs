@@ -278,9 +278,9 @@ namespace Caasiope.Explorer
             {
                 if (topic is JSON.API.Internals.AddressTopic address)
                     topicResult = new AddressTopic(new Address(address.Address));
-                if (topic is JSON.API.Internals.LedgerTopic)
+                else if (topic is JSON.API.Internals.LedgerTopic)
                     topicResult = new LedgerTopic();
-                if (topic is JSON.API.Internals.OrderBookTopic orderBook)
+                else if (topic is JSON.API.Internals.OrderBookTopic orderBook)
                 {
                     if (!symbols.Contains(orderBook.Symbol))
                     {
@@ -290,12 +290,13 @@ namespace Caasiope.Explorer
 
                     topicResult = new OrderBookTopic(orderBook.Symbol);
                 }
-                if (topic is JSON.API.Internals.TransactionTopic transaction)
+                else if (topic is JSON.API.Internals.TransactionTopic transaction)
                     topicResult = new TransactionTopic(new TransactionHash(Convert.FromBase64String(transaction.Hash)));
-                if (topic is JSON.API.Internals.FundsTopic)
+                else if (topic is JSON.API.Internals.FundsTopic)
                     topicResult = new FundsTopic();
+                else throw new NotImplementedException();
 
-                throw new NotImplementedException();
+                return true;
             }
             catch (Exception e)
             {
