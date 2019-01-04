@@ -73,8 +73,7 @@ namespace Caasiope.Explorer.Managers
 
         public void ListenTo(ISession session, Topic topic)
         {
-            var ledgerFilter = (LedgerTopic)topic;
-            if (ledgerFilter == null)
+            if (!(topic is LedgerTopic))
                 return;
 
             using (locker.CreateLock())
@@ -140,8 +139,7 @@ namespace Caasiope.Explorer.Managers
 
         public void ListenTo(ISession session, Topic topic)
         {
-            var transactionFilter = (TransactionTopic)topic;
-            if (transactionFilter == null)
+            if (!(topic is TransactionTopic transactionFilter))
                 return;
 
             var hash = transactionFilter.Hash;
@@ -203,8 +201,7 @@ namespace Caasiope.Explorer.Managers
 
         public void ListenTo(ISession session, Topic topic)
         {
-            var ledgerFilter = (LedgerTopic)topic;
-            if (ledgerFilter == null)
+            if (!(topic is LedgerTopic))
                 return;
 
             using (locker.CreateLock())
@@ -244,8 +241,7 @@ namespace Caasiope.Explorer.Managers
 
         public void ListenTo(ISession session, Topic topic)
         {
-            var addressFilter = (AddressTopic) topic;
-            if (addressFilter == null)
+            if (!(topic is AddressTopic addressFilter))
                 return;
 
             var address = addressFilter.Address;
@@ -318,8 +314,7 @@ namespace Caasiope.Explorer.Managers
 
         public void ListenTo(ISession session, Topic topic)
         {
-            var addressFilter = (OrderBookTopic)topic;
-            if (addressFilter == null)
+            if (!(topic is OrderBookTopic addressFilter))
                 return;
 
             var address = addressFilter.Symbol;
