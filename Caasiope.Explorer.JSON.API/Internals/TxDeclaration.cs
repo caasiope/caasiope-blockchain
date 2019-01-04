@@ -1,13 +1,29 @@
-﻿namespace Caasiope.Explorer.JSON.API.Internals
+﻿
+using System.Diagnostics;
+
+namespace Caasiope.Explorer.JSON.API.Internals
 {
-    public class TxDeclaration
+    public abstract class TxDeclaration
     {
-        public byte Type;
+        public readonly byte Type;
+
+        protected TxDeclaration(byte type)
+        {
+            Type = type;
+        }
     }
 
 
-    public class Topic
+    public abstract class Topic
     {
+        public readonly string Type;
+
+        protected Topic()
+        {
+            var name = GetType().Name;
+            Debug.Assert(name.Substring(name.Length-5, 5) == "Topic");
+            Type = name.Substring(0, name.Length - 5); // remove Topic
+        }
     }
 
     public class AddressTopic : Topic

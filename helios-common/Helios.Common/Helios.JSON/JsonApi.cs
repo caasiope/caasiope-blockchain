@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Newtonsoft.Json;
 
 namespace Helios.JSON
 {
@@ -14,6 +15,11 @@ namespace Helios.JSON
 		public JsonApi(Assembly[] assemblies)
 		{
 			JsonMessageFactory = new JsonMessageFactory(assemblies);
+		}
+
+		public JsonApi(Assembly assembly, JsonConverter[] converters)
+		{
+			JsonMessageFactory = new JsonMessageFactory(assembly, converters);
 		}
 	}
 }

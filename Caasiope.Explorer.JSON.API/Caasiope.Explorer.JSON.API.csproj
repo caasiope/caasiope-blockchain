@@ -38,6 +38,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BlockchainExplorerApi.cs" />
+    <Compile Include="Converters\DeclarationConverter.cs" />
+    <Compile Include="Converters\JsonConverter.cs" />
+    <Compile Include="Converters\TopicConverter.cs" />
     <Compile Include="Internals\Ledger.cs" />
     <Compile Include="Internals\HashLock.cs" />
     <Compile Include="Internals\MultiSignature.cs" />

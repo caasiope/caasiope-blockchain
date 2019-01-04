@@ -4,12 +4,14 @@ namespace Caasiope.Explorer.JSON.API.Internals
 {
     public class HashLock : TxDeclaration
     {
-        public readonly SecretHash SecretHash;
+        public SecretHash SecretHash;
 
-        public HashLock(SecretHash secretHash)
+        public HashLock(SecretHash secretHash) : this()
         {
             SecretHash = secretHash;
         }
+
+        public HashLock() : base((byte)DeclarationType.HashLock) { }
     }
 
     public class SecretHash
