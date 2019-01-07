@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Caasiope.Explorer.JSON.API.Notifications;
 using Caasiope.Explorer.Types;
 using Caasiope.Node;
@@ -15,40 +16,38 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
         [Injected] public ILiveService LiveService;
 
         private readonly MonitorLocker locker = new MonitorLocker();
-        private readonly MonitorLocker fundsLocker = new MonitorLocker();
 
         private readonly HashSet<ISession> subscriptors = new HashSet<ISession>();
-        private readonly Dictionary<string, decimal> funds = new Dictionary<string, decimal>();
+        private readonly Dictionary<string, long> funds = new Dictionary<string, long>();
         private readonly List<Issuer> issuers = new List<Issuer>();
 
         public Action<ISession, NotificationMessage> Send { get; set; }
 
         public void ListenTo(ISession session, Topic topic)
         {
-            if (!(topic is LedgerTopic))
+            if (!(topic is FundsTopic))
                 return;
 
             using (locker.CreateLock())
             {
                 subscriptors.Add(session);
+                SendNotification(session, funds.ToDictionary(_ => _.Key, __ => -Amount.ToWholeDecimal(__.Value)));
             }
-
-            SendNotification(session);
         }
 
         public void Notify(SignedLedger ledger)
         {
             foreach (var subscriptor in subscriptors)
             {
-                SendNotification(subscriptor);
+                SendNotification(subscriptor, GetChanges());
             }
         }
 
-        private void SendNotification(ISession subscriptor)
+        private void SendNotification(ISession subscriptor, Dictionary<string, decimal> changes)
         {
             var notification = new FundsNotification()
             {
-                Funds = GetChanges()
+                Funds = changes
             };
             Send(subscriptor, new NotificationMessage(notification));
         }
@@ -64,14 +63,10 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
                 var newBalance = account.Account.GetBalance(issuer.Currency);
                 var currency = Currency.ToSymbol(issuer.Currency);
 
-                // TODO Looks weird
-                using (fundsLocker.CreateLock())
+                if (funds[currency] != newBalance)
                 {
-                    if (funds[currency] != newBalance)
-                    {
-                        funds[currency] = newBalance;
-                        results.Add(currency, Amount.ToWholeDecimal(-newBalance));
-                    }
+                    funds[currency] = newBalance;
+                    results.Add(currency, -Amount.ToWholeDecimal(newBalance));
                 }
             }
 
