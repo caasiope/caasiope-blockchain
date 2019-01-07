@@ -8,6 +8,7 @@ using Caasiope.Node;
 using Caasiope.Node.Services;
 using Caasiope.Protocol.Types;
 using Helios.Common.Extensions;
+using Helios.Common.Logs;
 using Helios.Common.Synchronization;
 using Helios.JSON;
 
@@ -18,7 +19,10 @@ namespace Caasiope.Explorer.Managers
     {
         private readonly List<INotificationManager> managers = new List<INotificationManager>();
 
-        public Action<ISession, NotificationMessage> Send;
+        private readonly FundsNotificationManager fundsNotificationManager;
+        private Action<ISession, NotificationMessage> send;
+        private readonly ILogger logger;
+
 
         public void ListenTo(ISession session, Topic topic)
         {
@@ -31,19 +35,25 @@ namespace Caasiope.Explorer.Managers
         {
             foreach (var manager in managers)
             {
-                manager.Notify(ledger);
+                try
+                {
+                    manager.Notify(ledger);
+                }
+                catch (Exception e)
+                {
+                    logger.Log("SubscriptionManager", e);
+                }
             }
         }
 
-        public SubscriptionManager()
+        public SubscriptionManager(ILogger logger)
         {
+            this.logger = logger;
             AddManager(new TransactionNotificationManager());
             AddManager(new LedgerNotificationManager());
             AddManager(new AddressNotificationManager());
             AddManager(new OrderBookNotificationManager());
             fundsNotificationManager = AddManager(new FundsNotificationManager());
-
-            managers.ForEach(_ => _.Send += Send);
         }
 
         private T AddManager<T>(T manager) where T : INotificationManager
@@ -54,10 +64,14 @@ namespace Caasiope.Explorer.Managers
 
         public void Initialize()
         {
+            managers.ForEach(_ => _.Send += send);
             fundsNotificationManager.Initialize();
         }
 
-        private readonly FundsNotificationManager fundsNotificationManager;
+        public void OnSend(Action<ISession, NotificationMessage> callback)
+        {
+            send += callback;
+        }
     }
 
     public class FundsNotificationManager : INotificationManager

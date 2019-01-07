@@ -18,14 +18,17 @@ namespace Caasiope.Explorer.Services
 
 	public class ExplorerConnectionService : WebSocketServerService, IExplorerConnectionService
 	{
-        public SubscriptionManager SubscriptionManager { get; } = new SubscriptionManager();
+        public SubscriptionManager SubscriptionManager { get; }
 
-	    public ExplorerConnectionService(WebSocketServer server) : base(server, new BlockchainExplorerApi().JsonMessageFactory) { }
+	    public ExplorerConnectionService(WebSocketServer server) : base(server, new BlockchainExplorerApi().JsonMessageFactory)
+	    {
+            SubscriptionManager = new SubscriptionManager(Logger);
+        }
 
 	    protected override void OnInitialize()
 	    {
 	        base.OnInitialize();
-	        SubscriptionManager.Send = Send;
+	        SubscriptionManager.OnSend(Send);
 	        LedgerService.LedgerManager.SubscribeOnNewLedger(SubscriptionManager.Notify);
         }
 
