@@ -21,11 +21,11 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
             if (!(topic is OrderBookTopic addressFilter))
                 return;
 
-            var address = addressFilter.Symbol;
+            var symbol = addressFilter.Symbol;
 
             using (locker.CreateLock())
             {
-                subscriptors.GetOrCreate(session).Add(address);
+                subscriptors.GetOrCreate(session).Add(symbol);
             }
 
             throw new NotImplementedException();

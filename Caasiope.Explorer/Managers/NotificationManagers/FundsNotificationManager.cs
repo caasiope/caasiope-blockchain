@@ -30,7 +30,9 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
 
             using (locker.CreateLock())
             {
-                subscriptors.Add(session);
+                if(!subscriptors.Add(session))
+                    return;
+
                 SendNotification(session, funds.ToDictionary(_ => _.Key, __ => -Amount.ToWholeDecimal(__.Value)));
             }
         }
