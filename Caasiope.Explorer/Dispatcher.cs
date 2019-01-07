@@ -257,7 +257,7 @@ namespace Caasiope.Explorer
             {
                 var height = LedgerService.LedgerManager.GetSignedLedger().GetHeight();
 
-                var ledgers = DatabaseService.ReadDatabaseManager.GetLedgersFromHeight(height - 10);
+                var ledgers = DatabaseService.ReadDatabaseManager.GetLedgersFromHeight(height - 9);
 
                 var results = ledgers.Select(LedgerConverter.GetLedger).ToList();
                 sendResponse.Call(ResponseHelper.CreateGetLatestLedgersResponse(results), ResultCode.Success);
