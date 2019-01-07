@@ -56,7 +56,12 @@
   <ItemGroup>
     <Compile Include="BlockchainExplorer.cs" />
     <Compile Include="Dispatcher.cs" />
+    <Compile Include="Managers\NotificationManagers\AddressNotificationManager.cs" />
     <Compile Include="Managers\DataTransformerManager.cs" />
+    <Compile Include="Managers\NotificationManagers\FundsNotificationManager.cs" />
+    <Compile Include="Managers\NotificationManagers\LedgerNotificationManager.cs" />
+    <Compile Include="Managers\NotificationManagers\TransactionNotificationManager.cs" />
+    <Compile Include="Managers\NotificationManagers\OrderBookNotificationManager.cs" />
     <Compile Include="Services\ExplorerConnectionService.cs" />
     <Compile Include="Services\ExplorerDatabaseService.cs" />
     <Compile Include="Services\ExplorerDataTransformationService.cs" />
