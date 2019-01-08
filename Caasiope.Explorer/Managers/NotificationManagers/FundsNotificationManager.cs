@@ -33,7 +33,7 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
             {
                 subscriptors.Add(session);
 
-                SendNotification(session, funds.ToDictionary(_ => _.Key, __ => -Amount.ToWholeDecimal(__.Value)));
+                SendNotification(session, LedgerService.LedgerManager.LastLedger.GetHeight());
             }
         }
 
@@ -41,26 +41,28 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
         {
             foreach (var subscriptor in subscriptors)
             {
-                var changes = GetChanges();
-                if(!changes.Any())
+                if (!TryUpdateFunds())
                     continue;
 
-                SendNotification(subscriptor, changes);
+                SendNotification(subscriptor, ledger.Ledger.LedgerLight.Height);
             }
         }
 
-        private void SendNotification(ISession subscriptor, Dictionary<string, decimal> changes)
+        private void SendNotification(ISession subscriptor, long height)
         {
+            var changes = funds.ToDictionary(_ => _.Key, __ => -Amount.ToWholeDecimal(__.Value));
+
             var notification = new FundsNotification()
             {
-                Funds = changes
+                Funds = changes,
+                Height = height
             };
             Send(subscriptor, new NotificationMessage(notification));
         }
 
-        private Dictionary<string, decimal> GetChanges()
+        private bool TryUpdateFunds()
         {
-            var results = new Dictionary<string, decimal>();
+            var isUpdated = false;
             foreach (var issuer in issuers)
             {
                 if (!LedgerService.LedgerManager.LedgerState.TryGetAccount(issuer.Address, out var account))
@@ -71,12 +73,11 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
 
                 if (funds[currency] != newBalance)
                 {
+                    isUpdated = true;
                     funds[currency] = newBalance;
-                    results.Add(currency, -Amount.ToWholeDecimal(newBalance));
                 }
             }
-
-            return results;
+            return isUpdated;
         }
 
         public void Initialize()
