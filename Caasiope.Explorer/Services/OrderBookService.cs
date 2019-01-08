@@ -32,6 +32,7 @@ namespace Caasiope.Explorer.Services
             ExplorerDatabaseService.StartedHandle.WaitOne();
             ExplorerDataTransformationService.StartedHandle.WaitOne();
             ExplorerDataTransformationService.WaitTransformationCompleted();
+            LedgerService.StartedHandle.WaitOne();
 
             LedgerService.LedgerManager.SubscribeOnNewLedger(OnNewLedger);
 

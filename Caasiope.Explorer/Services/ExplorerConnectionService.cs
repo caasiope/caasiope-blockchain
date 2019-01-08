@@ -138,8 +138,9 @@ namespace Caasiope.Explorer.Services
 		{
 		    ExplorerDataTransformationService.StartedHandle.WaitOne();
             ExplorerDataTransformationService.WaitTransformationCompleted();
+		    LedgerService.StartedHandle.WaitOne();
 
-		    server.Start();
+            server.Start();
 		}
 
 		protected override void OnStop()
