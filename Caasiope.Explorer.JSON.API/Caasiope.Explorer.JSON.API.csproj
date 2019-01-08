@@ -53,6 +53,7 @@
     <Compile Include="Internals\TxInputOutput.cs" />
     <Compile Include="Internals\VendingMachine.cs" />
     <Compile Include="NotificationHelper.cs" />
+    <Compile Include="Notifications\AddressNotification.cs" />
     <Compile Include="Notifications\ConfirmationNotification.cs" />
     <Compile Include="Notifications\FundsNotification.cs" />
     <Compile Include="Notifications\LedgerNotification.cs" />

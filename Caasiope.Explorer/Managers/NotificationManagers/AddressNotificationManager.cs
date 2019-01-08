@@ -4,6 +4,8 @@ using System.Linq;
 using Caasiope.Explorer.JSON.API;
 using Caasiope.Explorer.JSON.API.Notifications;
 using Caasiope.Explorer.Types;
+using Caasiope.Node;
+using Caasiope.Node.Services;
 using Caasiope.Protocol.Types;
 using Helios.Common.Extensions;
 using Helios.Common.Synchronization;
@@ -36,27 +38,26 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
         {
             foreach (var subscriptor in subscriptors)
             {
-                var notification = new LedgerNotification()
+                foreach (var notification in GetNotifications(subscriptor.Value, ledger))
                 {
-                    Hash = ledger.Hash.ToBase64(),
-                    Height = ledger.GetHeight(),
-                    Timestamp = ledger.GetTimestamp(),
-                    Transactions = GetTransactions(subscriptor.Value, ledger)
-                };
-                Send(subscriptor.Key, new NotificationMessage(notification));
+                    Send(subscriptor.Key, new NotificationMessage(notification));
+                }
             }
         }
 
-        private List<JSON.API.Internals.Transaction> GetTransactions(AddressSubscriptor subscriptor, SignedLedger ledger)
+        private List<AddressNotification> GetNotifications(AddressSubscriptor subscriptor, SignedLedger ledger)
         {
-            return ledger.Ledger.Block.Transactions
-                .Where(transaction => subscriptor.IsSubscribed(transaction, true))
-                .Select(signed => TransactionConverter.GetTransaction(signed.Transaction)).ToList();
+            var inputs = ledger.Ledger.Block.Transactions.SelectMany(_ => _.Transaction.Inputs.Select(__ => __.Address));
+            var outputs = ledger.Ledger.Block.Transactions.SelectMany(_ => _.Transaction.Outputs.Select(__ => __.Address));
+            var addresses = inputs.Union(outputs).ToList();
+            return subscriptor.GetNotifications(addresses);
         }
     }
 
     internal class AddressSubscriptor
     {
+        [Injected] public ILedgerService LedgerService;
+
         private readonly HashSet<Address> addresses = new HashSet<Address>();
 
         public void Subscribe(Address address)
@@ -64,23 +65,25 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
             addresses.Add(address);
         }
 
-        public bool IsSubscribed(SignedTransaction transaction, bool unsubcribe = false)
+        public List<AddressNotification> GetNotifications(List<Address> toCheck)
         {
-            var inputs = transaction.Transaction.Inputs.Select(_ => _.Address);
-            var outputs = transaction.Transaction.Outputs.Select(_ => _.Address);
-            var toCheck = inputs.Union(outputs).ToList();
+            var results = new List<AddressNotification>();
 
             foreach (var address in toCheck)
             {
-                if (addresses.Contains(address))
+                if(!addresses.Contains(address))
+                    continue;
+
+                if (LedgerService.LedgerManager.LedgerState.TryGetAccount(address, out var account))
                 {
-                    if (unsubcribe)
-                        addresses.Remove(address);
-                    return true;
+                    results.Add(new AddressNotification
+                    {
+                        Address = account.Address.Encoded,
+                        Balance = account.Balances.ToDictionary(_ => Currency.ToSymbol(_.Currency), __ => Amount.ToWholeDecimal(__.Amount))
+                    });
                 }
             }
-
-            return false;
+            return results;
         }
     }
 }
