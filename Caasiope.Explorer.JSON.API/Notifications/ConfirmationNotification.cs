@@ -4,7 +4,7 @@ using Helios.JSON;
 
 namespace Caasiope.Explorer.JSON.API.Notifications
 {
-    public class LedgerNotification : Notification
+    public class ConfirmationNotification : Notification
     {
         public long Height;
         public long Timestamp;

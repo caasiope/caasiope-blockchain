@@ -36,7 +36,7 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
         {
             foreach (var subscriptor in subscriptors)
             {
-                var notification = new LedgerNotification()
+                var notification = new ConfirmationNotification()
                 {
                     Hash = ledger.Hash.ToBase64(),
                     Height = ledger.GetHeight(),
