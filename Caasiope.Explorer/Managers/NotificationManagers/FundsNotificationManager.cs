@@ -14,6 +14,7 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
     public class FundsNotificationManager : INotificationManager
     {
         [Injected] public ILiveService LiveService;
+        [Injected] public ILedgerService LedgerService;
 
         private readonly MonitorLocker locker = new MonitorLocker();
 
@@ -41,7 +42,11 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
         {
             foreach (var subscriptor in subscriptors)
             {
-                SendNotification(subscriptor, GetChanges());
+                var changes = GetChanges();
+                if(!changes.Any())
+                    continue;
+
+                SendNotification(subscriptor, changes);
             }
         }
 
@@ -59,10 +64,10 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
             var results = new Dictionary<string, decimal>();
             foreach (var issuer in issuers)
             {
-                if (!LiveService.AccountManager.TryGetAccount(issuer.Address, out var account))
+                if (!LedgerService.LedgerManager.LedgerState.TryGetAccount(issuer.Address, out var account))
                     continue;
 
-                var newBalance = account.Account.GetBalance(issuer.Currency);
+                var newBalance = account.GetBalance(issuer.Currency);
                 var currency = Currency.ToSymbol(issuer.Currency);
 
                 if (funds[currency] != newBalance)
@@ -83,8 +88,8 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
             {
                 issuers.Add(issuer);
 
-                if (LiveService.AccountManager.TryGetAccount(issuer.Address, out var account))
-                    funds.Add(Currency.ToSymbol(issuer.Currency), account.Account.GetBalance(issuer.Currency));
+                if (LedgerService.LedgerManager.LedgerState.TryGetAccount(issuer.Address, out var account))
+                    funds.Add(Currency.ToSymbol(issuer.Currency), account.GetBalance(issuer.Currency));
             }
         }
     }

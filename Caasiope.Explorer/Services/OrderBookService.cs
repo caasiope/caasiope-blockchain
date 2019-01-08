@@ -40,8 +40,8 @@ namespace Caasiope.Explorer.Services
             var vendingMachines = new List<Account>();
             foreach (var machine in machines)
             {
-                if (LiveService.AccountManager.TryGetAccount(machine.Address, out var account))
-                    vendingMachines.Add(account.Account);
+                if (LedgerService.LedgerManager.LedgerState.TryGetAccount(machine.Address, out var account))
+                    vendingMachines.Add(account);
             }
 
             orderbooks.Initialize(vendingMachines);

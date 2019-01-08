@@ -15,7 +15,7 @@ namespace Caasiope.Explorer.Managers
     {
         // Thread safe
 
-        [Injected] public ILiveService LiveService;
+        [Injected] public ILedgerService LedgerService;
 
         private readonly Dictionary<string, Dictionary<Address, Order>> orders = new Dictionary<string, Dictionary<Address, Order>>();
         private readonly MonitorLocker locker = new MonitorLocker();
@@ -90,15 +90,15 @@ namespace Caasiope.Explorer.Managers
 
         public void ProcessNewLedger(SignedLedger ledger)
         {
-            var accountsToUpdate = new Dictionary<Address, ExtendedAccount>();
+            var accountsToUpdate = new Dictionary<Address, Account>();
             foreach (var transaction in ledger.Ledger.Block.Transactions)
             {
                 foreach (var input in transaction.Transaction.Inputs)
                 {
-                    if (LiveService.AccountManager.TryGetAccount(input.Address, out var account))
-                        if (account.Account.Address.Type == AddressType.VendingMachine)
+                    if (LedgerService.LedgerManager.LedgerState.TryGetAccount(input.Address, out var account))
+                        if (account.Address.Type == AddressType.VendingMachine)
                         {
-                            accountsToUpdate.Add(account.Account.Address, account);
+                            accountsToUpdate.Add(account.Address, account);
                         }
                 }
 
@@ -107,10 +107,10 @@ namespace Caasiope.Explorer.Managers
                     if (accountsToUpdate.ContainsKey(input.Address))
                         continue;
 
-                    if (LiveService.AccountManager.TryGetAccount(input.Address, out var account))
-                        if (account.Account.Address.Type == AddressType.VendingMachine)
+                    if (LedgerService.LedgerManager.LedgerState.TryGetAccount(input.Address, out var account))
+                        if (account.Address.Type == AddressType.VendingMachine)
                         {
-                            accountsToUpdate.Add(account.Account.Address, account);
+                            accountsToUpdate.Add(account.Address, account);
                         }
                 }
             }
@@ -119,15 +119,15 @@ namespace Caasiope.Explorer.Managers
             {
                 foreach (var account in accountsToUpdate.Values)
                 {
-                    var machine = (VendingMachine) account.Account.Declaration;
+                    var machine = (VendingMachine) account.Declaration;
                     var symbol = GetSymbol(machine, out var side);
 
-                    var oldOrders = orders.GetOrCreate(symbol, () => new Dictionary<Address, Order>() {{account.Account.Address, GetOrder(account.Account, machine, side)}});
+                    var oldOrders = orders.GetOrCreate(symbol, () => new Dictionary<Address, Order>() {{account.Address, GetOrder(account, machine, side)}});
 
-                    var size = GetSize(account.Account, machine);
+                    var size = GetSize(account, machine);
                     if (size == 0)
-                        oldOrders.Remove(account.Account.Address);
-                    else if (oldOrders.TryGetValue(account.Account.Address, out var oldOrder))
+                        oldOrders.Remove(account.Address);
+                    else if (oldOrders.TryGetValue(account.Address, out var oldOrder))
                         oldOrder.Size = size;
                 }
             }
