@@ -13,6 +13,7 @@ namespace Caasiope.Explorer.Managers
     {
         private readonly List<INotificationManager> managers = new List<INotificationManager>();
         private readonly FundsNotificationManager fundsNotificationManager;
+        private readonly AddressNotificationManager addressNotificationManager;
         private Action<ISession, NotificationMessage> send;
         private readonly ILogger logger;
 
@@ -21,7 +22,7 @@ namespace Caasiope.Explorer.Managers
             this.logger = logger;
             AddManager(new TransactionNotificationManager());
             AddManager(new LedgerNotificationManager());
-            AddManager(new AddressNotificationManager());
+            addressNotificationManager = AddManager(new AddressNotificationManager());
             AddManager(new OrderBookNotificationManager());
             fundsNotificationManager = AddManager(new FundsNotificationManager());
         }
@@ -58,6 +59,7 @@ namespace Caasiope.Explorer.Managers
         {
             managers.ForEach(_ => _.Send += send);
             fundsNotificationManager.Initialize();
+            addressNotificationManager.Initialize();
         }
 
         public void OnSend(Action<ISession, NotificationMessage> callback)
