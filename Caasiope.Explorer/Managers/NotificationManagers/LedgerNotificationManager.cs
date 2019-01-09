@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Caasiope.Explorer.JSON.API;
 using Caasiope.Explorer.JSON.API.Notifications;
 using Caasiope.Explorer.Types;
 using Caasiope.Protocol.Types;
@@ -38,15 +37,10 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
                     Hash = ledger.Hash.ToBase64(),
                     Height = ledger.GetHeight(),
                     Timestamp = ledger.GetTimestamp(),
-                    Transactions = GetTransactions(ledger)
+                    Transactions = ledger.Ledger.Block.Transactions.Count()
                 };
                 Send(subscriptor, new NotificationMessage(notification));
             }
-        }
-
-        private List<JSON.API.Internals.Transaction> GetTransactions(SignedLedger ledger)
-        {
-            return ledger.Ledger.Block.Transactions.Select(signed => TransactionConverter.GetTransaction((Transaction) signed.Transaction)).ToList();
         }
     }
 }

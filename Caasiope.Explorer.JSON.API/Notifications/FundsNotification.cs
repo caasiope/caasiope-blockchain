@@ -5,7 +5,7 @@ namespace Caasiope.Explorer.JSON.API.Notifications
 {
     public class FundsNotification : Notification
     {
-        public Dictionary<string, decimal> Funds;
         public long Height;
+        public Dictionary<string, decimal> Funds;
     }
 }
