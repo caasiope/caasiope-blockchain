@@ -57,10 +57,12 @@
     <Compile Include="Notifications\ConfirmationNotification.cs" />
     <Compile Include="Notifications\FundsNotification.cs" />
     <Compile Include="Notifications\LedgerNotification.cs" />
+    <Compile Include="Requests\GetAccountRequest.cs" />
     <Compile Include="Requests\GetLatestLedgersRequest.cs" />
     <Compile Include="Requests\GetLedgerRequest.cs" />
     <Compile Include="Requests\GetOrderBookRequest.cs" />
     <Compile Include="Requests\SubscribeRequest.cs" />
+    <Compile Include="Responses\GetAccountResponse.cs" />
     <Compile Include="Responses\GetLatestLedgersResponse.cs" />
     <Compile Include="Responses\GetLedgerResponse.cs" />
     <Compile Include="Responses\GetOrderBookResponse.cs" />

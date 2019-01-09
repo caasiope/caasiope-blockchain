@@ -171,7 +171,7 @@ namespace Caasiope.Explorer.JSON.API
             return new Internals.TxOutput { Address = output.Address.Encoded, Currency = Currency.ToSymbol(output.Currency), Amount = Amount.ToWholeDecimal(output.Amount) };
         }
 
-        private static Internals.TxDeclaration CreateDeclaration(TxDeclaration declaration)
+        public static Internals.TxDeclaration CreateDeclaration(TxDeclaration declaration)
         {
             switch (declaration.Type)
             {

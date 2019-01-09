@@ -6,17 +6,28 @@ using Caasiope.Protocol;
 using Caasiope.Protocol.Types;
 using Helios.JSON;
 using Ledger = Caasiope.Explorer.JSON.API.Internals.Ledger;
+using TxDeclaration = Caasiope.Explorer.JSON.API.Internals.TxDeclaration;
 
 namespace Caasiope.Explorer.JSON.API
 {
     public class ResponseHelper
 	{
-		public static Response CreateGetAccountResponse(Account account)
+		public static Response CreateGetBalanceResponse(Account account)
 		{
 		    return ReferenceEquals(account, null) ? new GetBalanceResponse() : new GetBalanceResponse { Address = account.Address.Encoded, Balance = FormatBalance(account.Balances)};
 		}
 
-		public static Response CreateGetTransactionResponse(Internals.Transaction transaction = null)
+		public static Response CreateGetAccountResponse(Account account)
+		{
+		    return ReferenceEquals(account, null) ? new GetAccountResponse() : new GetAccountResponse { Address = account.Address.Encoded, Balance = FormatBalance(account.Balances), Declaration = GetDeclaration(account.Declaration)};
+		}
+
+	    private static TxDeclaration GetDeclaration(TxAddressDeclaration declaration)
+	    {
+	        return ReferenceEquals(declaration, null) ? null : TransactionConverter.CreateDeclaration(declaration);
+	    }
+
+	    public static Response CreateGetTransactionResponse(Internals.Transaction transaction = null)
 		{
 		    return transaction == null ? new GetTransactionResponse() : new GetTransactionResponse {Transaction = transaction};
 		}

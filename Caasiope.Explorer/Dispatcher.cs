@@ -38,9 +38,9 @@ namespace Caasiope.Explorer
 
         public bool Dispatch(ISession session, MessageWrapper wrapper, Action<Response, ResultCode> sendResponse)
         {
-            if (wrapper.Data is Request)
+            if (wrapper.Data is Request request)
             {
-                DispatchRequest(session, (Request)wrapper.Data, sendResponse);
+                DispatchRequest(session, request, sendResponse);
                 return true;
             }
 
@@ -111,6 +111,13 @@ namespace Caasiope.Explorer
             else if (request is GetBalanceRequest)
             {
                 var message = (GetBalanceRequest)request;
+
+                var command = new GetAccountCommand(message.Address, (acc, rc) => sendResponse(ResponseHelper.CreateGetBalanceResponse(acc), rc));
+                LiveService.AddCommand(command);
+            }
+            else if (request is GetAccountRequest)
+            {
+                var message = (GetAccountRequest)request;
 
                 var command = new GetAccountCommand(message.Address, (acc, rc) => sendResponse(ResponseHelper.CreateGetAccountResponse(acc), rc));
                 LiveService.AddCommand(command);
