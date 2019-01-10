@@ -9,7 +9,7 @@ namespace Caasiope.Explorer.JSON.API.Internals
         public string CurrencyOut;
         public decimal Rate;
 
-        public VendingMachine(string owner, string currencyIn, string currencyOut, long rate) : this()
+        public VendingMachine(string owner, string currencyIn, string currencyOut, decimal rate) : this()
         {
             Owner = owner;
             CurrencyIn = currencyIn;
