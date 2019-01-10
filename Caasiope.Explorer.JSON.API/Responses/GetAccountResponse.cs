@@ -2,6 +2,7 @@
 using Caasiope.Explorer.JSON.API.Internals;
 using Caasiope.Explorer.JSON.API.Requests;
 using Helios.JSON;
+using Newtonsoft.Json;
 
 namespace Caasiope.Explorer.JSON.API.Responses
 {
@@ -9,6 +10,7 @@ namespace Caasiope.Explorer.JSON.API.Responses
     {
         public string Address;
         public Dictionary<string, decimal> Balance;
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public TxDeclaration Declaration;
     }
 }
