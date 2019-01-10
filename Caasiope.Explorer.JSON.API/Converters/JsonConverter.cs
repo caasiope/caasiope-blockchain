@@ -15,6 +15,9 @@ namespace Caasiope.Explorer.JSON.API.Converters
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
+            if (reader.TokenType == JsonToken.Null)
+                return null;
+
             var jsonObject = JObject.Load(reader);
             var target = Create(objectType, jsonObject);
             serializer.Populate(jsonObject.CreateReader(), target);
