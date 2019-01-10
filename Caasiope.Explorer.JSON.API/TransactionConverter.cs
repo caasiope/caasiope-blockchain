@@ -70,7 +70,7 @@ namespace Caasiope.Explorer.JSON.API
             return new TxOutput(new Address(output.Address), Currency.FromSymbol(output.Currency), Amount.FromWholeDecimal(output.Amount));
         }
 
-        private static TxDeclaration CreateDeclaration(Internals.TxDeclaration declaration)
+        public static TxDeclaration CreateDeclaration(Internals.TxDeclaration declaration)
         {
             switch ((DeclarationType)declaration.Type)
             {
