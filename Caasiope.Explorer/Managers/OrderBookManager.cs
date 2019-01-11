@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Caasiope.Explorer.Services;
 using Caasiope.Node;
-using Caasiope.Node.Managers;
 using Caasiope.Node.Services;
 using Caasiope.Protocol.Types;
 using Helios.Common.Extensions;
