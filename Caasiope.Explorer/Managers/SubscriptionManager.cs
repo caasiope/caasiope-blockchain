@@ -11,6 +11,8 @@ namespace Caasiope.Explorer.Managers
     // subscription manager ?
     public class SubscriptionManager
     {
+        public OrderBookNotificationManager OrderBookNotificationManager { get; }
+
         private readonly List<INotificationManager> managers = new List<INotificationManager>();
         private readonly FundsNotificationManager fundsNotificationManager;
         private readonly AddressNotificationManager addressNotificationManager;
@@ -23,7 +25,7 @@ namespace Caasiope.Explorer.Managers
             AddManager(new TransactionNotificationManager());
             AddManager(new LedgerNotificationManager());
             addressNotificationManager = AddManager(new AddressNotificationManager());
-            AddManager(new OrderBookNotificationManager());
+            OrderBookNotificationManager = AddManager(new OrderBookNotificationManager());
             fundsNotificationManager = AddManager(new FundsNotificationManager());
         }
 

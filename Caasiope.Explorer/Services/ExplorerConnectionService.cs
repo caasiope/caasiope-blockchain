@@ -30,6 +30,7 @@ namespace Caasiope.Explorer.Services
 	        base.OnInitialize();
 	        SubscriptionManager.OnSend(Send);
 	        LedgerService.LedgerManager.SubscribeOnNewLedger(SubscriptionManager.Notify);
+	        OrderBookService.OnOrderBookUpdated(SubscriptionManager.OrderBookNotificationManager.Notify);
         }
 
 	    protected override void OnStart()
@@ -48,6 +49,7 @@ namespace Caasiope.Explorer.Services
 	{
 	    [Injected] public IExplorerDataTransformationService ExplorerDataTransformationService;
 	    [Injected] public ILedgerService LedgerService;
+	    [Injected] public IOrderBookService OrderBookService;
 
         private readonly WebSocketServer server;
 		private IDispatcher<ISession> dispatcher;

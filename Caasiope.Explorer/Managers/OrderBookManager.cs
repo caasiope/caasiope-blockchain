@@ -16,6 +16,7 @@ namespace Caasiope.Explorer.Managers
         // Thread safe
 
         [Injected] public ILedgerService LedgerService;
+        public Action<string, List<Order>> OrderBookUpdated;
 
         private readonly Dictionary<string, Dictionary<Address, Order>> orders = new Dictionary<string, Dictionary<Address, Order>>();
         private readonly MonitorLocker locker = new MonitorLocker();
@@ -40,15 +41,19 @@ namespace Caasiope.Explorer.Managers
         private Order GetOrder(Account account, VendingMachine machine, OrderSide side)
         {
             var size = GetSize(account, machine);
-            var rate = machine.Rate;
+            var rate = Amount.ToWholeDecimal(machine.Rate);
+
+            if (side == OrderSide.Sell)
+                rate = 1 / rate;
+
             return new Order(side, size, rate, machine.Address);
         }
 
-        private static Amount GetSize(Account account, VendingMachine machine)
+        private static decimal GetSize(Account account, VendingMachine machine)
         {
             var currencyOut = machine.CurrencyOut;
             var size = account.GetBalance(currencyOut);
-            return size;
+            return Amount.ToWholeDecimal(size);
         }
 
         private string GetSymbol(VendingMachine machine, out OrderSide orderSide)
@@ -84,11 +89,58 @@ namespace Caasiope.Explorer.Managers
                     return true;
                 }
             }
-
             return false;
         }
 
         public void ProcessNewLedger(SignedLedger ledger)
+        {
+            var accountsToUpdate = GetChangedAccounts(ledger);
+
+            var changes = UpdateOrderbook(accountsToUpdate);
+
+            foreach (var change in changes)
+            {
+                if (change.Value)
+                {
+                    TryGetOrderBook(change.Key, out var orderbook);
+                    OrderBookUpdated(change.Key, orderbook);
+                }
+            }
+        }
+
+        private Dictionary<string, bool> UpdateOrderbook(Dictionary<Address, Account> accountsToUpdate)
+        {
+            var changes = new Dictionary<string, bool>();
+            using (locker.CreateLock())
+            {
+                foreach (var account in accountsToUpdate.Values)
+                {
+                    var machine = (VendingMachine) account.Declaration;
+                    var symbol = GetSymbol(machine, out var side);
+
+                    var oldOrders = orders.GetOrCreate(symbol, () => new Dictionary<Address, Order>() {{account.Address, GetOrder(account, machine, side)}});
+
+                    var size = GetSize(account, machine);
+                    if (size == 0)
+                    {
+                        oldOrders.Remove(account.Address);
+                        changes[symbol] = true;
+                    }
+                    else if (oldOrders.TryGetValue(account.Address, out var oldOrder))
+                    {
+                        if (oldOrder.Size == size)
+                            continue;
+
+                        changes[symbol] = true;
+                        oldOrder.Size = size;
+                    }
+                }
+            }
+
+            return changes;
+        }
+
+        private Dictionary<Address, Account> GetChangedAccounts(SignedLedger ledger)
         {
             var accountsToUpdate = new Dictionary<Address, Account>();
             foreach (var transaction in ledger.Ledger.Block.Transactions)
@@ -115,22 +167,7 @@ namespace Caasiope.Explorer.Managers
                 }
             }
 
-            using (locker.CreateLock())
-            {
-                foreach (var account in accountsToUpdate.Values)
-                {
-                    var machine = (VendingMachine) account.Declaration;
-                    var symbol = GetSymbol(machine, out var side);
-
-                    var oldOrders = orders.GetOrCreate(symbol, () => new Dictionary<Address, Order>() {{account.Address, GetOrder(account, machine, side)}});
-
-                    var size = GetSize(account, machine);
-                    if (size == 0)
-                        oldOrders.Remove(account.Address);
-                    else if (oldOrders.TryGetValue(account.Address, out var oldOrder))
-                        oldOrder.Size = size;
-                }
-            }
+            return accountsToUpdate;
         }
 
         public IEnumerable<string> GetSymbols()

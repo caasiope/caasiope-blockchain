@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Caasiope.Explorer.JSON.API.Notifications;
+using Caasiope.Explorer.Services;
 using Caasiope.Explorer.Types;
 using Caasiope.Protocol.Types;
 using Helios.Common.Extensions;
@@ -27,13 +29,27 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
             {
                 subscriptors.GetOrCreate(session).Add(symbol);
             }
-
-            throw new NotImplementedException();
         }
 
-        public void Notify(SignedLedger ledger)
+        public void Notify(SignedLedger ledger) { }
+
+        public void Notify(string symbol, List<Order> orders)
         {
-            // TODO 
+            using (locker.CreateLock())
+            {
+                foreach (var subscriptor in subscriptors)
+                {
+                    if(subscriptor.Value.Contains(symbol))
+                    {
+                        var notification = new OrderBookNotification()
+                        {
+                            Symbol = symbol,
+                            Orders = OrderConverter.GetOrders(orders)
+                        };
+                        Send(subscriptor.Key, new NotificationMessage(notification));
+                    }
+                }
+            }
         }
 
     }

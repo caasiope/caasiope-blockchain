@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Caasiope.Explorer.Managers;
 using Caasiope.Node;
@@ -12,6 +13,7 @@ namespace Caasiope.Explorer.Services
     {
         List<Order> GetOrderBook(string symbol);
         IEnumerable<string> GetSymbols();
+        void OnOrderBookUpdated(Action<string, List<Order>> callback);
     }
 
     public class OrderBookService: ThreadedService, IOrderBookService
@@ -77,6 +79,11 @@ namespace Caasiope.Explorer.Services
         {
             return orderbooks.GetSymbols();
         }
+
+        public void OnOrderBookUpdated(Action<string, List<Order>> callback)
+        {
+            orderbooks.OrderBookUpdated += callback;
+        }
     }
 
     public enum OrderSide
@@ -110,11 +117,11 @@ namespace Caasiope.Explorer.Services
     public class Order
     {
         public readonly OrderSide Side;
-        public Amount Size;
-        public readonly Amount Price;
+        public decimal Size;
+        public readonly decimal Price;
         public readonly Address Address;
 
-        public Order(OrderSide side, Amount size, Amount price, Address address)
+        public Order(OrderSide side, decimal size, decimal price, Address address)
         {
             Debug.Assert(size != 0, "Size cannot be 0");
             Side = side;
