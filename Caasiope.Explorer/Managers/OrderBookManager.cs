@@ -134,6 +134,11 @@ namespace Caasiope.Explorer.Managers
                         changes[symbol] = true;
                         oldOrder.Size = size;
                     }
+                    else
+                    {
+                        changes[symbol] = true;
+                        oldOrders.Add(account.Address, GetOrder(account, machine, side));
+                    }
                 }
             }
 
