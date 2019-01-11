@@ -33,6 +33,14 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
 
         public void Notify(SignedLedger ledger) { }
 
+        public void OnClose(ISession session)
+        {
+            using (locker.CreateLock())
+            {
+                subscriptors.Remove(session);
+            }
+        }
+
         public void Notify(string symbol, List<Order> orders)
         {
             using (locker.CreateLock())

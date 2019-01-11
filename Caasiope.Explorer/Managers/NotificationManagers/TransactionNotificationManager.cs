@@ -47,6 +47,14 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
             }
         }
 
+        public void OnClose(ISession session)
+        {
+            using (locker.CreateLock())
+            {
+                subscriptors.Remove(session);
+            }
+        }
+
         private List<JSON.API.Internals.Transaction> GetTransactions(SessionSubscriptor subscriptor, SignedLedger ledger)
         {
             return ledger.Ledger.Block.Transactions

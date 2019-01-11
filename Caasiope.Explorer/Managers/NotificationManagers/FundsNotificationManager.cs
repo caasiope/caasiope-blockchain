@@ -48,6 +48,14 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
             }
         }
 
+        public void OnClose(ISession session)
+        {
+            using (locker.CreateLock())
+            {
+                subscriptors.Remove(session);
+            }
+        }
+
         private void SendNotification(ISession subscriptor, long height)
         {
             var changes = funds.ToDictionary(_ => _.Key, __ => -Amount.ToWholeDecimal(__.Value));

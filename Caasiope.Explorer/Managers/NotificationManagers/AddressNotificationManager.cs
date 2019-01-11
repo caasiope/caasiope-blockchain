@@ -52,6 +52,14 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
             }
         }
 
+        public void OnClose(ISession session)
+        {
+            using (locker.CreateLock())
+            {
+                subscriptors.Remove(session);
+            }
+        }
+
         private List<AddressNotification> GetNotifications(AddressSubscriptor subscriptor, SignedLedger ledger)
         {
             var inputs = ledger.Ledger.Block.Transactions.SelectMany(_ => _.Transaction.Inputs.Select(__ => __.Address));

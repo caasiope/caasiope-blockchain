@@ -42,5 +42,13 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
                 Send(subscriptor, new NotificationMessage(notification));
             }
         }
+
+        public void OnClose(ISession session)
+        {
+            using (locker.CreateLock())
+            {
+                subscriptors.Remove(session);
+            }
+        }
     }
 }

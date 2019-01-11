@@ -68,6 +68,11 @@ namespace Caasiope.Explorer.Managers
         {
             send += callback;
         }
+
+        public void OnClose(ISession session)
+        {
+            managers.ForEach(_ => _.OnClose(session));
+        }
     }
 
     public interface INotificationManager
@@ -75,5 +80,6 @@ namespace Caasiope.Explorer.Managers
         void ListenTo(ISession session, Topic topic);
         void Notify(SignedLedger ledger);
         Action<ISession, NotificationMessage> Send { get; set; }
+        void OnClose(ISession session);
     }
 }

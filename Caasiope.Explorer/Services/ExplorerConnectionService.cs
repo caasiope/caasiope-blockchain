@@ -33,7 +33,12 @@ namespace Caasiope.Explorer.Services
 	        OrderBookService.OnOrderBookUpdated(SubscriptionManager.OrderBookNotificationManager.Notify);
         }
 
-	    protected override void OnStart()
+	    protected override void OnClose(ISession session)
+	    {
+	        SubscriptionManager.OnClose(session);
+        }
+
+        protected override void OnStart()
 	    {
 	        base.OnStart();
 	        SubscriptionManager.Initialize();
@@ -70,12 +75,16 @@ namespace Caasiope.Explorer.Services
         protected override void OnInitialize()
 		{
             server.OnReceive(OnReceive);
+            server.OnClose(OnClose);
+
             Injector.Inject(this);
 			Injector.Inject(dispatcher);
 			server.Initialize();
         }
 
-		public void OnReceive(ISession session, string message)
+	    protected virtual void OnClose(ISession obj) { }
+
+	    public void OnReceive(ISession session, string message)
 		{
 			string crid = null;
 			try
