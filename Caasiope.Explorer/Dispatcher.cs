@@ -13,6 +13,7 @@ using Caasiope.Protocol.Types;
 using Helios.Common.Extensions;
 using Helios.Common.Logs;
 using Helios.JSON;
+using WebSocketSharp;
 using GetSignedLedgerRequest = Caasiope.Explorer.JSON.API.Requests.GetSignedLedgerRequest;
 using HistoricalTransaction = Caasiope.Protocol.Types.HistoricalTransaction;
 using ResponseHelper = Caasiope.Explorer.JSON.API.ResponseHelper;
@@ -243,6 +244,12 @@ namespace Caasiope.Explorer
             else if (request is GetOrderBookRequest)
             {
                 var message = (GetOrderBookRequest)request;
+
+                if(message.Symbol.IsNullOrEmpty() || !OrderBookService.GetSymbols().Contains(message.Symbol))
+                {
+                    sendResponse.Call(ResponseHelper.CreateGetLedgerResponse(), ResultCode.InvalidInputParam);
+                    return;
+                }
 
                 OrderBookService.GetOrderBook(message.Symbol, (ob) => sendResponse(ResponseHelper.CreateGetOrderBookResponse(OrderConverter.GetOrders(ob), message.Symbol), ResultCode.Success));
             }

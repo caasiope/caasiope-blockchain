@@ -6,7 +6,6 @@ using Caasiope.Node;
 using Caasiope.Node.Services;
 using Caasiope.Protocol.Types;
 using Helios.Common.Extensions;
-using Helios.Common.Synchronization;
 
 namespace Caasiope.Explorer.Managers
 {
@@ -16,7 +15,6 @@ namespace Caasiope.Explorer.Managers
         public Action<string, List<Order>> OrderBookUpdated;
 
         private readonly Dictionary<string, Dictionary<Address, Order>> orders = new Dictionary<string, Dictionary<Address, Order>>();
-        private readonly MonitorLocker locker = new MonitorLocker();
 
         private readonly HashSet<string> symbols = new HashSet<string>() { new Symbol("BTC", "LTC"), new Symbol("CAS", "BTC"), new Symbol("CAS", "LTC"), new Symbol("BTC", "ETH") };
 
@@ -78,14 +76,12 @@ namespace Caasiope.Explorer.Managers
         public bool TryGetOrderBook(string symbol, out List<Order> orderbook)
         {
             orderbook = null;
-            using (locker.CreateLock())
+            if (orders.TryGetValue(symbol, out var dict))
             {
-                if (orders.TryGetValue(symbol, out var dict))
-                {
-                    orderbook = dict.Values.ToList();
-                    return true;
-                }
+                orderbook = dict.Values.ToList();
+                return true;
             }
+
             return false;
         }
 
@@ -108,34 +104,31 @@ namespace Caasiope.Explorer.Managers
         private Dictionary<string, bool> UpdateOrderbook(Dictionary<Address, Account> accountsToUpdate)
         {
             var changes = new Dictionary<string, bool>();
-            using (locker.CreateLock())
+            foreach (var account in accountsToUpdate.Values)
             {
-                foreach (var account in accountsToUpdate.Values)
+                var machine = (VendingMachine) account.Declaration;
+                var symbol = GetSymbol(machine, out var side);
+
+                var oldOrders = orders.GetOrCreate(symbol, () => new Dictionary<Address, Order>() {{account.Address, GetOrder(account, machine, side)}});
+
+                var size = GetSize(account, machine);
+                if (size == 0)
                 {
-                    var machine = (VendingMachine) account.Declaration;
-                    var symbol = GetSymbol(machine, out var side);
+                    oldOrders.Remove(account.Address);
+                    changes[symbol] = true;
+                }
+                else if (oldOrders.TryGetValue(account.Address, out var oldOrder))
+                {
+                    if (oldOrder.Size == size)
+                        continue;
 
-                    var oldOrders = orders.GetOrCreate(symbol, () => new Dictionary<Address, Order>() {{account.Address, GetOrder(account, machine, side)}});
-
-                    var size = GetSize(account, machine);
-                    if (size == 0)
-                    {
-                        oldOrders.Remove(account.Address);
-                        changes[symbol] = true;
-                    }
-                    else if (oldOrders.TryGetValue(account.Address, out var oldOrder))
-                    {
-                        if (oldOrder.Size == size)
-                            continue;
-
-                        changes[symbol] = true;
-                        oldOrder.Size = size;
-                    }
-                    else
-                    {
-                        changes[symbol] = true;
-                        oldOrders.Add(account.Address, GetOrder(account, machine, side));
-                    }
+                    changes[symbol] = true;
+                    oldOrder.Size = size;
+                }
+                else
+                {
+                    changes[symbol] = true;
+                    oldOrders.Add(account.Address, GetOrder(account, machine, side));
                 }
             }
 
