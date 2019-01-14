@@ -10,7 +10,7 @@ using Helios.Common.Synchronization;
 
 namespace Caasiope.Explorer.Managers
 {
-    internal class OrderBookManager
+    public class OrderBookManager
     {
         // Thread safe?
 

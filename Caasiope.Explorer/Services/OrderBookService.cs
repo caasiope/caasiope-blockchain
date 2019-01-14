@@ -11,22 +11,24 @@ namespace Caasiope.Explorer.Services
 {
     public interface IOrderBookService : IService
     {
-        List<Order> GetOrderBook(string symbol);
+        void GetOrderBook(string symbol, Action<List<Order>> callback);
         IEnumerable<string> GetSymbols();
         void OnOrderBookUpdated(Action<string, List<Order>> callback);
+        OrderBookManager OrderBookManager { get; }
     }
 
     public class OrderBookService: ThreadedService, IOrderBookService
     {
         [Injected] public IExplorerDatabaseService ExplorerDatabaseService;
         [Injected] public IExplorerDataTransformationService ExplorerDataTransformationService;
+        public OrderBookManager OrderBookManager { get; } = new OrderBookManager();
 
-        private SignedLedger ledger;
-        private readonly OrderBookManager orderbooks = new OrderBookManager();
+        private OrderBookCommandProcessor processor;
 
         protected override void OnInitialize()
         {
-            Injector.Inject(orderbooks);
+            Injector.Inject(OrderBookManager);
+            processor = new OrderBookCommandProcessor(Logger);
         }
 
         protected override void OnStart()
@@ -47,7 +49,7 @@ namespace Caasiope.Explorer.Services
                     vendingMachines.Add(account);
             }
 
-            orderbooks.Initialize(vendingMachines);
+            OrderBookManager.Initialize(vendingMachines);
         }
 
         protected override void OnStop()
@@ -56,33 +58,29 @@ namespace Caasiope.Explorer.Services
 
         protected override void Run()
         {
-            orderbooks.ProcessNewLedger(ledger);
-
-            ledger = null;
+            while (processor.TryProcessOne()) { }
         }
 
-        public List<Order> GetOrderBook(string symbol)
+        public void GetOrderBook(string symbol, Action<List<Order>> callback)
         {
-            if (orderbooks.TryGetOrderBook(symbol, out var results))
-                return results;
-            return new List<Order>();
+            processor.Add(new GetOrderbookCommand(symbol, callback));
+            trigger.Set();
         }
 
         public void OnNewLedger(SignedLedger signed)
         {
-            // todo use queue
-            ledger = signed;
+            processor.Add(new UpdateOrderbookCommand(signed));
             trigger.Set();
         }
 
         public IEnumerable<string> GetSymbols()
         {
-            return orderbooks.GetSymbols();
+            return OrderBookManager.GetSymbols();
         }
 
         public void OnOrderBookUpdated(Action<string, List<Order>> callback)
         {
-            orderbooks.OrderBookUpdated += callback;
+            OrderBookManager.OrderBookUpdated += callback;
         }
     }
 

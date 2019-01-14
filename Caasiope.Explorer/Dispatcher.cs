@@ -244,8 +244,7 @@ namespace Caasiope.Explorer
             {
                 var message = (GetOrderBookRequest)request;
 
-                var orderbook = OrderBookService.GetOrderBook(message.Symbol);
-                sendResponse(ResponseHelper.CreateGetOrderBookResponse(OrderConverter.GetOrders(orderbook), message.Symbol), ResultCode.Success);
+                OrderBookService.GetOrderBook(message.Symbol, (ob) => sendResponse(ResponseHelper.CreateGetOrderBookResponse(OrderConverter.GetOrders(ob), message.Symbol), ResultCode.Success));
             }
             else if (request is SubscribeRequest)
             {
