@@ -12,8 +12,6 @@ namespace Caasiope.Explorer.Managers
 {
     public class OrderBookManager
     {
-        // Thread safe?
-
         [Injected] public ILedgerService LedgerService;
         public Action<string, List<Order>> OrderBookUpdated;
 

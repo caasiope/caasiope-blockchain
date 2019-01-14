@@ -19,7 +19,7 @@ namespace Caasiope.Explorer.Services
 
         protected override void Process(SignedLedger input)
         {
-            OrderBookService.Orderbooks.ProcessNewLedger(input);
+            OrderBookService.OrderBookManager.ProcessNewLedger(input);
         }
     }
 
@@ -36,7 +36,7 @@ namespace Caasiope.Explorer.Services
         {
             try
             {
-                callback(OrderBookService.Orderbooks.TryGetOrderBook(input, out var results) ? results : new List<Order>());
+                callback(OrderBookService.OrderBookManager.TryGetOrderBook(input, out var results) ? results : new List<Order>());
             }
             catch (Exception)
             {
