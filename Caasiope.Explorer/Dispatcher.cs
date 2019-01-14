@@ -247,7 +247,7 @@ namespace Caasiope.Explorer
 
                 if(message.Symbol.IsNullOrEmpty() || !OrderBookService.GetSymbols().Contains(message.Symbol))
                 {
-                    sendResponse.Call(ResponseHelper.CreateGetLedgerResponse(), ResultCode.InvalidInputParam);
+                    sendResponse.Call(ResponseHelper.CreateGetOrderBookResponse(null, message.Symbol), ResultCode.InvalidInputParam);
                     return;
                 }
 
