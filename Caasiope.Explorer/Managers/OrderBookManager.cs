@@ -12,7 +12,7 @@ namespace Caasiope.Explorer.Managers
 {
     internal class OrderBookManager
     {
-        // Thread safe
+        // Thread safe?
 
         [Injected] public ILedgerService LedgerService;
         public Action<string, List<Order>> OrderBookUpdated;
@@ -42,7 +42,7 @@ namespace Caasiope.Explorer.Managers
             var size = GetSize(account, machine);
             var rate = Amount.ToWholeDecimal(machine.Rate);
 
-            if (side == OrderSide.Sell)
+            if (side == OrderSide.Buy)
                 rate = 1 / rate;
 
             return new Order(side, size, rate, machine.Address);
@@ -63,14 +63,14 @@ namespace Caasiope.Explorer.Managers
             var symbol = new Symbol(inStr, outStr);
             if (symbols.Contains(symbol))
             {
-                orderSide = OrderSide.Buy;
+                orderSide = OrderSide.Sell;
                 return symbol;
             }
 
             var reversedSymbol = new Symbol(outStr, inStr);
             if (symbols.Contains(reversedSymbol))
             {
-                orderSide = OrderSide.Sell;
+                orderSide = OrderSide.Buy;
                 return reversedSymbol;
             }
 
