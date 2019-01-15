@@ -9,12 +9,65 @@ using Helios.Common.Extensions;
 
 namespace Caasiope.Explorer.Managers
 {
+    public class OrderBook
+    {
+        private readonly Dictionary<Address, Order> buyOrders = new Dictionary<Address, Order>();
+        private readonly Dictionary<Address, Order> sellOrders = new Dictionary<Address, Order>();
+
+        public void Add(Address address, Order order)
+        {
+            if(order.Side == OrderSide.Buy)
+                buyOrders.Add(address, order);
+            else
+                sellOrders.Add(address, order);
+        }
+
+        public List<Order> GetOrderBook(int count)
+        {
+            // todo optimize
+            var result = buyOrders.OrderByDescending(_ => _.Value.Price).Take(count).Select(_ => _.Value);
+            return result.Union(sellOrders.OrderByDescending(_ => _.Value.Price).Take(count).Select(_ => _.Value)).ToList();
+        }
+
+        private void Remove(Address address, OrderSide side)
+        {
+            if (side == OrderSide.Buy)
+                buyOrders.Remove(address);
+            else
+                sellOrders.Remove(address);
+        }
+
+        public bool TryUpdateOrder(Account account, Order order)
+        {
+            if (order.Size == 0)
+            {
+                Remove(account.Address, order.Side);
+                return true;
+            }
+
+            var side = order.Side;
+            if (side == OrderSide.Buy && buyOrders.TryGetValue(account.Address, out var oldOrder) 
+                || side == OrderSide.Sell && sellOrders.TryGetValue(account.Address, out oldOrder))
+            {
+                if (oldOrder.Size == order.Size)
+                    return false;
+
+                oldOrder.Size = order.Size;
+                return true;
+            }
+            else
+            {
+                Add(account.Address, order);
+                return true;
+            }
+        }
+    }
     public class OrderBookManager
     {
         [Injected] public ILedgerService LedgerService;
         public Action<string, List<Order>> OrderBookUpdated;
 
-        private readonly Dictionary<string, Dictionary<Address, Order>> orders = new Dictionary<string, Dictionary<Address, Order>>();
+        private readonly Dictionary<string, OrderBook> orderBooks = new Dictionary<string, OrderBook>();
 
         private readonly HashSet<string> symbols = new HashSet<string>() { new Symbol("BTC", "LTC"), new Symbol("CAS", "BTC"), new Symbol("CAS", "LTC"), new Symbol("BTC", "ETH") };
 
@@ -29,7 +82,7 @@ namespace Caasiope.Explorer.Managers
                     continue;
 
                 var order = GetOrder(account, machine, side);
-                orders.GetOrCreate(symbol).Add(account.Address, order);
+                orderBooks.GetOrCreate(symbol).Add(account.Address, order);
             }
         }
 
@@ -76,9 +129,9 @@ namespace Caasiope.Explorer.Managers
         public bool TryGetOrderBook(string symbol, out List<Order> orderbook)
         {
             orderbook = null;
-            if (orders.TryGetValue(symbol, out var dict))
+            if (orderBooks.TryGetValue(symbol, out var orderBook))
             {
-                orderbook = dict.Values.ToList();
+                orderbook = orderBook.GetOrderBook(10);
                 return true;
             }
 
@@ -108,27 +161,13 @@ namespace Caasiope.Explorer.Managers
             {
                 var machine = (VendingMachine) account.Declaration;
                 var symbol = GetSymbol(machine, out var side);
+                var newOrder = GetOrder(account, machine, side);
 
-                var oldOrders = orders.GetOrCreate(symbol, () => new Dictionary<Address, Order>() {{account.Address, GetOrder(account, machine, side)}});
+                var orderBook = orderBooks.GetOrCreate(symbol, () => new OrderBook());
 
-                var size = GetSize(account, machine);
-                if (size == 0)
-                {
-                    oldOrders.Remove(account.Address);
-                    changes[symbol] = true;
-                }
-                else if (oldOrders.TryGetValue(account.Address, out var oldOrder))
-                {
-                    if (oldOrder.Size == size)
-                        continue;
-
-                    changes[symbol] = true;
-                    oldOrder.Size = size;
-                }
-                else
+                if (orderBook.TryUpdateOrder(account, newOrder))
                 {
                     changes[symbol] = true;
-                    oldOrders.Add(account.Address, GetOrder(account, machine, side));
                 }
             }
 
