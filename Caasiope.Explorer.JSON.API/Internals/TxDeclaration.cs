@@ -13,6 +13,15 @@ namespace Caasiope.Explorer.JSON.API.Internals
         }
     }
 
+    public abstract class TxAddressDeclaration : TxDeclaration
+    {
+        public string Address;
+
+        protected TxAddressDeclaration(byte type) : base(type)
+        {
+        }
+    }
+
 
     public abstract class Topic
     {
