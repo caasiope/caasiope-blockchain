@@ -69,9 +69,6 @@ namespace Caasiope.Explorer.Managers
             var size = GetSize(account, machine);
             var rate = Amount.ToWholeDecimal(machine.Rate);
 
-            if (side == OrderSide.Buy)
-                rate = 1 / rate;
-
             return new Order(side, size, rate, machine.Address);
         }
 
