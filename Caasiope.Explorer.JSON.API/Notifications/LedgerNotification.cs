@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using Caasiope.Explorer.JSON.API.Internals;
-using Helios.JSON;
+﻿using Helios.JSON;
 
 namespace Caasiope.Explorer.JSON.API.Notifications
 {
@@ -9,7 +7,6 @@ namespace Caasiope.Explorer.JSON.API.Notifications
         public long Height;
         public long Timestamp;
         public string Hash;
-
-        public List<Transaction> Transactions;
+        public int Transactions;
     }
 }

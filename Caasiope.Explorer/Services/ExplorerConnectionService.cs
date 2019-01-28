@@ -13,22 +13,37 @@ namespace Caasiope.Explorer.Services
 {
     public interface IExplorerConnectionService : IWebSocketServerService
     {
-        NotificationManager NotificationManager { get; }
+        SubscriptionManager SubscriptionManager { get; }
     }
 
 	public class ExplorerConnectionService : WebSocketServerService, IExplorerConnectionService
 	{
-        public NotificationManager NotificationManager { get; } = new NotificationManager();
+        public SubscriptionManager SubscriptionManager { get; }
 
-	    public ExplorerConnectionService(WebSocketServer server) : base(server, new BlockchainExplorerApi().JsonMessageFactory) { }
+	    public ExplorerConnectionService(WebSocketServer server) : base(server, new BlockchainExplorerApi().JsonMessageFactory)
+	    {
+            SubscriptionManager = new SubscriptionManager(Logger);
+        }
 
 	    protected override void OnInitialize()
 	    {
 	        base.OnInitialize();
-	        NotificationManager.Send = Send;
-	        LedgerService.LedgerManager.SubscribeOnNewLedger(NotificationManager.Notify);
+	        SubscriptionManager.OnSend(Send);
+	        LedgerService.LedgerManager.SubscribeOnNewLedger(SubscriptionManager.Notify);
+	        OrderBookService.OnOrderBookUpdated(SubscriptionManager.OrderBookNotificationManager.Notify);
         }
-    }
+
+	    protected override void OnClose(ISession session)
+	    {
+	        SubscriptionManager.OnClose(session);
+        }
+
+        protected override void OnStart()
+	    {
+	        base.OnStart();
+	        SubscriptionManager.Initialize();
+	    }
+	}
 
     public interface IWebSocketServerService : IService
     {
@@ -39,6 +54,7 @@ namespace Caasiope.Explorer.Services
 	{
 	    [Injected] public IExplorerDataTransformationService ExplorerDataTransformationService;
 	    [Injected] public ILedgerService LedgerService;
+	    [Injected] public IOrderBookService OrderBookService;
 
         private readonly WebSocketServer server;
 		private IDispatcher<ISession> dispatcher;
@@ -59,12 +75,16 @@ namespace Caasiope.Explorer.Services
         protected override void OnInitialize()
 		{
             server.OnReceive(OnReceive);
+            server.OnClose(OnClose);
+
             Injector.Inject(this);
 			Injector.Inject(dispatcher);
 			server.Initialize();
         }
 
-		public void OnReceive(ISession session, string message)
+	    protected virtual void OnClose(ISession obj) { }
+
+	    public void OnReceive(ISession session, string message)
 		{
 			string crid = null;
 			try
@@ -129,8 +149,9 @@ namespace Caasiope.Explorer.Services
 		{
 		    ExplorerDataTransformationService.StartedHandle.WaitOne();
             ExplorerDataTransformationService.WaitTransformationCompleted();
+		    LedgerService.StartedHandle.WaitOne();
 
-		    server.Start();
+            server.Start();
 		}
 
 		protected override void OnStop()

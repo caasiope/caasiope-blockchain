@@ -1,12 +1,17 @@
-﻿namespace Caasiope.Explorer.JSON.API.Internals
-{
-    public class TimeLock : TxDeclaration
-    {
-        public readonly long Timestamp;
+﻿using Caasiope.Protocol.Types;
 
-        public TimeLock(long timestamp)
+namespace Caasiope.Explorer.JSON.API.Internals
+{
+    public class TimeLock : TxAddressDeclaration
+    {
+        public long Timestamp;
+
+        public TimeLock(long timestamp, string address) : this()
         {
             Timestamp = timestamp;
+            Address = address;
         }
+
+        public TimeLock() : base((byte)DeclarationType.TimeLock) { }
     }
 }

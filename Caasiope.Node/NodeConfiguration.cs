@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Caasiope.Protocol.Types;
 using Helios.Common.Configurations;
 
@@ -11,24 +13,36 @@ namespace Caasiope.Node
     {
         private static NodeConfiguration Instance;
 
-        private readonly string ConfigurationPath;
-        private readonly Network Network;
+        private readonly string configurationPath;
+        private readonly string dataPath;
+        private readonly Network network;
 
         public static Network GetNetwork()
         {
-            return Instance.Network;
+            return Instance.network;
         }
 
         public static string GetPath(string path)
         {
-            return Instance.ConfigurationPath + path;
+            return Instance.configurationPath + path;
         }
 
-        private NodeConfiguration(string name)
+        public static string GetCertificatesPath()
         {
+            return Path.Combine(Instance.dataPath, "certificates\\");
+        }
+
+        public static string GetDataPath()
+        {
+            return Instance.dataPath;
+        }
+
+        private NodeConfiguration(string name, string dataPath)
+        {
+            this.dataPath = dataPath;
             var networks = GetNetworkInstances();
-            Network = networks.Single(n => n.Name == name);
-            ConfigurationPath = $"config/{name}/";
+            network = networks.Single(n => n.Name == name);
+            configurationPath = $"config/{name}/";
         }
 
         public static bool IsInitialized() => Instance != null;
@@ -36,12 +50,23 @@ namespace Caasiope.Node
         public static void Initialize()
         {
             var name = new UrlConfiguration("config/network.txt").Lines[0];
-            Initialize(name);
+            var dataPath = GetFullDataPath(new DictionaryConfiguration("config/config.txt").GetValue("DataPath"), name);
+            Initialize(name, dataPath);
         }
 
-        public static void Initialize(string name)
+        private static string GetFullDataPath(string settingsPath, string network)
         {
-            Instance = new NodeConfiguration(name);
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var path = Regex.Replace(settingsPath, "%AppData%", appData, RegexOptions.IgnoreCase);
+            if (path.Contains('%'))
+                throw new Exception($"Alias is not supported. Data path is not valid {path}");
+            return Path.Combine(path, network + Path.DirectorySeparatorChar);
+        }
+
+        public static void Initialize(string name, string dataPath)
+        {
+            Instance = new NodeConfiguration(name, dataPath);
+            Directory.CreateDirectory(GetCertificatesPath());
         }
 
         private static List<Network> GetNetworkInstances()

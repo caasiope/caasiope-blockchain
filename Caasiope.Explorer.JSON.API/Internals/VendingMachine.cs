@@ -1,18 +1,23 @@
-﻿namespace Caasiope.Explorer.JSON.API.Internals
-{
-    public class VendingMachine : TxDeclaration
-    {
-        public readonly string Owner;
-        public readonly string CurrencyIn;
-        public readonly string CurrencyOut;
-        public readonly decimal Rate;
+﻿using Caasiope.Protocol.Types;
 
-        public VendingMachine(string owner, string currencyIn, string currencyOut, long rate)
+namespace Caasiope.Explorer.JSON.API.Internals
+{
+    public class VendingMachine : TxAddressDeclaration
+    {
+        public string Owner;
+        public string CurrencyIn;
+        public string CurrencyOut;
+        public decimal Rate;
+
+        public VendingMachine(string owner, string currencyIn, string currencyOut, decimal rate, string address) : this()
         {
             Owner = owner;
             CurrencyIn = currencyIn;
             CurrencyOut = currencyOut;
             Rate = rate;
+            Address = address;
         }
+
+        public VendingMachine() : base((byte)DeclarationType.VendingMachine) { }
     }
 }

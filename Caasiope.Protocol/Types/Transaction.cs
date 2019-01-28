@@ -536,6 +536,7 @@ namespace Caasiope.Protocol.Types
         }
     }
 
+    [DebuggerDisplay("In = {Currency.ToSymbol(CurrencyIn)} Out = {Currency.ToSymbol(CurrencyOut)} Rate = {Amount.ToWholeDecimal(Rate)}")]
     public class VendingMachine : TxAddressDeclaration
     {
         public readonly Address Owner;

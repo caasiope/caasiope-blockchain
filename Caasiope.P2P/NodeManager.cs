@@ -10,6 +10,7 @@ namespace Caasiope.P2P
     public class NodeManager
     {
         public readonly Persona Self;
+        public readonly int ForwardedPort;
         public readonly int ServerPort;
 
         private readonly HashSet<IPEndPoint> knownSelfEndPoints = new HashSet<IPEndPoint>();
@@ -17,13 +18,14 @@ namespace Caasiope.P2P
         private readonly MonitorLocker locker = new MonitorLocker();
         private static readonly Random Random = new Random();
 
-        public NodeManager(Persona self, IPAddress ip, int serverPort, IEnumerable<IPEndPoint> endPoints)
+        public NodeManager(Persona self, IPEndPoint endPoint, int forwardedPort, IEnumerable<IPEndPoint> endPoints)
         {
             Self = self;
-            if(serverPort > 0)
-                knownSelfEndPoints.Add(new IPEndPoint(ip, serverPort));
+            if(forwardedPort > 0)
+                knownSelfEndPoints.Add(new IPEndPoint(endPoint.Address, forwardedPort));
 
-            ServerPort = serverPort;
+            ServerPort = endPoint.Port;
+            ForwardedPort = forwardedPort;
             RegisterEndPoints(endPoints);
         }
 

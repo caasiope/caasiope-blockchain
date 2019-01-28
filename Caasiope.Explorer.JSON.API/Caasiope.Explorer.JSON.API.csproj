@@ -38,9 +38,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BlockchainExplorerApi.cs" />
+    <Compile Include="Converters\DeclarationConverter.cs" />
+    <Compile Include="Converters\JsonConverter.cs" />
+    <Compile Include="Converters\TopicConverter.cs" />
     <Compile Include="Internals\Ledger.cs" />
     <Compile Include="Internals\HashLock.cs" />
     <Compile Include="Internals\MultiSignature.cs" />
+    <Compile Include="Internals\Order.cs" />
     <Compile Include="Internals\SecretRevelation.cs" />
     <Compile Include="Internals\Signature.cs" />
     <Compile Include="Internals\TimeLock.cs" />
@@ -49,9 +53,21 @@
     <Compile Include="Internals\TxInputOutput.cs" />
     <Compile Include="Internals\VendingMachine.cs" />
     <Compile Include="NotificationHelper.cs" />
+    <Compile Include="Notifications\AddressNotification.cs" />
+    <Compile Include="Notifications\ConfirmationNotification.cs" />
+    <Compile Include="Notifications\FundsNotification.cs" />
     <Compile Include="Notifications\LedgerNotification.cs" />
+    <Compile Include="Notifications\OrderBookNotification.cs" />
+    <Compile Include="Requests\GetAccountRequest.cs" />
+    <Compile Include="Requests\GetLatestLedgersRequest.cs" />
     <Compile Include="Requests\GetLedgerRequest.cs" />
+    <Compile Include="Requests\GetOrderBookRequest.cs" />
+    <Compile Include="Requests\SubscribeRequest.cs" />
+    <Compile Include="Responses\GetAccountResponse.cs" />
+    <Compile Include="Responses\GetLatestLedgersResponse.cs" />
     <Compile Include="Responses\GetLedgerResponse.cs" />
+    <Compile Include="Responses\GetOrderBookResponse.cs" />
+    <Compile Include="Responses\SubscribeResponse.cs" />
     <Compile Include="TransactionConverter.cs" />
     <Compile Include="Internals\Transaction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

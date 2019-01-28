@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caasiope.Explorer.JSON.API;
-using Caasiope.Explorer.JSON.API.Internals;
 using Caasiope.Explorer.JSON.API.Requests;
 using Caasiope.Explorer.Services;
+using Caasiope.Explorer.Types;
 using Caasiope.Node;
 using Caasiope.Node.Connections;
 using Caasiope.Node.Processors.Commands;
@@ -13,6 +13,7 @@ using Caasiope.Protocol.Types;
 using Helios.Common.Extensions;
 using Helios.Common.Logs;
 using Helios.JSON;
+using WebSocketSharp;
 using GetSignedLedgerRequest = Caasiope.Explorer.JSON.API.Requests.GetSignedLedgerRequest;
 using HistoricalTransaction = Caasiope.Protocol.Types.HistoricalTransaction;
 using ResponseHelper = Caasiope.Explorer.JSON.API.ResponseHelper;
@@ -27,6 +28,7 @@ namespace Caasiope.Explorer
         [Injected] public IDatabaseService DatabaseService;
         [Injected] public IExplorerDatabaseService ExplorerDatabaseService;
         [Injected] public IExplorerConnectionService ExplorerConnectionService;
+        [Injected] public IOrderBookService OrderBookService;
 
         protected readonly ILogger Logger;
 
@@ -37,9 +39,9 @@ namespace Caasiope.Explorer
 
         public bool Dispatch(ISession session, MessageWrapper wrapper, Action<Response, ResultCode> sendResponse)
         {
-            if (wrapper.Data is Request)
+            if (wrapper.Data is Request request)
             {
-                DispatchRequest(session, (Request)wrapper.Data, sendResponse);
+                DispatchRequest(session, request, sendResponse);
                 return true;
             }
 
@@ -60,7 +62,7 @@ namespace Caasiope.Explorer
                 LiveService.AddCommand(new SendTransactionCommand(signed, (r, rc) =>
                 {
                     if(rc == ResultCode.Success)
-                        ExplorerConnectionService.NotificationManager.ListenTo(session, signed.Hash);
+                        ExplorerConnectionService.SubscriptionManager.ListenTo(session, new TransactionTopic(signed.Hash));
                     sendResponse.Call(ResponseHelper.CreateSendTransactionResponse(signed.Hash), rc);
                 }));
             }
@@ -110,6 +112,13 @@ namespace Caasiope.Explorer
             else if (request is GetBalanceRequest)
             {
                 var message = (GetBalanceRequest)request;
+
+                var command = new GetAccountCommand(message.Address, (acc, rc) => sendResponse(ResponseHelper.CreateGetBalanceResponse(acc), rc));
+                LiveService.AddCommand(command);
+            }
+            else if (request is GetAccountRequest)
+            {
+                var message = (GetAccountRequest)request;
 
                 var command = new GetAccountCommand(message.Address, (acc, rc) => sendResponse(ResponseHelper.CreateGetAccountResponse(acc), rc));
                 LiveService.AddCommand(command);
@@ -232,11 +241,95 @@ namespace Caasiope.Explorer
                 }
                 sendResponse.Call(ResponseHelper.CreateGetLedgerResponse(), ResultCode.InvalidInputParam);
             }
+            else if (request is GetOrderBookRequest)
+            {
+                var message = (GetOrderBookRequest)request;
+
+                if(message.Symbol.IsNullOrEmpty() || !OrderBookService.GetSymbols().Contains(message.Symbol))
+                {
+                    sendResponse.Call(ResponseHelper.CreateGetOrderBookResponse(null, message.Symbol), ResultCode.InvalidInputParam);
+                    return;
+                }
+
+                OrderBookService.GetOrderBook(message.Symbol, (ob) => sendResponse(ResponseHelper.CreateGetOrderBookResponse(OrderConverter.GetOrders(ob), message.Symbol), ResultCode.Success));
+            }
+            else if (request is SubscribeRequest)
+            {
+                var message = (SubscribeRequest) request;
+
+                if (TopicsConverter.TryGetTopic(message.Topic, OrderBookService.GetSymbols(), out var topic))
+                {
+                    ExplorerConnectionService.SubscriptionManager.ListenTo(session, topic);
+                    sendResponse(ResponseHelper.CreateSubscribeResponse(), ResultCode.Success);
+                    return;
+                }
+
+                sendResponse(ResponseHelper.CreateSubscribeResponse(), ResultCode.InvalidInputParam);
+            }
+            else if (request is GetLatestLedgersRequest)
+            {
+                var height = LedgerService.LedgerManager.GetSignedLedger().GetHeight();
+
+                var ledgers = DatabaseService.ReadDatabaseManager.GetLedgersFromHeight(height - 9);
+
+                var results = ledgers.Select(LedgerConverter.GetLedger).ToList();
+                sendResponse.Call(ResponseHelper.CreateGetLatestLedgersResponse(results), ResultCode.Success);
+            }
 
             else
             {
                 sendResponse.Call(new Response(), ResultCode.UnknownMessage);
             }
+        }
+    }
+
+    public class TopicsConverter
+    {
+        public static bool TryGetTopic(JSON.API.Internals.Topic topic, IEnumerable<string> symbols, out Topic topicResult)
+        {
+            try
+            {
+                if (topic is JSON.API.Internals.AddressTopic address)
+                    topicResult = new AddressTopic(new Address(address.Address));
+                else if (topic is JSON.API.Internals.LedgerTopic)
+                    topicResult = new LedgerTopic();
+                else if (topic is JSON.API.Internals.OrderBookTopic orderBook)
+                {
+                    if (!symbols.Contains(orderBook.Symbol))
+                    {
+                        topicResult = null;
+                        return false;
+                    }
+
+                    topicResult = new OrderBookTopic(orderBook.Symbol);
+                }
+                else if (topic is JSON.API.Internals.TransactionTopic transaction)
+                    topicResult = new TransactionTopic(new TransactionHash(Convert.FromBase64String(transaction.Hash)));
+                else if (topic is JSON.API.Internals.FundsTopic)
+                    topicResult = new FundsTopic();
+                else throw new NotImplementedException();
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                topicResult = null;
+                return false;
+            }
+
+        }
+    }
+
+    public class OrderConverter
+    {
+        public static List<JSON.API.Internals.Order> GetOrders(List<Order> orders)
+        {
+            return orders.Select(_ => new JSON.API.Internals.Order(GetSide(_.Side), _.Size, _.Price, _.Address.Encoded)).ToList(); // TODO Price??
+        }
+
+        private static char GetSide(OrderSide side)
+        {
+            return side == OrderSide.Buy ? 'b' : 's';
         }
     }
 }

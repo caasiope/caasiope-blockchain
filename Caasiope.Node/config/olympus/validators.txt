@@ -1,0 +1,38 @@
+# Quorum : Number of signatures required for a ledger to be valid
+2
+# Validators public key
+# Alias : zeus
+BJEUME4KhbmVqbNAf3crPUDAk1lGPzBT7GM0eOqhl8sF27jpCQfNSfGZfzgSpoMUiZF3noq8VVd4zfLcUZmfBzk=
+#
+# Alias : hera
+BK9S5vQrQqaXfJtVeM6TtOSAIDaOdAVo9Fq5di3hMYAjQ5RYcAg6tqX6FXoGz9VDAtOZ76dXk7wo3DJGQDp9q1A=
+#
+# Alias : poseidon
+BJb67Vd5glRvRv5m7DDAGNFapOK0qR8+/nQqojLmIDqwwY4J/SMNsKQG6NERdkxzFN+76lfMqSSy203NpcajZzM=
+#
+# Alias : demeter
+# BG7ROAzJ31R9bYfbsQGZ2N3hF5WhI8wpAzNHttz+098PD3h+2ps27NRYMKs1tW64nxVfclWqRrt5jvc+uyremFQ=
+#
+# Alias : athena
+# BAdnUEgL8MKL7Rg+10dhYQ8h8K9oyHE3wjlSniiAb4jhfywU66QprKXPAAAYe/4zfzEcFxrv/724L1v6E8nTwgQ=
+#
+# Alias : apollo
+# BOej/ocTr8udGT9+e+Jzr9QQ9m2bwAuVxxITMAx2543mKgMa2DTlPvfsLmw662WXjuTkoBbqVGNTeU+O4b48Hxo=
+#
+# Alias : artemis
+# BLu41oiavPiQt00R7U92n7ENB2ZM9hn96r8UGImMpz1pUEhpmGzTijUyTUpndPFGl/VicMN7gArUuMJ/5RffJ38=
+#
+# Alias : ares
+# BP8XtyjgQXLoSZdMdM/JxzNbWi/tVzzPWbpTSc5iSdt1SVEQ6JDlzxFZhBlFvpXtCY5r46tFckb8BCmJjK1abBM=
+#
+# Alias : aphrodite
+# BMTq3gtJCgL+tPM+PXoq3CoSBsuQRUyy7LejOklWBikUx7me1OoSNSYDXm5aBoFBMNFVyGxbtx4WwC0xg0J3u0U=
+#
+# Alias : hephaestus
+# BONzY6PvDnkDDTOCd0rpJMNAxBMTpx9uQTeaQsH0eBqpV0oyfHO4ktrxnGmzp/ic1wUbPCxR1uhnMeti7/JyGhM=
+#
+# Alias : hermes
+# BIueSHcEGuRI7nBi2Q74+mJdS1aPAOLYNqcINwspg83pKGCWAt2zZTob0ipKfod3pOPLr7NHluTadMlyayk6kvo=
+#
+# Alias : dionysus
+# BPJFvUSXgtn5pL++2sZEesQx8fBuhubrrzCcFWmqqVAjpaVV2p3FTPtp9CbGPnrRq3wwGcaNCvHpWOq734XjeFA=

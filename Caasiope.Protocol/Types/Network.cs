@@ -27,15 +27,9 @@ namespace Caasiope.Protocol.Types
 	}
 
 	public class MainNetwork
-	{
-		public static MainNetwork Instance = new MainNetwork();
-
-		private MainNetwork()
-		{
-			// versionBytes.Add(VersionByte.BIP38_ENCRYPTED_PRIVATE_KEY, new byte[]{ 0x26 });
-            throw new NotImplementedException();
-		}
-	}
+    {
+        public static Network Instance => OlympusNetwork.Instance;
+    }
 
 	public class TestNetwork
 	{
@@ -67,5 +61,16 @@ namespace Caasiope.Protocol.Types
 			versionBytes.Add(VersionByte.BIP38_ENCRYPTED_PRIVATE_KEY, new byte[]{ 0x66 });
 		    versionBytes.Add(VersionByte.SIGNED_MESSAGE_HEADER_BYTES, Encoding.UTF8.GetBytes($"{Name}.caasiope.net"));
         }
-	}
+    }
+
+    public class OlympusNetwork : Network
+    {
+        public static OlympusNetwork Instance = new OlympusNetwork();
+
+        private OlympusNetwork() : base("olympus")
+        {
+            versionBytes.Add(VersionByte.BIP38_ENCRYPTED_PRIVATE_KEY, new byte[] { 0x86 });
+            versionBytes.Add(VersionByte.SIGNED_MESSAGE_HEADER_BYTES, Encoding.UTF8.GetBytes($"{Name}.caasiope.net"));
+        }
+    }
 }

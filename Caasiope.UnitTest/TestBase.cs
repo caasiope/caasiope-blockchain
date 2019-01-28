@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using Caasiope.Database.Managers;
 using Helios.Common;
@@ -9,11 +8,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Caasiope.NBitcoin;
 using Caasiope.JSON.Helpers;
 using Caasiope.Node;
-using Caasiope.Node.Managers;
 using Caasiope.Node.Services;
-using Caasiope.Node.Types;
 using Caasiope.Protocol;
-using Caasiope.Protocol.MerkleTrees;
 using Caasiope.Protocol.Types;
 using Caasiope.Protocol.Validators;
 using Caasiope.Protocol.Validators.Transactions;
@@ -42,7 +38,7 @@ namespace Caasiope.UnitTest
         static TestBase()
         {
 			AssertionHandler.CatchAssertions();
-            NodeConfiguration.Initialize(LocalNetwork.Instance.Name);
+            NodeConfiguration.Initialize(LocalNetwork.Instance.Name, "");
             Network = NodeConfiguration.GetNetwork();
         }
 

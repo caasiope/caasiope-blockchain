@@ -1,12 +1,16 @@
-﻿namespace Caasiope.Explorer.JSON.API.Internals
+﻿using Caasiope.Protocol.Types;
+
+namespace Caasiope.Explorer.JSON.API.Internals
 {
     public class SecretRevelation : TxDeclaration
     {
-        public readonly string Secret;
+        public string Secret;
 
-        public SecretRevelation(string secret)
+        public SecretRevelation(string secret) : this()
         {
             Secret = secret;
         }
+
+        public SecretRevelation() : base((byte)DeclarationType.Secret) { }
     }
 }

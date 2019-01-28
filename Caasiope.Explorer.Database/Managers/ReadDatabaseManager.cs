@@ -143,5 +143,17 @@ namespace Caasiope.Explorer.Database.Managers
                 list.AddRange(repositoryManager.GetRepository<TransactionDeclarationRepository>().GetEnumerable(transaction.TransactionHash));
             return list;
         }
+
+        public List<VendingMachine> GetVendingMachines()
+        {
+            var results = new List<VendingMachine>();
+
+            foreach (var machine in repositoryManager.GetRepository<VendingMachineRepository>().GetEnumerable())
+            {
+                results.Add(new VendingMachine(machine.Account.Owner, machine.Account.CurrencyIn, machine.Account.CurrencyOut, machine.Account.Rate));
+            }
+
+            return results;
+        }
     }
 }

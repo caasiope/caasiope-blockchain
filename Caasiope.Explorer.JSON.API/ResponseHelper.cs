@@ -1,36 +1,58 @@
 ﻿using System;
 using System.Collections.Generic;
+using Caasiope.Explorer.JSON.API.Internals;
 using Caasiope.Explorer.JSON.API.Responses;
 using Caasiope.Protocol;
 using Caasiope.Protocol.Types;
 using Helios.JSON;
 using Ledger = Caasiope.Explorer.JSON.API.Internals.Ledger;
+using TxDeclaration = Caasiope.Explorer.JSON.API.Internals.TxDeclaration;
 
 namespace Caasiope.Explorer.JSON.API
 {
     public class ResponseHelper
 	{
-		public static Response CreateGetAccountResponse(Account account)
+		public static Response CreateGetBalanceResponse(Account account)
 		{
 		    return ReferenceEquals(account, null) ? new GetBalanceResponse() : new GetBalanceResponse { Address = account.Address.Encoded, Balance = FormatBalance(account.Balances)};
 		}
 
-		public static Response CreateGetTransactionResponse(Internals.Transaction transaction = null)
+		public static Response CreateGetAccountResponse(Account account)
+		{
+		    return ReferenceEquals(account, null) ? new GetAccountResponse() : new GetAccountResponse { Address = account.Address.Encoded, Balance = FormatBalance(account.Balances), Declaration = GetDeclaration(account.Declaration)};
+		}
+
+	    private static TxDeclaration GetDeclaration(Protocol.Types.TxAddressDeclaration declaration)
+	    {
+	        return ReferenceEquals(declaration, null) ? null : TransactionConverter.CreateDeclaration(declaration);
+	    }
+
+	    public static Response CreateGetTransactionResponse(Internals.Transaction transaction = null)
 		{
 		    return transaction == null ? new GetTransactionResponse() : new GetTransactionResponse {Transaction = transaction};
 		}
 
-		public static Response CreateGetTransactionHistoryResponse(List<Internals.HistoricalTransaction> transactions = null, int? total = null)
+	    public static Response CreateGetTransactionHistoryResponse(List<Internals.HistoricalTransaction> transactions = null, int? total = null)
 		{
 		    return transactions == null ? new GetTransactionHistoryResponse() : new GetTransactionHistoryResponse { Transactions = transactions, Total = total};
 		}
 
-		public static Response CreateGetLedgerResponse(Ledger ledger = null)
+	    public static Response CreateGetLedgerResponse(Ledger ledger = null)
 		{
 		    return ledger == null ? new GetLedgerResponse() : new GetLedgerResponse { Ledger = ledger };
 		}
 
-		private static Dictionary<string, decimal> FormatBalance(IEnumerable<AccountBalance> balances)
+	    public static Response CreateGetLatestLedgersResponse(List<Ledger> ledgers = null)
+		{
+		    return ledgers == null ? new GetLatestLedgersResponse() : new GetLatestLedgersResponse { Ledgers = ledgers };
+		}
+
+	    public static Response CreateGetOrderBookResponse(List<Order> orderbook, string symbol)
+	    {
+	        return new GetOrderBookResponse() {Orders = orderbook, Symbol = symbol};
+	    }
+
+	    private static Dictionary<string, decimal> FormatBalance(IEnumerable<AccountBalance> balances)
 		{
 			var dictionary = new Dictionary<string, decimal>();
 
@@ -77,7 +99,7 @@ namespace Caasiope.Explorer.JSON.API
 	        return true;
 	    }
 
-        private static string ToBase64<T>(Action<T> write) where T : ByteStream, new()
+	    private static string ToBase64<T>(Action<T> write) where T : ByteStream, new()
 	    {
 	        byte[] bytes;
 	        using (var stream = new T())
@@ -87,5 +109,10 @@ namespace Caasiope.Explorer.JSON.API
 	        }
 	        return Convert.ToBase64String(bytes);
 	    }
-    }
+
+	    public static Response CreateSubscribeResponse()
+	    {
+	        return new SubscribeResponse();
+	    }
+	}
 }

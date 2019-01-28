@@ -79,7 +79,7 @@ namespace Caasiope.Database.Managers
             }
         }
 
-        public List<SignedLedgerState> GetLedgersFromHeight(long startHeight)
+        public List<SignedLedgerState> GetLedgersWithStateFromHeight(long startHeight)
         {
             using (var entities = new BlockchainEntities())
             {
@@ -95,6 +95,15 @@ namespace Caasiope.Database.Managers
                     select new SignedLedgerState(ledger, state.Item2);
 
                 return results.ToList();
+            }
+        }
+
+        public List<SignedLedger> GetLedgersFromHeight(long startHeight)
+        {
+            using (var entities = new BlockchainEntities())
+            {
+                var rawLedgers = entities.ledgers.Where(_ => _.height >= startHeight).ToList();
+                return rawLedgers.Select(_ => LedgerCompressionEngine.ReadZippedLedger(_.raw)).ToList();
             }
         }
 

@@ -29,7 +29,7 @@ namespace Caasiope.Explorer.Managers
 
         private readonly Dictionary<string, TableTransformationState> tableTransformationStates = new Dictionary<string, TableTransformationState>();
         private readonly MonitorLocker locker = new MonitorLocker();
-        private readonly AutoResetEvent finished = new AutoResetEvent(false);
+        private readonly ManualResetEvent finished = new ManualResetEvent(false);
         private long current;
         private ILogger logger;
 
@@ -65,7 +65,7 @@ namespace Caasiope.Explorer.Managers
             //    throw new ApplicationException("Explorer ledger height is higher than current ledger height. Please wipe the Explorer database!");
 
             //TODO use batch
-            var ledgers = DatabaseService.ReadDatabaseManager.GetLedgersFromHeight(minimal).ToDictionary(_ => _.Ledger.Ledger.LedgerLight.Height);
+            var ledgers = DatabaseService.ReadDatabaseManager.GetLedgersWithStateFromHeight(minimal).ToDictionary(_ => _.Ledger.Ledger.LedgerLight.Height);
 
             var min = tableTransformationStates.Values.Min(table => table.CurrentHeight);
 

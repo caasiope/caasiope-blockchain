@@ -20,17 +20,16 @@ namespace Caasiope.Node.Managers
     {
         [Injected] public ILiveService LiveService;
         [Injected] public ILedgerService LedgerService;
-        [Injected] public IConnectionService ConnectionService;
 
         public SignedLedgerValidator SignedLedgerValidator;
         public readonly Network Network;
         private readonly ILogger logger;
         private readonly ILogger merkleLogger;
         private bool needSetInitialLedger;
+        private Action<SignedLedger> OnNewLedger { get; set; }
 
         public LedgerStateFinal LedgerState { get; private set; }
         public SignedLedger LastLedger { get; private set; }
-        public Action<SignedLedger> onNewLedger { get; set; }
 
         public LedgerManager(Network network, ILogger logger)
         {
@@ -41,7 +40,7 @@ namespace Caasiope.Node.Managers
 
         public void SubscribeOnNewLedger(Action<SignedLedger> callback)
         {
-            onNewLedger += callback;
+            OnNewLedger += callback;
         }
 
         public void Initialize(SignedLedger lastLedger, bool needToSetInitial)
@@ -224,7 +223,7 @@ namespace Caasiope.Node.Managers
             LedgerState = ledgerState;
             LastLedger = signed;
 
-            onNewLedger(LastLedger);
+            OnNewLedger(LastLedger);
         }
 
         private bool CheckMerkleRoot(LedgerStateFinal ledgerState, SignedLedger ledger)
