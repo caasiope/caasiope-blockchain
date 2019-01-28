@@ -26,7 +26,7 @@ namespace Caasiope.Explorer.Managers
         {
             // todo optimize
             var result = buyOrders.OrderByDescending(_ => _.Value.Price).Take(count).Select(_ => _.Value);
-            return result.Union(sellOrders.OrderByDescending(_ => _.Value.Price).Take(count).Select(_ => _.Value)).ToList();
+            return result.Union(sellOrders.OrderBy(_ => _.Value.Price).Take(count).Select(_ => _.Value)).ToList();
         }
 
         private void Remove(Address address, OrderSide side)
@@ -37,29 +37,46 @@ namespace Caasiope.Explorer.Managers
                 sellOrders.Remove(address);
         }
 
-        public bool TryUpdateOrder(Account account, Order order)
+        public bool TryUpdateOrder(Account account, VendingMachine machine, OrderSide side)
         {
-            if (order.Size == 0)
+            var size = GetSize(account, machine);
+
+            if (size == 0)
             {
-                Remove(account.Address, order.Side);
+                Remove(account.Address, side);
                 return true;
             }
 
-            var side = order.Side;
             if (side == OrderSide.Buy && buyOrders.TryGetValue(account.Address, out var oldOrder) 
                 || side == OrderSide.Sell && sellOrders.TryGetValue(account.Address, out oldOrder))
             {
-                if (oldOrder.Size == order.Size)
+                if (oldOrder.Size == size)
                     return false;
 
-                oldOrder.Size = order.Size;
+                oldOrder.Size = size;
                 return true;
             }
             else
             {
-                Add(account.Address, order);
+                var newOrder = GetOrder(account, machine, side);
+                Add(account.Address, newOrder);
                 return true;
             }
+        }
+
+        public static Order GetOrder(Account account, VendingMachine machine, OrderSide side)
+        {
+            var size = GetSize(account, machine);
+            var rate = Amount.ToWholeDecimal(machine.Rate);
+
+            return new Order(side, size, rate, machine.Address);
+        }
+
+        public static decimal GetSize(Account account, VendingMachine machine)
+        {
+            var currencyOut = machine.CurrencyOut;
+            var size = account.GetBalance(currencyOut);
+            return Amount.ToWholeDecimal(size);
         }
     }
     public class OrderBookManager
@@ -77,31 +94,13 @@ namespace Caasiope.Explorer.Managers
             {
                 var machine = (VendingMachine) account.Declaration;
                 var symbol = GetSymbol(machine, out var side);
-                var size = GetSize(account, machine);
+                var size = OrderBook.GetSize(account, machine);
                 if (size == 0)
                     continue;
 
-                var order = GetOrder(account, machine, side);
+                var order = OrderBook.GetOrder(account, machine, side);
                 orderBooks.GetOrCreate(symbol).Add(account.Address, order);
             }
-        }
-
-        private Order GetOrder(Account account, VendingMachine machine, OrderSide side)
-        {
-            var size = GetSize(account, machine);
-            var rate = Amount.ToWholeDecimal(machine.Rate);
-
-            if (side == OrderSide.Buy)
-                rate = 1 / rate;
-
-            return new Order(side, size, rate, machine.Address);
-        }
-
-        private static decimal GetSize(Account account, VendingMachine machine)
-        {
-            var currencyOut = machine.CurrencyOut;
-            var size = account.GetBalance(currencyOut);
-            return Amount.ToWholeDecimal(size);
         }
 
         private string GetSymbol(VendingMachine machine, out OrderSide orderSide)
@@ -161,11 +160,11 @@ namespace Caasiope.Explorer.Managers
             {
                 var machine = (VendingMachine) account.Declaration;
                 var symbol = GetSymbol(machine, out var side);
-                var newOrder = GetOrder(account, machine, side);
+
 
                 var orderBook = orderBooks.GetOrCreate(symbol, () => new OrderBook());
 
-                if (orderBook.TryUpdateOrder(account, newOrder))
+                if (orderBook.TryUpdateOrder(account, machine, side))
                 {
                     changes[symbol] = true;
                 }
@@ -181,6 +180,9 @@ namespace Caasiope.Explorer.Managers
             {
                 foreach (var input in transaction.Transaction.Inputs)
                 {
+                    if (accountsToUpdate.ContainsKey(input.Address))
+                        continue;
+
                     if (LedgerService.LedgerManager.LedgerState.TryGetAccount(input.Address, out var account))
                         if (account.Address.Type == AddressType.VendingMachine)
                         {

@@ -192,13 +192,13 @@ namespace Caasiope.Explorer.JSON.API
 
         private static Internals.MultiSignature CreateMultisignature(MultiSignature declaration)
         {
-            return new Internals.MultiSignature(declaration.Signers.Select(_ => _.Encoded).ToList(), declaration.Required);
+            return new Internals.MultiSignature(declaration.Signers.Select(_ => _.Encoded).ToList(), declaration.Required, declaration.Address.Encoded);
         }
 
         private static Internals.HashLock CreateHashLock(HashLock declaration)
         {
             var secretHash = new Internals.SecretHash(declaration.SecretHash.Type, Convert.ToBase64String(declaration.SecretHash.Hash.Bytes));
-            return new Internals.HashLock(secretHash);
+            return new Internals.HashLock(secretHash, declaration.Address.Encoded);
         }
 
         private static Internals.SecretRevelation CreateSecret(SecretRevelation declaration)
@@ -208,12 +208,12 @@ namespace Caasiope.Explorer.JSON.API
 
         private static Internals.TimeLock CreateTimeLock(TimeLock declaration)
         {
-            return new Internals.TimeLock(declaration.Timestamp);
+            return new Internals.TimeLock(declaration.Timestamp, declaration.Address.Encoded);
         }
 
         public static Internals.VendingMachine CreateVendingMachine(VendingMachine declaration)
         {
-            return new Internals.VendingMachine(declaration.Owner.Encoded, Currency.ToSymbol(declaration.CurrencyIn), Currency.ToSymbol(declaration.CurrencyOut), Amount.ToWholeDecimal(declaration.Rate));
+            return new Internals.VendingMachine(declaration.Owner.Encoded, Currency.ToSymbol(declaration.CurrencyIn), Currency.ToSymbol(declaration.CurrencyOut), Amount.ToWholeDecimal(declaration.Rate), declaration.Address.Encoded);
         }
 
         public static IEnumerable<Internals.Signature> GetSignatures(List<Signature> signatures)

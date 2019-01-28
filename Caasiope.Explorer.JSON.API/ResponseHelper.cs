@@ -22,7 +22,7 @@ namespace Caasiope.Explorer.JSON.API
 		    return ReferenceEquals(account, null) ? new GetAccountResponse() : new GetAccountResponse { Address = account.Address.Encoded, Balance = FormatBalance(account.Balances), Declaration = GetDeclaration(account.Declaration)};
 		}
 
-	    private static TxDeclaration GetDeclaration(TxAddressDeclaration declaration)
+	    private static TxDeclaration GetDeclaration(Protocol.Types.TxAddressDeclaration declaration)
 	    {
 	        return ReferenceEquals(declaration, null) ? null : TransactionConverter.CreateDeclaration(declaration);
 	    }
