@@ -26,7 +26,7 @@ namespace Caasiope.Explorer.Managers
         {
             // todo optimize
             var result = buyOrders.OrderByDescending(_ => _.Value.Price).Take(count).Select(_ => _.Value);
-            return result.Union(sellOrders.OrderByDescending(_ => _.Value.Price).Take(count).Select(_ => _.Value)).ToList();
+            return result.Union(sellOrders.OrderBy(_ => _.Value.Price).Take(count).Select(_ => _.Value)).ToList();
         }
 
         private void Remove(Address address, OrderSide side)
