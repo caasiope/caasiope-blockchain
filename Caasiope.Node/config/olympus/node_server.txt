@@ -1,0 +1,7 @@
+﻿# websocket server configuration
+Ip=
+Port=2020
+ForwardedPort=
+TLS_CERT=
+TLS_PWD=
+MaxConnectionNumber=666
