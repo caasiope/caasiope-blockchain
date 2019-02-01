@@ -14,6 +14,8 @@ namespace Caasiope.Protocol.Types
         public static readonly Currency LTC = FromSymbol("LTC");
         public static readonly Currency ETH = FromSymbol("ETH");
         public static readonly Currency CAS = FromSymbol("CAS");
+        public static readonly Currency DOGE = FromSymbol("DOG");
+        public static readonly Currency DASH = FromSymbol("DSH");
 
         private readonly short value;
 

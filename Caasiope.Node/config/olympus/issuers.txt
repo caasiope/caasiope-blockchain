@@ -1,3 +1,7 @@
 # Currency | Address
 CAS | qsqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqxdpx0l
 BTC | qymt8j56rx4uvjxyxctsnpujk3cv74keechdxhpt
+LTC | qyfjaxl94ypq42cm2yu4ea7t9rtlfpn8v9qlh0vv
+ETH | qy2lrfrxyjz7z6lwem8cw36syqg07crqhx78eyet
+DSH | qyu7kx3a9uhaercwm0mf5ja8qkykk2ynk540vslt
+DOG | qy62ut98532kq295svf5w2j5gze30enh89x7cply
