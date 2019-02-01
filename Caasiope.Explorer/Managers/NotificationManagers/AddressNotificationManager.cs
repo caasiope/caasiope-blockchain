@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Caasiope.Explorer.JSON.API;
 using Caasiope.Explorer.JSON.API.Notifications;
 using Caasiope.Explorer.Types;
 using Caasiope.Node;
@@ -65,7 +64,7 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
             var inputs = ledger.Ledger.Block.Transactions.SelectMany(_ => _.Transaction.Inputs.Select(__ => __.Address));
             var outputs = ledger.Ledger.Block.Transactions.SelectMany(_ => _.Transaction.Outputs.Select(__ => __.Address));
             var addresses = inputs.Union(outputs).ToList();
-            return subscriptor.GetNotifications(addresses, LedgerService.LedgerManager.LedgerState);
+            return subscriptor.GetNotifications(addresses, LedgerService.LedgerManager.LedgerState, ledger.Ledger);
         }
     }
 
@@ -79,7 +78,7 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
             addresses.Add(address);
         }
 
-        public List<AddressNotification> GetNotifications(List<Address> toCheck, LedgerState ledgerState)
+        public List<AddressNotification> GetNotifications(List<Address> toCheck, LedgerState ledgerState, Ledger ledger)
         {
             var results = new List<AddressNotification>();
 
@@ -90,10 +89,14 @@ namespace Caasiope.Explorer.Managers.NotificationManagers
 
                 if (ledgerState.TryGetAccount(address, out var account))
                 {
+                    var transactions = ledger.Block.Transactions.Where(_ => _.Transaction.Inputs.Any(__ => __.Address == address) 
+                                                                            || _.Transaction.Outputs.Any(__ => __.Address == address)).Select(_ => _.Hash.ToBase64()).ToList();
                     results.Add(new AddressNotification
                     {
                         Address = account.Address.Encoded,
-                        Balance = account.Balances.ToDictionary(_ => Currency.ToSymbol(_.Currency), __ => Amount.ToWholeDecimal(__.Amount))
+                        Balance = account.Balances.ToDictionary(_ => Currency.ToSymbol(_.Currency), __ => Amount.ToWholeDecimal(__.Amount)),
+                        Height = ledger.LedgerLight.Height,
+                        Transactions = transactions
                     });
                 }
             }

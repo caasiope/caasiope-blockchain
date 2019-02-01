@@ -29,22 +29,22 @@ namespace Caasiope.Explorer.JSON.API
 
 	    public static Response CreateGetTransactionResponse(Internals.Transaction transaction = null)
 		{
-		    return transaction == null ? new GetTransactionResponse() : new GetTransactionResponse {Transaction = transaction};
+		    return new GetTransactionResponse {Transaction = transaction};
 		}
 
 	    public static Response CreateGetTransactionHistoryResponse(List<Internals.HistoricalTransaction> transactions = null, int? total = null)
 		{
-		    return transactions == null ? new GetTransactionHistoryResponse() : new GetTransactionHistoryResponse { Transactions = transactions, Total = total};
+		    return new GetTransactionHistoryResponse { Transactions = transactions, Total = total};
 		}
 
 	    public static Response CreateGetLedgerResponse(Ledger ledger = null)
 		{
-		    return ledger == null ? new GetLedgerResponse() : new GetLedgerResponse { Ledger = ledger };
+		    return new GetLedgerResponse { Ledger = ledger };
 		}
 
 	    public static Response CreateGetLatestLedgersResponse(List<Ledger> ledgers = null)
 		{
-		    return ledgers == null ? new GetLatestLedgersResponse() : new GetLatestLedgersResponse { Ledgers = ledgers };
+		    return new GetLatestLedgersResponse { Ledgers = ledgers };
 		}
 
 	    public static Response CreateGetOrderBookResponse(List<Order> orderbook, string symbol)

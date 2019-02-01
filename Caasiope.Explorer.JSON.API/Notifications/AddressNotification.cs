@@ -7,5 +7,7 @@ namespace Caasiope.Explorer.JSON.API.Notifications
     {
         public string Address;
         public Dictionary<string, decimal> Balance;
+        public long Height;
+        public List<string> Transactions;
     }
 }

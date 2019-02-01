@@ -29,7 +29,8 @@ namespace Caasiope.Explorer.Services
 	    {
 	        base.OnInitialize();
 	        SubscriptionManager.OnSend(Send);
-	        LedgerService.LedgerManager.SubscribeOnNewLedger(SubscriptionManager.Notify);
+            // TODO there is a problem. It cannot run from LedgerService thread!
+            LedgerService.LedgerManager.SubscribeOnNewLedger(SubscriptionManager.Notify);
 	        OrderBookService.OnOrderBookUpdated(SubscriptionManager.OrderBookNotificationManager.Notify);
         }
 
