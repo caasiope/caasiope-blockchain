@@ -17,7 +17,7 @@ namespace Caasiope.Explorer.JSON.API
             var light = ledger.Ledger.LedgerLight;
             var txs = ledger.Ledger.Block.Transactions;
             var transactions = txs.Select(GetTransactionHeader).ToList();
-            return new Internals.Ledger(light.Height, ledger.Hash.ToBase64(), light.Timestamp, light.Lastledger.ToBase64(), light.Version.VersionNumber, transactions);
+            return new Internals.Ledger(light.Height, ledger.Hash.ToBase64(), light.Timestamp, light.Lastledger.ToBase64(), light.Version.VersionNumber, ledger.Ledger.Block.FeeTransactionIndex, transactions);
         }
 
         private static Internals.TransactionHeader GetTransactionHeader(SignedTransaction signed, int index)
