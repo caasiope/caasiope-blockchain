@@ -86,7 +86,8 @@ namespace Caasiope.Explorer.Managers
 
         private readonly Dictionary<string, OrderBook> orderBooks = new Dictionary<string, OrderBook>();
 
-        private readonly HashSet<string> symbols = new HashSet<string>() { new Symbol("BTC", "LTC"), new Symbol("CAS", "BTC"), new Symbol("CAS", "LTC"), new Symbol("BTC", "ETH") };
+        // TODO Take it from config
+        private readonly HashSet<string> symbols = new HashSet<string>() { new Symbol("BTC", "LTC"), new Symbol("CAS", "BTC"), new Symbol("CAS", "LTC"), new Symbol("BTC", "ETH"), new Symbol("DOG", "BTC") };
 
         public void Initialize(List<Account> accounts)
         {
