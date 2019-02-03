@@ -1,6 +1,9 @@
-﻿using Caasiope.Explorer.Services;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Caasiope.Explorer.Services;
 using Caasiope.Node;
 using Helios.Common.Concepts.Services;
+using Helios.Common.Configurations;
 
 //The blockchain explorer of Caasiope blockchain
 //Authors:
@@ -53,7 +56,14 @@ namespace Caasiope.Explorer
 
 	    public IOrderBookService CreateOrderBookService()
 	    {
-	        return new OrderBookService();
+	        var raw = new UrlConfiguration(NodeConfiguration.GetPath("symbols.txt"));
+	        var symbols = raw.Lines.Select(_ =>
+	        {
+	            var splited = _.Split('|');
+                return new Symbol(splited[0].Trim(), splited[1].Trim());
+	        }).ToList();
+
+	        return new OrderBookService(symbols);
 	    }
 	}
 

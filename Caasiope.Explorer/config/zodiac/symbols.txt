@@ -1,0 +1,6 @@
+﻿# BASE_currency | QUOTE_currency 
+BTC | LTC
+CAS | BTC
+CAS | LTC
+BTC | ETH
+DOG | BTC

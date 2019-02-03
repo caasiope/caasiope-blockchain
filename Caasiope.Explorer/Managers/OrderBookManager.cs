@@ -85,12 +85,15 @@ namespace Caasiope.Explorer.Managers
         public Action<string, List<Order>> OrderBookUpdated;
 
         private readonly Dictionary<string, OrderBook> orderBooks = new Dictionary<string, OrderBook>();
+        private readonly HashSet<string> symbols = new HashSet<string>();
 
-        // TODO Take it from config
-        private readonly HashSet<string> symbols = new HashSet<string>() { new Symbol("BTC", "LTC"), new Symbol("CAS", "BTC"), new Symbol("CAS", "LTC"), new Symbol("BTC", "ETH"), new Symbol("DOG", "BTC") };
-
-        public void Initialize(List<Account> accounts)
+        public void Initialize(List<Account> accounts, List<Symbol> symbols)
         {
+            foreach (var symbol in symbols)
+            {
+                this.symbols.Add(symbol);
+            }
+
             foreach (var account in accounts)
             {
                 var machine = (VendingMachine) account.Declaration;
@@ -123,7 +126,7 @@ namespace Caasiope.Explorer.Managers
                 return reversedSymbol;
             }
 
-            throw new NotImplementedException();
+            throw new NotImplementedException($"Symbol doesn't exist for currencies {inStr}, {outStr}");
         }
 
         public bool TryGetOrderBook(string symbol, out List<Order> orderbook)

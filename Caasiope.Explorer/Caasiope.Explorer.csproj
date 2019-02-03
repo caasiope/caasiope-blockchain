@@ -55,6 +55,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BlockchainExplorer.cs" />
+    <Content Include="config\zodiac\symbols.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Compile Include="Dispatcher.cs" />
     <Compile Include="Managers\NotificationManagers\AddressNotificationManager.cs" />
     <Compile Include="Managers\DataTransformerManager.cs" />

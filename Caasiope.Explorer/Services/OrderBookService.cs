@@ -24,6 +24,12 @@ namespace Caasiope.Explorer.Services
         public OrderBookManager OrderBookManager { get; } = new OrderBookManager();
 
         private OrderBookCommandProcessor processor;
+        private readonly List<Symbol> symbols;
+
+        public OrderBookService(List<Symbol> symbols)
+        {
+            this.symbols = symbols;
+        }
 
         protected override void OnInitialize()
         {
@@ -49,7 +55,7 @@ namespace Caasiope.Explorer.Services
                     vendingMachines.Add(account);
             }
 
-            OrderBookManager.Initialize(vendingMachines);
+            OrderBookManager.Initialize(vendingMachines, symbols);
         }
 
         protected override void OnStop()
@@ -97,6 +103,9 @@ namespace Caasiope.Explorer.Services
 
         public Symbol(string baseCurrency, string quoteCurrency)
         {
+            if(baseCurrency == quoteCurrency)
+                throw new ApplicationException($"Base currency and quote currency cannot be the same value! {baseCurrency}");
+
             BaseCurrency = baseCurrency;
             QuoteCurrency = quoteCurrency;
         }
