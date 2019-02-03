@@ -3,5 +3,4 @@ BTC | LTC
 CAS | BTC
 CAS | LTC
 BTC | ETH
-DOG | BTC
-DOG | CAS
+CAS | DOG
