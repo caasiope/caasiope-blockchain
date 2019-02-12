@@ -12,6 +12,7 @@ namespace Caasiope.Node.Services
     public interface ILedgerService : IService
     {
         LedgerManager LedgerManager { get; }
+        SignedTransactionManager SignedTransactionManager { get; }
         SynchronizedBlockingState<LedgerStatus> State { get; }
 
         void SetNextLedger(SignedLedger signed, Action onFinish);
@@ -28,6 +29,7 @@ namespace Caasiope.Node.Services
     public class LedgerService : ThreadedService, ILedgerService
     {
         public LedgerManager LedgerManager { get; }
+        public SignedTransactionManager SignedTransactionManager { get; } = new SignedTransactionManager();
 
         private readonly LedgerCommandProcessor commands;
 
@@ -49,6 +51,7 @@ namespace Caasiope.Node.Services
         {
             LiveService.StartedHandle.WaitOne();
 
+            SignedTransactionManager.Initialize();
             var needSetInitial = InitializeLedgerManager();
 
             State.SetAndWait(LedgerStatus.Updated); // TODO initialize
@@ -86,11 +89,12 @@ namespace Caasiope.Node.Services
 
         private void CheckMerkleRoot()
         {
-            var merkle = LedgerService.LedgerManager.GetMerkleRoot();
-            var ledger = LedgerService.LedgerManager.GetSignedLedger();
+            var computed = LedgerService.LedgerManager.GetMerkleRootHash();
+            var expected = LedgerService.LedgerManager.GetSignedLedger().Ledger.MerkleHash;
 
             // TODO why debug assert ?
-            Debug.Assert(ledger.Ledger.MerkleHash.Equals(merkle.Hash));
+            Debug.Assert(expected.Equals(computed), "Ledger hash does not match with the loaded");
+            Debug.Assert(LedgerService.LedgerManager.CheckMerkleRoot(), "Merkle root is not valid!");
         }
 
         protected override void OnStop()

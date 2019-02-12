@@ -7,6 +7,7 @@ using Helios.Common.Logs;
 
 namespace Caasiope.Protocol.MerkleTrees
 {
+    // outdated use trie
     public class LedgerMerkleRoot
     {
         private readonly ILogger logger;
@@ -15,7 +16,7 @@ namespace Caasiope.Protocol.MerkleTrees
 
         public readonly LedgerMerkleRootHash Hash;
 
-        public LedgerMerkleRoot(IEnumerable<Account> accounts, IEnumerable<TxDeclaration> declarations, ILogger logger) : this(SortAccounts(accounts), SortDeclarations(declarations), logger) { }
+        public LedgerMerkleRoot(IEnumerable<Account> accounts, IEnumerable<TxDeclaration> declarations, ILogger logger, Hasher hasher) : this(SortAccounts(accounts, hasher), SortDeclarations(declarations), logger) { }
 
         private LedgerMerkleRoot(SortedList<AccountHash, Account> accounts, SortedList<TxDeclarationHash, TxDeclaration> declarations, ILogger logger)
         {
@@ -52,12 +53,12 @@ namespace Caasiope.Protocol.MerkleTrees
             logger.LogDebug($"__Merkle Hash       : {Hash.ToBase64()}");
         }
 
-        private static SortedList<AccountHash, Account> SortAccounts(IEnumerable<Account> accounts)
+        private static SortedList<AccountHash, Account> SortAccounts(IEnumerable<Account> accounts, Hasher hasher)
         {
             var list = new SortedList<AccountHash, Account>();
             foreach (var account in accounts)
             {
-                list.Add(account.GetHash(), account);
+                list.Add(hasher.GetHash(account), account);
             }
             return list;
         }

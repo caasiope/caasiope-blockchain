@@ -10,6 +10,7 @@ namespace Caasiope.P2P
     public class NodeManager
     {
         public readonly Persona Self;
+        public readonly int ForwardedPort;
         public readonly int ServerPort;
 
         private readonly HashSet<IPEndPoint> knownSelfEndPoints = new HashSet<IPEndPoint>();
@@ -17,13 +18,14 @@ namespace Caasiope.P2P
         private readonly MonitorLocker locker = new MonitorLocker();
         private static readonly Random Random = new Random();
 
-        public NodeManager(Persona self, IPAddress ip, int serverPort, IEnumerable<IPEndPoint> endPoints)
+        public NodeManager(Persona self, IPEndPoint endPoint, int forwardedPort, IEnumerable<IPEndPoint> endPoints)
         {
             Self = self;
-            if(serverPort > 0)
-                knownSelfEndPoints.Add(new IPEndPoint(ip, serverPort));
+            if(forwardedPort > 0)
+                knownSelfEndPoints.Add(new IPEndPoint(endPoint.Address, forwardedPort));
 
-            ServerPort = serverPort;
+            ServerPort = endPoint.Port;
+            ForwardedPort = forwardedPort;
             RegisterEndPoints(endPoints);
         }
 
@@ -98,7 +100,8 @@ namespace Caasiope.P2P
             {
                 if (nodes.ContainsKey(endpoint))
                 {
-                    nodes[endpoint].Node.SetEndPoint(peerSession.Peer.Node.EndPoint);
+                    if(peerSession.Peer.Node.HasServer)
+                        nodes[endpoint].Node.SetEndPoint(peerSession.Peer.Node.EndPoint);
                 }
                 else
                 {
@@ -127,7 +130,6 @@ namespace Caasiope.P2P
                     results = scored.Where(_ => _.Node.IsPrivateEndPoint.HasValue && !_.Node.IsPrivateEndPoint.Value).ToList();
                 }
 
-                // TODO get 10 random endpoints
                 return results.Select(_ => _.Node.EndPoint).Take(10).ToList();
             }
         }
@@ -135,7 +137,8 @@ namespace Caasiope.P2P
         //TODO
         private List<NodeEntry> GetGoodScoredNodes(List<NodeEntry> nodes)
         {
-            return nodes;
+                        // This is the dirty fix
+            return nodes.Where(_ => _.Node.HasServer).ToList();
         }
 
         public List<Node> GetAllNodes()

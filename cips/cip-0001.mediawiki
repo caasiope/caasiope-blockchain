@@ -1,0 +1,63 @@
+<pre>
+  CIP: 1
+  Title: Immutable State
+  Author: Guillaume Bonnot
+  Status: Draft
+  Created: 2018-11-03
+</pre>
+
+==Abstract==
+The current implementation is using managers to store the current state of the ledger and because everything is mutable, the object you get can be modified at anytime by another thread. We propose that the state of the ledger and the state of the accounts become immutable so it can be safely accessed by multiple threads.
+
+==Motivation==
+In current implementation, the ledger state (acounts, declarations) is contained is several different places (managers) and can be accessed independently. There is also no notion of temporary poststate. The ledger state currently is a dynamic object, preventing it to be concurrently accessed by different threads.
+
+==Specification==
+
+===Ledger State===
+The ledger state is now an immutable object containing the immutable state of the accounts and the merkle hash of the ledger state.
+The ledger poststate is a mutable object containing both the previous ledger state and the mutable accounts modified by the newly included transactions.
+The ledger poststate can be finalized to create the new ledger state.
+
+LedgerState(h) -> PostState(h+1) -> LedgerState(h+1)
+
+===Account===
+The account is now immutable and contains new fields
+* current ledger : the block height it was modified for the last time
+* declaration : the account declaration if any
+
+The account hash has changed and now includes height and declaration :
+* address
+* current ledger
+* balances (list)
+* declaration (nullable)
+
+The immutable account is temporary and only used by the ledger poststate when executing transactions.
+
+Account(h) -> MutableAccount(h+1) -> Account(h+1)
+
+===Merkle Tree===
+The accounts are stored in a compact merkle radix trie where the key is the fixed length address.
+The trie can be finalized and become immutable.
+The trie can be cloned and any modification on the clone will not have any impact on the original tree.
+This trie implementation enables the ledger poststate to be built on top of the previous trie while the previous ledger state remains immutable.
+
+===Merkle Hash===
+The merkle hash of the ledger state is now computed using the merkle hash of the account merkle tree.
+
+===Protocol Version===
+A new protocol version is introduced :
+* ImmutableState : 0x2
+
+===Hash Factory===
+The hash factory uses the protocol version to determine which implementation of the hashing function should be used.
+
+==Rationale==
+The blockchain is immutable, so should be a ledger state and by extension an account state.
+Each new ledger state is based on the previous ledger state, so an implementation using a tree structure should be able to have 2 states sharing the same nodes.
+In order to fully represent the state of an account at a given time, we needed to include the current ledger (history) and also the declaration(state) direclty into the account.
+
+==Backwards compatibility==
+This proposal changes the hash of accounts and the merkle hash of the ledger state.
+Backwards compatibility is handle by using the protocol version of a ledger to determine which hashing implementation should be used.
+Forwards compatibility is not possible, when old versions are going to compare the hash given with the hash they computed, it will fail and they will reject any new ledger.

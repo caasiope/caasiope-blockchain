@@ -32,13 +32,13 @@ namespace Caasiope.Protocol.Validators
             }
         }
 
-        public static bool CheckSignatures(this SignedTransaction transaction, TransactionRequiredValidationFactory factory, Network network, long timestamp)
+        public static bool CheckSignatures(this SignedTransaction transaction, TransactionRequiredValidationFactory factory, Network network, long timestamp, ILedgerState state = null)
         {
             var hash = transaction.Hash;
 
             // get required signatures
             List<TransactionRequiredValidation> requireds;
-            if (!TryGetRequiredValidations(factory, transaction.Transaction, out requireds))
+            if (!TryGetRequiredValidations(state, factory, transaction.Transaction, out requireds))
                 return false;
 
             var signatures = transaction.Signatures.Select(signature => new SignatureRequired(signature)).ToList();
@@ -46,7 +46,7 @@ namespace Caasiope.Protocol.Validators
             // check required signatures and declarations are set
             foreach (var required in requireds)
             {
-                if (!required.IsValid(signatures, transaction.Transaction.Declarations, timestamp))
+                if (!required.IsValid(signatures, transaction.Transaction, timestamp))
                 {
                     return false;
                 }
@@ -66,7 +66,7 @@ namespace Caasiope.Protocol.Validators
             return true;
         }
 
-        private static bool TryGetRequiredValidations(TransactionRequiredValidationFactory factory, Transaction transaction, out List<TransactionRequiredValidation> validations)
+        public static bool TryGetRequiredValidations(ILedgerState state, TransactionRequiredValidationFactory factory, Transaction transaction, out List<TransactionRequiredValidation> validations)
         {
             var dictionary = new Dictionary<Address, TransactionRequiredValidation>();
             foreach (var input in transaction.GetInputs())
@@ -75,7 +75,7 @@ namespace Caasiope.Protocol.Validators
                 if (!dictionary.ContainsKey(address))
                 {
                     TransactionRequiredValidation validation;
-                    if (!factory.TryGetRequiredValidations(input.Address, transaction.Declarations, out validation))
+                    if (!factory.TryGetRequiredValidations(state, input.Address, transaction.Declarations, out validation))
                     {
                         validations = new List<TransactionRequiredValidation>();
                         return false;
@@ -132,7 +132,7 @@ namespace Caasiope.Protocol.Validators
             return LedgerValidationStatus.Ok;
         }
 
-        private static bool TryGetRequiredSignatures(TransactionRequiredValidationFactory factory, Transaction transaction, out List<TransactionRequiredValidation> list)
+        private static bool TryGetRequiredSignatures(ILedgerState state, TransactionRequiredValidationFactory factory, Transaction transaction, out List<TransactionRequiredValidation> list)
         {
             var validations = new Dictionary<string, TransactionRequiredValidation>();
 
@@ -141,7 +141,7 @@ namespace Caasiope.Protocol.Validators
                 if (!validations.ContainsKey(input.Address.Encoded))
                 {
                     TransactionRequiredValidation required;
-                    if (!factory.TryGetRequiredValidations(input.Address, transaction.Declarations, out required))
+                    if (!factory.TryGetRequiredValidations(state, input.Address, transaction.Declarations, out required))
                     {
                         list = null;
                         return false;
@@ -157,20 +157,20 @@ namespace Caasiope.Protocol.Validators
 
     public abstract class TransactionRequiredValidationFactory
     {
-        public abstract bool TryGetRequiredValidations(Address address, List<TxDeclaration> declarations, out TransactionRequiredValidation required);
+        public abstract bool TryGetRequiredValidations(ILedgerState state, Address address, List<TxDeclaration> declarations, out TransactionRequiredValidation required);
     }
 
     // TODO have one instance per type
     public abstract class TransactionRequiredValidation
     {
-        public abstract bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, List<TxDeclaration> declarations, long timestamp);
+        public abstract bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, Transaction transaction, long timestamp);
     }
 
     public class NotDeclaredRequiredValidation : TransactionRequiredValidation
     {
         public static readonly NotDeclaredRequiredValidation Instance = new NotDeclaredRequiredValidation();
 
-        public override bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, List<TxDeclaration> declarations, long timestamp)
+        public override bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, Transaction transaction, long timestamp)
         {
             return false;
         }

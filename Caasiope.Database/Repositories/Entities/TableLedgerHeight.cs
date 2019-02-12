@@ -2,7 +2,7 @@
 
 namespace Caasiope.Database.Repositories.Entities
 {
-    public class TableLedgerHeight:IEquatable<TableLedgerHeight>
+    public class TableLedgerHeight: IEquatable<TableLedgerHeight>
     {
         public TableLedgerHeight(string tableName, long height)
         {

@@ -56,7 +56,7 @@ namespace Caasiope.Protocol
 
         public void Write(LedgerStateChange change)
         {
-            Write(change.Balances, Write);
+            Write(change.Accounts, Write);
             Write(change.MultiSignatures, Write);
             Write(change.HashLocks, Write);
             Write(change.TimeLocks, Write);
@@ -68,7 +68,14 @@ namespace Caasiope.Protocol
             Write(accountBalance.AccountBalance);
         }
 
-        public void Write<T>(List<T> items, Action<T> write, int bytes = 1)
+        private void Write(AccountEntity account)
+        {
+            Write(account.Address);
+            Write(account.CurrentLedgerHeight);
+            Write(account.IsDeclared);
+        }
+
+        public void Write<T>(IList<T> items, Action<T> write, int bytes = 1)
         {
             Debug.Assert(bytes > 0 && bytes <= 4);
             var count = items.Count;
@@ -120,6 +127,9 @@ namespace Caasiope.Protocol
                     break;
                 case DeclarationType.Secret:
                     Write((SecretRevelation) declaration);
+                    break;
+                case DeclarationType.VendingMachine:
+                    Write((VendingMachine) declaration);
                     break;
                 default:
                     throw new NotImplementedException();
@@ -179,6 +189,14 @@ namespace Caasiope.Protocol
             Write(secret.Secret.Bytes);
         }
 
+        protected void Write(VendingMachine machine)
+        {
+            Write(machine.Owner);
+            Write(machine.CurrencyIn);
+            Write(machine.CurrencyOut);
+            Write(machine.Rate);
+        }
+
         protected void Write(byte data)
         {
             stream.WriteByte(data);
@@ -219,7 +237,20 @@ namespace Caasiope.Protocol
         public void Write(Account account)
         {
             Write(account.Address);
+            Write(account.CurrentLedger);
             Write(account.Balances.ToList(), Write);
+            WriteNullable(account.Declaration, Write);
+        }
+
+        // TODO replace
+        // version < cip#0001 : immutable state
+        public void Write1(Account account)
+        {
+            Write(account.Address);
+            var sorted = new SortedList<Currency, AccountBalance>(new CurrencyComparer1());
+            foreach (var balance in account.Balances)
+                sorted.Add(balance.Currency, balance);
+            Write(sorted.Values, Write);
         }
 
         public void Write(AccountBalance accountBalance)
@@ -387,12 +418,7 @@ namespace Caasiope.Protocol
 
         public Account ReadAccount()
         {
-            var account = Account.FromAddress(ReadAddress());
-            foreach (var balance in ReadAccountBalances())
-            {
-                account.AddBalance(balance);
-            }
-            return account;
+            return new Account(ReadAddress(), ReadLong(), ReadAccountBalances(), (TxAddressDeclaration) ReadNullable(ReadTxDeclaration));
         }
 
         protected List<AccountBalance> ReadAccountBalances()
@@ -428,7 +454,7 @@ namespace Caasiope.Protocol
             return new Transaction(ReadList(ReadTxDeclaration), ReadList(ReadTxInput), ReadList(ReadTxOutput), ReadNullable(ReadTransactionMessage), expire, fees);
         }
 
-        protected TxDeclaration ReadTxDeclaration()
+        public TxDeclaration ReadTxDeclaration()
         {
             var type = (DeclarationType)ReadByte();
 
@@ -442,9 +468,16 @@ namespace Caasiope.Protocol
                     return ReadTimeLock();
                 case DeclarationType.Secret:
                     return ReadSecretRevelation();
+                case DeclarationType.VendingMachine:
+                    return ReadVendingMachine();
                     default:
                         throw new NotImplementedException();
             }
+        }
+
+        private VendingMachine ReadVendingMachine()
+        {
+            return new VendingMachine(ReadAddress(), ReadCurrency(), ReadCurrency(), ReadAmount());
         }
 
         private TimeLock ReadTimeLock()
@@ -474,12 +507,17 @@ namespace Caasiope.Protocol
 
         public LedgerStateChange ReadLedgerStateChange()
         {
-            return new LedgerStateChange(ReadList(ReadAccountBalanceFull), ReadList(ReadMultiSignature), ReadList(ReadHashLock), ReadList(ReadTimeLock));
+            return new LedgerStateChange(ReadList(ReadAccount), ReadList(ReadMultiSignature), ReadList(ReadHashLock), ReadList(ReadTimeLock), ReadList(ReadVendingMachine));
         }
 
         private AccountBalanceFull ReadAccountBalanceFull()
         {
             return new AccountBalanceFull(ReadAddress(), ReadAccountBalance());
+        }
+
+        private AccountEntity ReadAccountEntity()
+        {
+            return new AccountEntity(ReadAddress(), ReadLong(), ReadBool());
         }
     }
 }

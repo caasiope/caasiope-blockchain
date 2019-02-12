@@ -38,9 +38,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ByteStream.cs" />
+    <Compile Include="Extensions\AccountExtensions.cs" />
     <Compile Include="Formats\EncryptedPrivateKeyFormat.cs" />
     <Compile Include="Formats\MnemonicPrivateKeyFormat.cs" />
+    <Compile Include="Formats\TimeFormat.cs" />
+    <Compile Include="MerkleTrees\Trie.cs" />
+    <Compile Include="MerkleTrees\Hasher.cs" />
+    <Compile Include="Types\AccountEntity.cs" />
+    <Compile Include="Types\AddressCurrency.cs" />
     <Compile Include="Types\HashLockAccount.cs" />
+    <Compile Include="Types\LedgerState.cs" />
     <Compile Include="Types\MultiSignatureAccount.cs" />
     <Compile Include="Types\MultiSignatureAddress.cs" />
     <Compile Include="Types\MultiSignatureSigner.cs" />
@@ -49,11 +56,13 @@
     <Compile Include="Types\SignedTransaction.cs" />
     <Compile Include="Types\TimeLockAccount.cs" />
     <Compile Include="Compression\Zipper.cs" />
+    <Compile Include="Types\VendingMachineAccount.cs" />
     <Compile Include="Validators\Transactions\AddressRequiredSignature.cs" />
     <Compile Include="Validators\LedgerValidationEngine.cs" />
     <Compile Include="Validators\Transactions\HashLockRequiredSignature.cs" />
     <Compile Include="Validators\Transactions\MultiAddressRequiredSignature.cs" />
     <Compile Include="Validators\Transactions\TimeLockRequiredSignature.cs" />
+    <Compile Include="Validators\Transactions\VendingMachineRequiredSignature.cs" />
     <Compile Include="Validators\TransactionValidationEngine.cs" />
     <Compile Include="Types\AccountBalanceFull.cs" />
     <Compile Include="Types\Network.cs" />

@@ -12,7 +12,7 @@ namespace Caasiope.Protocol.Validators.Transactions
             this.locker = locker;
         }
 
-        public override bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, List<TxDeclaration> declarations, long timestamp)
+        public override bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, Transaction transaction, long timestamp)
         {
             return locker.Timestamp > 0 && timestamp >= locker.Timestamp;
         }

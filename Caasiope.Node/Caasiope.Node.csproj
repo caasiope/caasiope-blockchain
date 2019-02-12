@@ -42,6 +42,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BlockchainNode.cs" />
+    <Content Include="config\config.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Compile Include="ConsoleCommands\Commands\AnalyzeAddressCommand.cs" />
     <Compile Include="ConsoleCommands\Commands\GetAccountsCommand.cs" />
     <Compile Include="ConsoleCommands\Commands\GetHashLocksCommand.cs" />
@@ -59,12 +62,11 @@
     <Compile Include="ConsoleCommands\Commands\WipeNodeListCommand.cs" />
     <Compile Include="InitialLedgerConfiguration.cs" />
     <Compile Include="ConsoleCommands\InjectedConsoleCommand.cs" />
-    <Compile Include="Managers\AccountExtensions.cs" />
     <Compile Include="Managers\DataTransformerManager.cs" />
-    <Compile Include="Managers\HashLockManager.cs" />
-    <Compile Include="Managers\TimeLockManager.cs" />
+    <Compile Include="Managers\LedgerStateManager.cs" />
     <Compile Include="NodeConfiguration.cs" />
     <Compile Include="ConsoleCommands\NodeConsoleCommandProcessor.cs" />
+    <Compile Include="PostStateHolder.cs" />
     <Compile Include="Processors\CommandProcessor.cs" />
     <Compile Include="Processors\Commands\GetAccountCommand.cs" />
     <Compile Include="Processors\Commands\GetTransactionsCommand.cs" />
@@ -85,35 +87,19 @@
     <Compile Include="Services\LedgerService.cs" />
     <Compile Include="Services\PersistenceManager.cs" />
     <Compile Include="Trackers\TransactionTracker.cs" />
-    <Compile Include="Transformers\BlockTransformerService.cs" />
+    <Compile Include="Transformers\AccountTransformerService.cs" />
     <Compile Include="Transformers\DataTransformerService.cs" />
-    <Compile Include="Transformers\DeclarationTransformerService.cs" />
-    <Compile Include="Transformers\TransactionDeclarationTransformerService.cs" />
-    <Compile Include="Transformers\HashLockTransformerService.cs" />
-    <Compile Include="Transformers\LedgerSignatureTransformerService.cs" />
-    <Compile Include="Transformers\AccountBalanceTransformerService.cs" />
-    <Compile Include="Transformers\MultiSignatureAccountTransformerService.cs" />
-    <Compile Include="Transformers\MultiSignatureSignerTransformerService.cs" />
-    <Compile Include="Transformers\SecretRevelationTransformerService.cs" />
-    <Compile Include="Transformers\TimeLockTransformerService.cs" />
-    <Compile Include="Transformers\TransactionMessageTransformerService.cs" />
-    <Compile Include="Transformers\TransactionSignatureTransformerService.cs" />
-    <Compile Include="Transformers\TransactionTransformerService.cs" />
-    <Compile Include="Transformers\TxInputOutputTransformerService.cs" />
+    <Compile Include="Types\LedgerPostState.cs" />
+    <Compile Include="Types\LedgerStateFinal.cs" />
     <Compile Include="Validators\SignedLedgerValidator.cs" />
     <Compile Include="ConsoleLogger.cs" />
     <Compile Include="Managers\AccountManager.cs" />
     <Compile Include="Managers\IssuerManager.cs" />
     <Compile Include="Managers\LedgerManager.cs" />
-    <Compile Include="Managers\MultiSignatureManager.cs" />
     <Compile Include="Managers\SignatureManager.cs" />
     <Compile Include="Managers\SignedTransactionManager.cs" />
     <Compile Include="Managers\ValidatorManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Sagas\AccountTale.cs" />
-    <Compile Include="Sagas\FinalizeLedgerSaga.cs" />
-    <Compile Include="Sagas\IUpdateStateSaga.cs" />
-    <Compile Include="Sagas\UpdateStateSaga.cs" />
     <Compile Include="RealNodeServiceFactory.cs" />
     <Compile Include="ServiceManager.cs" />
     <Compile Include="Services\ConnectionService.cs" />
@@ -124,7 +110,9 @@
     <Compile Include="Validators\TransactionValidator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="config\olympus\initial.block">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="config\vice\initial.block">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -173,6 +161,18 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="config\network.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\olympus\issuers.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\olympus\nodes.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\olympus\node_server.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\olympus\validators.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="config\vice\issuers.txt">

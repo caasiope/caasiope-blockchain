@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Caasiope.Node;
+using Caasiope.Node.Managers;
 using Caasiope.Node.Processors.Commands;
 using Caasiope.Node.Services;
 using Caasiope.Protocol.Types;
@@ -9,6 +10,8 @@ using Caasiope.Wallet.Managers;
 using Helios.Common.Concepts.Services;
 using Helios.Common.Synchronization;
 using Caasiope.Protocol;
+using Caasiope.Protocol.Validators;
+using Caasiope.Protocol.Validators.Transactions;
 using ResultCode = Caasiope.Node.ResultCode;
 
 namespace Caasiope.Wallet.Services
@@ -86,11 +89,11 @@ namespace Caasiope.Wallet.Services
         public bool ImportPrivateKey(string label, PrivateKeyNotWallet key)
         {
             var aliased = AliasManager.SetAlias(label, key);
-            var address = key.Account.Address.Encoded;
+            var address = key.Address.Encoded;
             if (wallets.ContainsKey(label))
                 return false;
             wallets.Add(address, aliased);
-            AddressListener.Listen(key.Account.Address);
+            AddressListener.Listen(key.Address);
             return true;
         }
 
@@ -126,14 +129,39 @@ namespace Caasiope.Wallet.Services
         // TODO make something smart that works with declarations
         private void SignTransaction(SignedTransaction signed, Network network)
         {
-            foreach (var input in signed.Transaction.GetInputs())
+            // TODO build new state and add declaration if needed
+
+            // TODO put this in a manager
+            if (TransactionValidationEngine.TryGetRequiredValidations(LedgerService.LedgerManager.LedgerState, LiveService.SignatureManager.TransactionRequiredValidationFactory, signed.Transaction, out var requireds))
             {
-                Aliased<PrivateKeyNotWallet> wallet;
-                if(wallets.TryGetValue(input.Address.Encoded, out wallet))
+                foreach (var required in requireds)
+                {
+                    Address address;
+                    if (required is AddressRequiredSignature)
+                    {
+                        address = ((AddressRequiredSignature) required).Address;
+                    }
+                    else if (required is VendingMachineRequiredSignature)
+                    {
+                        address = ((VendingMachineRequiredSignature)required).Machine.Owner;
+                    }
+                    else
+                        continue;
+
+                    if (wallets.TryGetValue(address.Encoded, out var wallet))
                         wallet.Data.SignTransaction(signed, network);
+                }
             }
 
-            //add declaration if needed
+            if (!LiveService.TransactionManager.TransactionValidator.Validate(signed))
+            {
+                Console.WriteLine("You cannot sign this transaction !");
+            }
+
+            if (!LiveService.TransactionManager.TransactionValidator.ValidateBalance(LedgerService.LedgerManager.LedgerState, signed.Transaction.GetInputs()))
+            {
+                Console.WriteLine("Insufficient balance !");
+            }
         }
 
         public IEnumerable<Aliased<PrivateKeyNotWallet>> GetPrivateKeys()
@@ -205,7 +233,7 @@ namespace Caasiope.Wallet.Services
             var wallet = item.GetObject<PrivateKeyNotWallet>();
             if (wallet != null)
             {
-                return wallet.Account.Address;
+                return wallet.Address;
             }
 
             return null;

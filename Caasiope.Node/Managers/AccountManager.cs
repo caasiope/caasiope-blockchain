@@ -1,76 +1,91 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using Caasiope.Node.Sagas;
 using Caasiope.Protocol.Types;
+using Helios.Common.Synchronization;
 
 namespace Caasiope.Node.Managers
 {
-    public class AccountManager : IAccountList
+    // this class is in charge to index every account we know
+    // every thread is going to concurrently get the reference to the account they need
+    // any operation on the tracked account object needs to be lock free
+
+    public class AccountManager
     {
         // account indexed by encoded address
-        private readonly Dictionary<string, Account> accounts = new Dictionary<string, Account>();
+        private readonly Dictionary<Address, ExtendedAccount> accounts = new Dictionary<Address, ExtendedAccount>();
+        private readonly MonitorLocker locker = new MonitorLocker();
 
-        // populate accounts fom the database
-        public void Initialize(List<Account> list)
+        public void Initialize(IEnumerable<Account> list)
         {
-            Debug.Assert(accounts.Count == 0);
-            foreach (var account in list)
-                accounts.Add(account.Address.Encoded, account);
+            // TODO add the account as the last history
+            using (locker.CreateLock())
+            {
+                foreach (var account in list)
+                {
+                    accounts.Add(account.Address, new ExtendedAccount(account));
+                }
+            }
         }
 
-        // get account if it exists in the current state of the ledger
-        public bool TryGetAccount(string address, out Account account)
+        public bool TryGetAccount(Address address, out ExtendedAccount account)
         {
-            return accounts.TryGetValue(address, out account);
+            using (locker.CreateLock())
+            {
+                return accounts.TryGetValue(address, out account);
+            }
         }
 
-        // create ecdsa account doesnt change state
-        public Account CreateECDSAAccount(Address address)
+        public bool AddAccount(Address address, ExtendedAccount account)
         {
-            Debug.Assert(address.Type == AddressType.ECDSA);
-            var encoded = address.Encoded;
-            Debug.Assert(!accounts.ContainsKey(encoded));
-            return Account.FromAddress(address); 
+            using (locker.CreateLock())
+            {
+                if (accounts.ContainsKey(address))
+                    return false;
+                accounts.Add(address, account);
+                return true;
+            }
         }
 
-        // create multisignature account doesnt change state
-        public Account CreateMultisignatureECDSAAccount(Address address)
+        public ExtendedAccount GetOrCreateAccount(Address address, Func<ExtendedAccount> create)
         {
-            Debug.Assert(address.Type == AddressType.MultiSignatureECDSA);
-            var encoded = address.Encoded;
-            Debug.Assert(!accounts.ContainsKey(encoded));
-            return Account.FromAddress(address);
+            using (locker.CreateLock())
+            {
+                if (!accounts.TryGetValue(address, out var account))
+                {
+                    account = create();
+                    accounts.Add(address, account);
+                }
+
+                return account;
+            }
         }
 
-        // Create HashLock Account doesnt change state
-        public Account CreateHashLockAccount(Address address)
+        // TODO ugly
+        // used only for initialization
+        internal Dictionary<Address, Account> GetAccounts()
         {
-            Debug.Assert(address.Type == AddressType.HashLock);
-            var encoded = address.Encoded;
-            Debug.Assert(!accounts.ContainsKey(encoded));
-            return Account.FromAddress(address);
+            var dictionary = new Dictionary<Address, Account>();
+            using (locker.CreateLock())
+            {
+                foreach (var pair in accounts)
+                    dictionary.Add(pair.Key, pair.Value.Account);
+            }
+            return dictionary;
         }
+    }
 
-        // Create TimeLock Account doesnt change state
-        public Account CreateTimeLockAccount(Address address)
-        {
-            Debug.Assert(address.Type == AddressType.TimeLock);
-            var encoded = address.Encoded;
-            Debug.Assert(!accounts.ContainsKey(encoded));
-            return Account.FromAddress(address);
-        }
+    // represents an account in memory
+    public class ExtendedAccount
+    {
+        // make it a node of the account history list
 
-        // add an account to the current state of the ledger
-        public void AddAccount(Account account)
-        {
-            accounts.Add(account.Address.Encoded, account);
-        }
+        // the initial account
+        public readonly Account Account;
 
-        public IEnumerable<Account> GetAccounts()
+        public ExtendedAccount(Account account)
         {
-            // TODO Optimize
-            return accounts.Values.Where(account => account.Balances.Any(balance => balance.Amount != 0));
+            Account = account;
         }
     }
 }

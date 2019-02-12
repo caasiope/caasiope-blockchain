@@ -30,55 +30,42 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EntityFramework">
-      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
-    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.SQLite, Version=1.0.109.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.SQLite.Core.1.0.109.2\lib\net45\System.Data.SQLite.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite.EF6, Version=1.0.109.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.SQLite.EF6.1.0.109.0\lib\net45\System.Data.SQLite.EF6.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite.Linq, Version=1.0.109.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.SQLite.Linq.1.0.109.0\lib\net45\System.Data.SQLite.Linq.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Managers\ReadDatabaseManager.cs" />
     <Compile Include="Managers\SqlTransactionManager.cs" />
     <Compile Include="Managers\WipeDatabaseHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Repositories\BalanceRepository.cs" />
-    <Compile Include="Repositories\BlockRepository.cs" />
-    <Compile Include="Repositories\DeclarationRepository.cs" />
-    <Compile Include="Repositories\TransactionDeclarationRepository.cs" />
-    <Compile Include="Repositories\Entities\BlockEntity.cs" />
-    <Compile Include="Repositories\Entities\AccountBalanceFull.cs" />
+    <Compile Include="ReferenceHelper.cs" />
+    <Compile Include="Repositories\AccountRepository.cs" />
+    <Compile Include="Repositories\Entities\AccountEntity.cs" />
     <Compile Include="Repositories\Entities\TransactionDeclarationEntity.cs" />
-    <Compile Include="Repositories\Entities\HashLockEntity.cs" />
-    <Compile Include="Repositories\Entities\SecretRevelationEntity.cs" />
     <Compile Include="Repositories\Entities\TableLedgerHeight.cs" />
     <Compile Include="Repositories\Entities\LedgerEntity.cs" />
-    <Compile Include="Repositories\Entities\MultiSignatureEntity.cs" />
-    <Compile Include="Repositories\Entities\SignedPaymentSimple.cs" />
     <Compile Include="Repositories\Entities\LedgerStateChangeSimple.cs" />
-    <Compile Include="Repositories\Entities\TimeLockEntity.cs" />
-    <Compile Include="Repositories\Entities\TransactionMessageEntity.cs" />
-    <Compile Include="Repositories\Entities\TxInputOutputFull.cs" />
-    <Compile Include="Repositories\HashLockRepository.cs" />
-    <Compile Include="Repositories\SecretRevelationRepository.cs" />
-    <Compile Include="Repositories\TableLedgerHeightRepository.cs" />
     <Compile Include="Repositories\LedgerRepository.cs" />
-    <Compile Include="Repositories\Entities\LedgerSignature.cs" />
-    <Compile Include="Repositories\LedgerSignatureRepository.cs" />
-    <Compile Include="Repositories\MultiSignatureAccountRepository.cs" />
-    <Compile Include="Repositories\MultiSignatureSignerRepository.cs" />
+    <Compile Include="Repositories\TableLedgerHeightRepository.cs" />
     <Compile Include="Repositories\LedgerStateChangeRepository.cs" />
-    <Compile Include="Repositories\TimeLockRepository.cs" />
-    <Compile Include="Repositories\TransactionInputOutputRepository.cs" />
-    <Compile Include="Repositories\TransactionMessageRepository.cs" />
-    <Compile Include="Repositories\TransactionRepository.cs" />
     <Compile Include="Repository.cs" />
-    <Compile Include="SqlTransaction.cs" />
-    <Compile Include="SqlTransactions\MultiSignatureSqlTransaction.cs" />
+    <Compile Include="Transaction.cs" />
     <Compile Include="Managers\RepositoryManager.cs" />
-    <Compile Include="SqlTransactions\SignedLedgerSqlTransaction.cs" />
-    <Compile Include="SqlTransactions\SignedTransactionSqlTransaction.cs" />
-    <Compile Include="Repositories\TransactionSignatureRepository.cs" />
-    <Compile Include="SqlTransactions\TransformerSqlTransaction.cs" />
+    <Compile Include="SqlTransactions\SignedLedgerTransaction.cs" />
+    <Compile Include="SqlTransactions\TransformerTransaction.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\helios-common\Helios.Common\Helios.Common\Helios.Common.csproj">

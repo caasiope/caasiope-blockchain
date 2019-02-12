@@ -9,18 +9,18 @@ namespace Caasiope.Protocol.Validators.Transactions
         private readonly List<TransactionRequiredValidation> signers;
         private readonly int threshold;
 
-        public MultiAddressRequiredSignature(MultiSignatureAddress multi, List<TransactionRequiredValidation> signers)
+        public MultiAddressRequiredSignature(MultiSignature multi, List<TransactionRequiredValidation> signers)
         {
             this.signers = signers;
             threshold = multi.Required;
         }
 
-        public override bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, List<TxDeclaration> declarations, long timestamp)
+        public override bool IsValid(List<TransactionValidationEngine.SignatureRequired> signatures, Transaction transaction, long timestamp)
         {
             var count = 0;
             foreach (var required in signers)
             {
-                if(required.IsValid(signatures, declarations, timestamp))
+                if(required.IsValid(signatures, transaction, timestamp))
                     count++;
             }
             return count >= threshold;

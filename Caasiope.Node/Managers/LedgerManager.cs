@@ -4,10 +4,10 @@ using System.Diagnostics;
 using System.Linq;
 using Caasiope.JSON.Helpers;
 using Caasiope.Log;
-using Caasiope.Node.Sagas;
 using Caasiope.Node.Services;
-using Caasiope.Node.Trackers;
+using Caasiope.Node.Types;
 using Caasiope.Node.Validators;
+using Caasiope.Protocol.Formats;
 using Caasiope.Protocol.MerkleTrees;
 using Caasiope.Protocol.Types;
 using Caasiope.Protocol.Validators;
@@ -18,23 +18,29 @@ namespace Caasiope.Node.Managers
 {
     public class LedgerManager
     {
-		[Injected] public ILiveService LiveService;
-		[Injected] public ILedgerService LedgerService;
-		[Injected] public IConnectionService ConnectionService;
+        [Injected] public ILiveService LiveService;
+        [Injected] public ILedgerService LedgerService;
 
         public SignedLedgerValidator SignedLedgerValidator;
-        private SignedLedger lastLedger;
-        public ProtocolVersion Version;
         public readonly Network Network;
         private readonly ILogger logger;
         private readonly ILogger merkleLogger;
         private bool needSetInitialLedger;
+        private Action<SignedLedger> OnNewLedger { get; set; }
+
+        public LedgerStateFinal LedgerState { get; private set; }
+        public SignedLedger LastLedger { get; private set; }
 
         public LedgerManager(Network network, ILogger logger)
         {
             Network = network;
             this.logger = logger;
             merkleLogger = new LoggerAdapter("StartupMerkleLogger");
+        }
+
+        public void SubscribeOnNewLedger(Action<SignedLedger> callback)
+        {
+            OnNewLedger += callback;
         }
 
         public void Initialize(SignedLedger lastLedger, bool needToSetInitial)
@@ -49,23 +55,45 @@ namespace Caasiope.Node.Managers
 
         private void InitializeLedger(SignedLedger lastLedger)
         {
-            this.lastLedger = lastLedger;
-            Debug.Assert(SignedLedgerValidator.Validate(this.lastLedger) == LedgerValidationStatus.Ok, "Last Ledger is not valid"); // Most likely not enough signatures (see quorum)
-            Version = GetLedgerLight().Version;
+            var accounts = new Trie<Account>(Address.RAW_SIZE);
+            foreach (var account in LiveService.AccountManager.GetAccounts())
+                accounts.CreateOrUpdate(account.Key.ToRawBytes(), old =>
+                {
+                    if(old != null)
+                        throw new Exception("The ledger's account states are duplicated !");
+                    return account.Value;
+                });
+            // TODO compute hash
+            accounts.ComputeHash(HasherFactory.CreateHasher(lastLedger.GetVersion()));
+
+            LedgerState = new LedgerStateFinal(accounts);
+            LastLedger = lastLedger;
+            // Debug.Assert(SignedLedgerValidator.Validate(this.lastLedger) == LedgerValidationStatus.Ok, "Last Ledger is not valid"); // Most likely not enough signatures (see quorum)
         }
 
-        public LedgerMerkleRoot GetMerkleRoot()
+        public LedgerMerkleRootHash GetMerkleRootHash()
         {
-            return new LedgerMerkleRoot(LiveService.AccountManager.GetAccounts(), GetDeclarations(), merkleLogger);
+            return GetMerkleRootHash(LedgerState, LastLedger.GetVersion());
         }
 
-        private IEnumerable<TxDeclaration> GetDeclarations()
+        public LedgerMerkleRootHash GetMerkleRootHash(LedgerStateFinal ledgerState, ProtocolVersion version)
         {
-            var result = new List<TxDeclaration>();
-            result.AddRange(LiveService.MultiSignatureManager.GetMultiSignatures());
-            result.AddRange(LiveService.HashLockManager.GetHashLocks());
-            result.AddRange(LiveService.TimeLockManager.GetTimeLocks());
-            return result;
+            return GetMerkleRootHash(ledgerState, version, merkleLogger);
+        }
+
+        public static LedgerMerkleRootHash GetMerkleRootHash(LedgerStateFinal ledgerState, ProtocolVersion version, ILogger logger)
+        {
+            // backward compatibility
+            if (version == ProtocolVersion.InitialVersion)
+                return new LedgerMerkleRoot(ledgerState.GetAccounts().Where(account => account.Balances.Any()), GetDeclarations(ledgerState), logger, HasherFactory.CreateHasher(version)).Hash;
+
+            return ledgerState.GetHash();
+        }
+
+        // for merkle root
+        private static IEnumerable<TxDeclaration> GetDeclarations(LedgerStateFinal ledgerState)
+        {
+            return ledgerState.GetAccounts().Where(account => account.Declaration != null).Select(account => (TxDeclaration) account.Declaration);
         }
 
         // call from command
@@ -96,18 +124,18 @@ namespace Caasiope.Node.Managers
             Debug.Assert(ValidateSignedLedgerInternal(signed));
             Debug.Assert(ValidateSignatures(signed));
 
-            // save all    
-            Finalize(signed);
+            Finalize(signed, CreateLedgerState(signed));
 
             needSetInitialLedger = false;
-            logger.Log($"Ledger Finalized. Height : {signed.Ledger.LedgerLight.Height} Transactions : {signed.Ledger.Block.Transactions.Count()} ");
+            var time = TimeFormat.ToDateTime(signed.GetTimestamp());
+            Console.WriteLine($"Ledger Finalized. Height : {signed.Ledger.LedgerLight.Height}  Timestamp : {time} Transactions : {signed.Ledger.Block.Transactions.Count()} ");
         }
 
         private bool ValidateSignedLedgerInternal(SignedLedger signed)
         {
             if (needSetInitialLedger)
                 return true;
-            
+
             return ValidateSignedLedger(signed);
         }
 
@@ -157,61 +185,67 @@ namespace Caasiope.Node.Managers
 
         public LedgerHash GetLastLedgerHash()
         {
-            return lastLedger.Hash;
+            return LastLedger.Hash;
         }
 
         public long GetNextHeight()
         {
-            return GetLedgerLight().Height + 1;
+            return GetSignedLedger().GetHeight() + 1;
         }
 
-        // TODO wait for other threads to release ressources, maybe via live service
-        private void Finalize(SignedLedger signedLedger)
+        // we create a new ledger state based on the current state and the new ledger
+        private LedgerPostState CreateLedgerState(SignedLedger signedLedger)
         {
-            using (var bard = new FinalizeLedgerBard(new FinalizeLedgerFolklore(signedLedger), Contextualize(new FinalizeLedgerSaga())))
+            var state = new LedgerPostState(LedgerState, signedLedger.GetHeight()) {AccountCreated = account => LiveService.AccountManager.AddAccount(account.Address, new ExtendedAccount(account))};
+
+            byte index = 0;
+            foreach (var signed in signedLedger.Ledger.Block.Transactions)
             {
-                byte index = 0;
-                foreach (var signed in signedLedger.Ledger.Block.Transactions)
-                {
-                    // TODO make a better validation
-                    // Debug.Assert(signed.Transaction.Expire > signedLedger.Ledger.LedgerLight.BeginTime);
-                    Debug.Assert(signedLedger.Ledger.Block.FeeTransactionIndex == index++ || LiveService.TransactionManager.TransactionValidator.ValidateBalance(bard.Saga, signed.Transaction.GetInputs()));
-                    LiveService.SignedTransactionManager.Execute(bard.Saga, signed.Transaction);
-                }
+                // TODO make a better validation
+                // Debug.Assert(signed.Transaction.Expire > signedLedger.Ledger.LedgerLight.BeginTime);
+                Debug.Assert(signedLedger.Ledger.Block.FeeTransactionIndex == index++ || LiveService.TransactionManager.TransactionValidator.ValidateBalance(state, signed.Transaction.GetInputs()));
+                LedgerService.SignedTransactionManager.Execute(state, signed.Transaction);
             }
 
-            lastLedger = signedLedger;
-
-            BroadcastNewLedger(lastLedger);
+            return state;
         }
 
-        private void BroadcastNewLedger(SignedLedger signedLedger)
+        // we finalize the ledger and create a new immutable ledger state
+        private void Finalize(SignedLedger signed, LedgerPostState state)
         {
-            var message = NotificationHelper.CreateSignedNewLedgerNotification(signedLedger);
-            // broadcast the hash of the new ledger with the signature.
-            ConnectionService.BlockchainChannel.Broadcast(message);
-            logger.Log("Broadcast Signed New Ledger");
+            var ledgerState = state.Finalize(HasherFactory.CreateHasher(signed.GetVersion()));
+            
+            if (!CheckMerkleRoot(ledgerState, signed))
+                throw new Exception("Merkle root is not valid");
+
+            LiveService.PersistenceManager.Save(new SignedLedgerState(signed, state.GetLedgerStateChange()));
+
+            LedgerState = ledgerState;
+            LastLedger = signed;
+
+            OnNewLedger(LastLedger);
         }
 
-        private FinalizeLedgerSaga Contextualize(FinalizeLedgerSaga finalizeLedgerSaga)
+        private bool CheckMerkleRoot(LedgerStateFinal ledgerState, SignedLedger ledger)
         {
-            // finalizeLedgerSaga.SetServices(services);
-            return finalizeLedgerSaga;
+            var hash = GetMerkleRootHash(ledgerState, ledger.GetVersion());
+            return ledger.Ledger.MerkleHash.Equals(hash);
         }
 
-        public LedgerLight GetLedgerLight()
+        public bool CheckMerkleRoot()
         {
-            return lastLedger.Ledger.LedgerLight;
+            return CheckMerkleRoot(LedgerState, LastLedger);
         }
+
 
         public SignedLedger GetSignedLedger()
         {
-            return lastLedger;
+            return LastLedger;
         }
 
         public long GetLedgerBeginTime()
         {
-            return GetLedgerLight().Timestamp; // TODO beginTime or beginTime + 1 ?
+            return GetSignedLedger().GetTimestamp(); // TODO beginTime or beginTime + 1 ?
         }
     }
 }

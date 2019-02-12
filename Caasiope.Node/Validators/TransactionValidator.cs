@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Caasiope.Node.Sagas;
 using Caasiope.Node.Services;
 using Caasiope.Protocol.Types;
 using Helios.Common.Extensions;
 using Caasiope.Node.Managers;
-using Caasiope.Protocol;
 using Caasiope.Protocol.Validators;
 
 namespace Caasiope.Node.Validators
@@ -34,7 +32,7 @@ namespace Caasiope.Node.Validators
                 return false;
 
             // validate signature
-            if (!signed.CheckSignatures(LiveService.SignatureManager.TransactionRequiredValidationFactory, LedgerService.LedgerManager.Network, timestamp))
+            if (!signed.CheckSignatures(LiveService.SignatureManager.TransactionRequiredValidationFactory, LedgerService.LedgerManager.Network, timestamp, LedgerService.LedgerManager.LedgerState))
                 return false;
 
             return Validate(signed.Transaction);
@@ -143,6 +141,7 @@ namespace Caasiope.Node.Validators
             var hashlocks = new List<HashLock>();
             var timelocks = new List<TimeLock>();
             var secrets = new List<SecretRevelation>();
+            var machines = new List<VendingMachine>();
 
             foreach (var declaration in transaction.Declarations)
             {
@@ -167,6 +166,11 @@ namespace Caasiope.Node.Validators
                         var timeLock = (TimeLock)declaration;
                         timelocks.Add(timeLock);
                         break;
+                    case DeclarationType.VendingMachine:
+                        var machine = (VendingMachine)declaration;
+                        valid = machine.Rate > 0 && machine.CurrencyIn != machine.CurrencyOut;
+                        machines.Add(machine);
+                        break;
                     default:
                         throw new NotImplementedException();
                 }
@@ -176,6 +180,7 @@ namespace Caasiope.Node.Validators
             valid &= NoDuplicate(hashlocks, (a, b) => a.Equals(b));
             valid &= NoDuplicate(timelocks, (a, b) => a.Equals(b));
             valid &= NoDuplicate(secrets, (a, b) => a.Equals(b));
+            valid &= NoDuplicate(machines, (a, b) => a.Equals(b));
 
             return valid;
         }
@@ -189,21 +194,27 @@ namespace Caasiope.Node.Validators
         }
         */
 
-        public bool ValidateBalance(IAccountList accounts, IEnumerable<TxInput> inputs)
+        // validates the inputs are spending money that exists
+        public bool ValidateBalance(ILedgerState state, IEnumerable<TxInput> inputs)
         {
             // we cannot have duplicate (account + currency). In fact we can since we use fees in input
-            var amounts = new Dictionary<string, Amount>();
+            var amounts = new Dictionary<AddressCurrency, Amount>();
             foreach (var input in inputs)
             {
                 var currency = input.Currency;
-                var address = input.Address.Encoded;
-                Account account;
-                if (!accounts.TryGetAccount(address, out account))
+                var address = input.Address;
+
+                // no need to check we have enough balance if we are issuer
+                if(LiveService.IssuerManager.IsIssuer(currency, address))
+                    continue;
+
+                if (!state.TryGetAccount(address, out var account))
                     return false;
 
                 // TODO looks not good
-                var amount = amounts[address + Currency.ToSymbol(currency)] = amounts.GetOrCreate(address + Currency.ToSymbol(currency), () => 0) + input.Amount;
-                if (!LiveService.IssuerManager.IsIssuer(currency, account.Address) && account.GetBalance(currency) < amount)
+                var key = new AddressCurrency(address, currency);
+                var amount = amounts[key] = amounts.GetOrCreate(key, () => 0) + input.Amount;
+                if (account.GetBalance(currency) < amount)
                     return false;
             }
 

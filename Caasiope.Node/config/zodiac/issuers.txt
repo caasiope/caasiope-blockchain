@@ -2,5 +2,7 @@
 BTC | qys7g6qvh3954m7nstj3smfrym25shkayd7yaq49
 LTC | qy54klxjtft5zxr34tgymj9j77rhxlzmnzdhghn2
 ETH | qyuaj8sxzxnae3dygdf0u5ed347xevyvc0tqfpuu
+DOG | qywpen5pym0czq0xu0zzafpcda0twce944n230rj
+DSH | qysnh09r43f9gmhxytk4l69e2daxqsfvelpr6293
 # timelock : 0
 CAS | qsqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqxdpx0l

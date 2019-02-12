@@ -14,11 +14,7 @@ namespace Caasiope.Node.Services
         AccountManager AccountManager { get; }
         IssuerManager IssuerManager { get; }
         PersistenceManager PersistenceManager { get; }
-        SignedTransactionManager SignedTransactionManager { get; }
         TransactionManager TransactionManager { get; }
-        MultiSignatureManager MultiSignatureManager { get; }
-        HashLockManager HashLockManager { get; }
-        TimeLockManager TimeLockManager { get; }
         SignatureManager SignatureManager { get; }
         ValidatorManager ValidatorManager { get; }
         CatchupManager CatchupManager { get; }
@@ -35,11 +31,7 @@ namespace Caasiope.Node.Services
         public AccountManager AccountManager { get; } = new AccountManager();
         public IssuerManager IssuerManager { get; } = new IssuerManager();
         public PersistenceManager PersistenceManager { get; } = new PersistenceManager();
-        public SignedTransactionManager SignedTransactionManager { get; } = new SignedTransactionManager();
         public TransactionManager TransactionManager { get; } = new TransactionManager();
-        public MultiSignatureManager MultiSignatureManager { get; } = new MultiSignatureManager();
-        public HashLockManager HashLockManager { get; } = new HashLockManager();
-        public TimeLockManager TimeLockManager { get; } = new TimeLockManager();
         public SignatureManager SignatureManager { get; } = new SignatureManager();
         public ValidatorManager ValidatorManager { get; } = new ValidatorManager();
         public CatchupManager CatchupManager { get; } = new CatchupManager();
@@ -73,7 +65,7 @@ namespace Caasiope.Node.Services
         // TODO move
         private void Validate()
         {
-            var max = LedgerService.LedgerManager.GetLedgerLight().Height;
+            var max = LedgerService.LedgerManager.GetSignedLedger().GetHeight();
             for (long height = 0; height < max; height++)
             {
                 Logger.Log($"Validating Ledger {height}");
@@ -87,18 +79,15 @@ namespace Caasiope.Node.Services
             DataTransformationService.StartedHandle.WaitOne();
             DataTransformationService.WaitTransformationCompleted();
 
+            var accounts = DatabaseService.ReadDatabaseManager.GetAccounts();
+
             // load all the accounts
-            AccountManager.Initialize(DatabaseService.ReadDatabaseManager.GetAccounts());
-            MultiSignatureManager.Initialize(DatabaseService.ReadDatabaseManager.GetMultiSignatureAddresses());
-            HashLockManager.Initialize(DatabaseService.ReadDatabaseManager.GetHashLockAccounts());
-            TimeLockManager.Initialize(DatabaseService.ReadDatabaseManager.GetTimeLockAccounts());
-            SignatureManager.Initialize();
+            AccountManager.Initialize(accounts);
             IssuerManager.Initialize(issuers);
             ValidatorManager.Initialize(validators, quorum);
             TransactionManager.Initialize();
             PersistenceManager.Initialize();
             CatchupManager.Initialize(Logger);
-            SignedTransactionManager.Initialize();
 
             TransactionManager.TransactionReceived += TransactionManager.SendTransactionReceivedNotification;
             ConnectionService.OnSessionConnected(SendSignedNewLedgerNotification);

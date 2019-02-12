@@ -10,7 +10,7 @@ namespace Caasiope.Protocol.Types
 
         private readonly long value;
 
-        private Amount(long value)
+        protected Amount(long value)
         {
             this.value = value;
         }
@@ -20,9 +20,9 @@ namespace Caasiope.Protocol.Types
             return new Amount(value);
         }
 
-        public static implicit operator long(Amount currency)
+        public static implicit operator long(Amount amount)
         {
-            return currency.value;
+            return amount.value;
         }
 
         public static Amount FromWholeValue(long i)
@@ -48,6 +48,18 @@ namespace Caasiope.Protocol.Types
         {
             // TODO check for max value
             return new Amount(i);
+        }
+
+        public static Amount Multiply(Amount amount, Amount rate)
+        {
+            var result = new decimal(amount) * ToWholeDecimal(rate);
+            return new Amount((long)result);
+        }
+
+        public static Amount Divide(Amount amount, Amount rate)
+        {
+            var result = new decimal(amount) / ToWholeDecimal(rate);
+            return new Amount((long)result);
         }
     }
 }

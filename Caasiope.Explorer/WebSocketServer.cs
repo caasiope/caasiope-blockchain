@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Helios.Common.Extensions;
 using Helios.WebSocket;
 
@@ -7,7 +8,8 @@ namespace Caasiope.Explorer
 	public interface IWebSocketServer
 	{
 		void OnNewSession(Action<ISession> callback);
-		void OnReceive(Action<ISession, string> callback);
+	    void OnClose(Action<ISession> callback);
+        void OnReceive(Action<ISession, string> callback);
 		void Start();
 		void Stop();
 		void Initialize();
@@ -28,12 +30,23 @@ namespace Caasiope.Explorer
 		{
 			SendAsync(message, delegate {  });
 		}
-	}
+
+	    public override bool Equals(object obj)
+	    {
+	        return obj is Session session && SessionId == session.SessionId;
+	    }
+
+        public override int GetHashCode()
+        {
+            return SessionId.GetHashCode();
+        }
+    }
 
 	public class WebSocketServer : IWebSocketServer
 	{
         private readonly Helios.WebSocket.WebSocketServer server;
 		private Action<ISession> onNewSession;
+		private Action<ISession> onClose;
 		private Action<ISession, string> onReceive;
 		
 		public WebSocketServer(string path)
@@ -51,33 +64,39 @@ namespace Caasiope.Explorer
 			return session;
 		}
 
-		private void OnMessage(Session session, string data)
+	    private void OnClose(Session session)
+	    {
+	        onClose.Call(session);
+	    }
+
+	    private void OnMessage(Session session, string data)
 		{
 			onReceive.Call(session, data);
 		}
 
-		private void OnClose(Session session)
-		{
-		}
-
-		private void OnOpen(Session session)
+	    private void OnOpen(Session session)
 		{
 			onNewSession.Call(session);
 		}
 
-		public void Broadcast(string message)
+	    public void Broadcast(string message)
 		{
 			server.Broadcast(message);
 		}
 
-		public void Stop()
+	    public void Stop()
 		{
 			server.Stop();
 		}
 
-		public void Initialize() { }
+	    public void Initialize() { }
 
-		public void OnNewSession(Action<ISession> callback)
+	    public void OnClose(Action<ISession> callback)
+	    {
+	        onClose += callback;
+	    }
+
+	    public void OnNewSession(Action<ISession> callback)
 		{
 			onNewSession += callback;
 		}

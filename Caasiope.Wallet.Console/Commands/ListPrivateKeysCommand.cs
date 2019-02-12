@@ -14,7 +14,7 @@ namespace Caasiope.Wallet.CommandLineConsole.Commands
             Console.WriteLine("Private Keys in the wallet :");
             foreach (var aliased in WalletService.GetPrivateKeys())
             {
-                Console.WriteLine($"{aliased.Alias} : Address {aliased.Data.Account.Address.Encoded}");
+                Console.WriteLine($"{aliased.Alias} : Address {aliased.Data.Address.Encoded}");
             }
             Console.WriteLine("--------------------");
         }

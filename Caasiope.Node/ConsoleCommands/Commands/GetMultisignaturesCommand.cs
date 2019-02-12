@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Caasiope.Protocol.Types;
 
 namespace Caasiope.Node.ConsoleCommands.Commands
 {
@@ -7,7 +8,9 @@ namespace Caasiope.Node.ConsoleCommands.Commands
     {
         protected override void ExecuteCommand(string[] args)
         {
-            var results = LiveService.MultiSignatureManager.GetMultiSignatures().ToList();
+            var results = LiveService.AccountManager.GetAccounts().Values
+                .Where(account => account.Address.Type == AddressType.MultiSignatureECDSA && account.Declaration != null)
+                .Select(account => (MultiSignature)account.Declaration).ToList();
 
             Console.WriteLine($"Number of MultiSignatures : {results.Count}");
 

@@ -1,0 +1,105 @@
+<pre>
+  CIP: 2
+  Title: Portable database
+  Author: Ilia Palekhov
+  Status: Draft
+  Created: 2018-11-25
+</pre>
+
+# Abstract  
+The current implementation of Node is using MySql to store the ledgers in binary and in addition all the blockchain in the relational model, which is used by the Caasiope Explorer. To run a Node it is required to have MySQL server running. We propose that node needs to have a portable database with Ledgers in binary and the blockchain state only, Explorer needs to have all the "unpacked" data.
+
+# Motivation  
+The current implementation of Node stores "unpacked" blockchain in the relational model. Disadvantages of this approach are that relational model of the blockchain is used only by the Caasiope Explorer, and all the entities which aggregate Node has useless duplicated "unpacked" data. Besiudes that to run a full node a regular user required to install MySQL server which is undesirable from his point of view. Thus Node need its own portable database with Ledgers in binary and the blockchain state only, all the rest is useless. Explorer needs to have all the "unpacked" data.
+
+# Specification
+
+# Node
+
+When node starts up, it needs to load a last Ledger and blockchain state, thus only this data needs to be stored.  
+
+## Database  
+
+We decided to use **SqLite** as the portable RDBMS.  
+
+Tables: 
+
+The blockchain state is going to be stored in account table in serialized binary format (column raw).  
+An account contains **Address**, **Balances** and **Declaration**.  
+
+* account  
+
+    * address  
+
+    * raw  
+
+Ledgers are going to be stored in ledger table, serialized in binary format.  
+
+* ledger  
+
+    * height  
+
+    * timestamp  
+
+    * hash  
+
+    * merkle_root_hash  
+
+    * previous_hash  
+
+    * version  
+
+    * raw  
+ 
+ledgerstatechange stores state changes of the blockchain.  
+Ledger state change contains **Accounts with Balances** and **Declarations** (serialized)
+* ledgerstatechange  
+
+    * ledger_height  
+
+    * raw  
+
+tableledgerheight - is a service table to store blockchain state height  
+
+* tableledgerheight  
+
+    * table_name  
+
+    * processed_ledger_height  
+
+
+# Explorer
+
+Explorer needs to have all the "unpacked" blockchain into the relational model to be able easily query the data.
+
+## Database 
+
+We decided to use MySQL
+
+Tables :
+
+* blocks  
+
+* declarations  
+
+* hashlocks  
+
+* multisignatureaccounts  
+
+* multisignaturesigners  
+
+* secretrevelations  
+
+* tableledgerheights  
+
+* timelocks  
+
+* transactiondeclarations  
+
+* transactioninputoutputs  
+
+* transactionmessages  
+
+* transactions  
+
+* transactionsignatures  

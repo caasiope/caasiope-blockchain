@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Caasiope.Protocol.Types
@@ -12,6 +14,8 @@ namespace Caasiope.Protocol.Types
         public static readonly Currency LTC = FromSymbol("LTC");
         public static readonly Currency ETH = FromSymbol("ETH");
         public static readonly Currency CAS = FromSymbol("CAS");
+        public static readonly Currency DOGE = FromSymbol("DOG");
+        public static readonly Currency DASH = FromSymbol("DSH");
 
         private readonly short value;
 
@@ -100,6 +104,36 @@ namespace Caasiope.Protocol.Types
         public static bool operator != (Currency a, Currency b)
         {
             return !(a == b);
+        }
+
+        public static int Compare(Currency x, Currency y)
+        {
+            if (x.value == y.value)
+                return 0;
+            else if (x.value > y.value)
+                return 1;
+            return -1;
+        }
+    }
+
+    public class CurrencyComparer : IComparer<Currency>
+    {
+        public int Compare(Currency x, Currency y)
+        {
+            return Currency.Compare(x, y);
+        }
+    }
+
+    // version < cip#0001 : immutable state
+    public class CurrencyComparer1 : IComparer<Currency>
+    {
+        public int Compare(Currency x, Currency y)
+        {
+            if (x.GetHashCode() == y.GetHashCode())
+                return 0;
+            else if (x.GetHashCode() > y.GetHashCode())
+                return 1;
+            return -1;
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Caasiope.Database.Managers
     public class SqlTransactionManager
     {
         private readonly AutoResetEvent trigger;
-        private readonly ConcurrentQueue<SqlTransaction> queue = new ConcurrentQueue<SqlTransaction>();
+        private readonly ConcurrentQueue<Transaction> queue = new ConcurrentQueue<Transaction>();
         private readonly RepositoryManager repositories;
         private readonly ILogger logger;
 
@@ -19,7 +19,7 @@ namespace Caasiope.Database.Managers
         }
 
         // set transaction to be processed later
-        public void Save(SqlTransaction transaction)
+        public void Save(Transaction transaction)
         {
             queue.Enqueue(transaction);
             trigger.Set();
@@ -37,7 +37,7 @@ namespace Caasiope.Database.Managers
         }
 
         // synchronously executes the sql transaction
-        public void ExecuteTransaction(SqlTransaction transaction)
+        public void ExecuteTransaction(Transaction transaction)
         {
             transaction.Initialize(logger);
             transaction.Save(repositories);

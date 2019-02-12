@@ -38,11 +38,13 @@ namespace Caasiope.UnitTest
                 Assert.IsTrue(context.TryCreateNextLedger());
 
                 // get account updated
-                Assert.IsTrue(context.LiveService.AccountManager.TryGetAccount(receiver.Account.Address.Encoded, out var account));
+                Assert.IsTrue(context.TryGetAccount(receiver.Address.Encoded, out var account));
                 Assert.IsTrue(account.Balances.First(b => b.Currency.Equals(Currency.BTC)).Amount == 10);
             }
         }
 
+
+        // TODO move to explorer
         [TestMethod]
         public void LedgerTransformationTestMerkleHash()
         {
@@ -81,16 +83,21 @@ namespace Caasiope.UnitTest
                 var signed5 = Transfer(sender, timeLock.Address, Currency.BTC, 10, null, null, new List<TxDeclaration>() {new TimeLock(777)});
                 context.SendTransaction(signed5);
 
-
                 Assert.IsTrue(context.TryCreateNextLedger());
 
                 context.DataTransformationService.WaitTransformationCompleted();
 
-                var last = context.LedgerService.LedgerManager.GetMerkleRoot();
+                var last = context.LedgerService.LedgerManager.GetMerkleRootHash();
 
+                Assert.Fail();
+                /*
                 var fromDb = context.DatabaseService.ReadDatabaseManager.GetLastLedger();
 
-                Assert.IsTrue(last.Hash.Equals(fromDb.Ledger.MerkleHash));
+                if(fromDb.GetHeight() != context.LedgerService.LedgerManager.LastLedger.GetHeight())
+                    Assert.Inconclusive();
+
+                Assert.IsTrue(last.Equals(fromDb.Ledger.MerkleHash));
+                */
             }
         }
     }

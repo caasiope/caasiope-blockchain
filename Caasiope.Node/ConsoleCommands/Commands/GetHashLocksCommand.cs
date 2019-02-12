@@ -8,7 +8,9 @@ namespace Caasiope.Node.ConsoleCommands.Commands
     {
         protected override void ExecuteCommand(string[] args)
         {
-            var results = LiveService.HashLockManager.GetHashLocks().ToList();
+            var results = LiveService.AccountManager.GetAccounts().Values
+                .Where(account => account.Address.Type == AddressType.HashLock && account.Declaration != null)
+                .Select(account => (HashLock) account.Declaration).ToList();
 
             Console.WriteLine($"Number of HashLocks : {results.Count}");
 

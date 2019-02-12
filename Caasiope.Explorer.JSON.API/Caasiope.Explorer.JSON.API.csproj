@@ -30,22 +30,44 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BlockchainExplorerApi.cs" />
+    <Compile Include="Converters\DeclarationConverter.cs" />
+    <Compile Include="Converters\JsonConverter.cs" />
+    <Compile Include="Converters\TopicConverter.cs" />
+    <Compile Include="Internals\Ledger.cs" />
     <Compile Include="Internals\HashLock.cs" />
     <Compile Include="Internals\MultiSignature.cs" />
+    <Compile Include="Internals\Order.cs" />
     <Compile Include="Internals\SecretRevelation.cs" />
     <Compile Include="Internals\Signature.cs" />
     <Compile Include="Internals\TimeLock.cs" />
+    <Compile Include="Internals\TransactionHeader.cs" />
     <Compile Include="Internals\TxDeclaration.cs" />
     <Compile Include="Internals\TxInputOutput.cs" />
+    <Compile Include="Internals\VendingMachine.cs" />
+    <Compile Include="NotificationHelper.cs" />
+    <Compile Include="Notifications\AddressNotification.cs" />
+    <Compile Include="Notifications\ConfirmationNotification.cs" />
+    <Compile Include="Notifications\FundsNotification.cs" />
+    <Compile Include="Notifications\LedgerNotification.cs" />
+    <Compile Include="Notifications\OrderBookNotification.cs" />
+    <Compile Include="Requests\GetAccountRequest.cs" />
+    <Compile Include="Requests\GetLatestLedgersRequest.cs" />
+    <Compile Include="Requests\GetLedgerRequest.cs" />
+    <Compile Include="Requests\GetOrderBookRequest.cs" />
+    <Compile Include="Requests\SubscribeRequest.cs" />
+    <Compile Include="Responses\GetAccountResponse.cs" />
+    <Compile Include="Responses\GetLatestLedgersResponse.cs" />
+    <Compile Include="Responses\GetLedgerResponse.cs" />
+    <Compile Include="Responses\GetOrderBookResponse.cs" />
+    <Compile Include="Responses\SubscribeResponse.cs" />
     <Compile Include="TransactionConverter.cs" />
     <Compile Include="Internals\Transaction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -62,7 +84,6 @@
     <Compile Include="Responses\GetTransactionResponse.cs" />
     <Compile Include="Responses\SendTransactionResponse.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\helios-common\Helios.Common\Helios.JSON\Helios.JSON.csproj">
       <Project>{B6468947-630D-4EE1-AACD-C8BB1E4BD935}</Project>

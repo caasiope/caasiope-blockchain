@@ -6,20 +6,68 @@ using HashLib;
 
 namespace Caasiope.Protocol.Types
 {
-	[DebuggerDisplay("Address = {Address.Encoded}")]
+    // TODO this should be a wrapper
+    public class MutableAccount : Account
+    {
+        public MutableAccount(Address address, long current) : base(address, current, true)
+        {
+        }
+
+        // TODO make it static method with explicit name
+        public MutableAccount(Account account, long current) : base(account.Address, current, account.Balances, account.Declaration)
+        {
+        }
+
+        public MutableAccount SetBalance(AccountBalance balance)
+        {
+            balances[balance.Currency] = balance;
+            return this;
+        }
+
+        public new MutableAccount SetBalances(IEnumerable<AccountBalance> balances)
+        {
+            base.SetBalances(balances);
+            return this;
+        }
+
+        public MutableAccount SetDeclaration(TxAddressDeclaration declaration)
+        {
+            Declaration = declaration;
+            return this;
+        }
+
+        public Account Finalize()
+        {
+            return this;
+        }
+    }
+
+    // this account should be immutable
+    [DebuggerDisplay("Address = {Address.Encoded}")]
     public class Account
     {
         public readonly Address Address;
         public IEnumerable<AccountBalance> Balances => balances.Values;
+        public readonly long CurrentLedger;
+        public readonly bool IsNew;
+        public TxAddressDeclaration Declaration { get; protected set; }
 
-        private readonly Dictionary<Currency, AccountBalance> balances = new Dictionary<Currency, AccountBalance>();
+        protected readonly SortedDictionary<Currency, AccountBalance> balances = new SortedDictionary<Currency, AccountBalance>(new CurrencyComparer());
 
-        private Account(Address address)
+        protected Account(Address address, long current, bool isNew = false)
         {
             Address = address;
+            CurrentLedger = current;
+            IsNew = isNew;
         }
 
-        private Account(Address address, List<AccountBalance> balances) : this(address)
+        public Account(Address address, long current, IEnumerable<AccountBalance> balances, TxAddressDeclaration declaration = null) : this(address, current)
+        {
+            Declaration = declaration;
+            SetBalances(balances);
+        }
+
+        protected void SetBalances(IEnumerable<AccountBalance> balances)
         {
             foreach (var balance in balances)
             {
@@ -27,65 +75,12 @@ namespace Caasiope.Protocol.Types
             }
         }
 
-        public AccountHash GetHash()
+        public Amount GetBalance(Currency currency)
         {
-            var sorted = SortBalances(Balances);
-            return GetHash(sorted);
-        }
+            if (balances.TryGetValue(currency, out var balance))
+                return balance.Amount;
 
-        private static SortedList<int, AccountBalance> SortBalances(IEnumerable<AccountBalance> balances)
-        {
-            var list = new SortedList<int, AccountBalance>();
-            foreach (var balance in balances)
-            {
-                list.Add(balance.Currency.GetHashCode(), balance);
-            }
-            return list;
-        }
-
-        public static Account FromAddress(Address address)
-        {
-            return new Account(address);
-        }
-
-        public static bool operator ==(Account a, Account b)
-        {
-            return a.Address == b.Address;
-        }
-
-        public static bool operator !=(Account a, Account b)
-        {
-            return !(a == b);
-        }
-
-        public Account Clone()
-        {
-            return new Account(Address, Balances.Select(b => new AccountBalance((short)b.Currency, (long)b.Amount)).ToList());
-        }
-
-        private AccountHash GetHash(SortedList<int, AccountBalance> balances)
-        {
-            using (var stream = new ByteStream())
-            {
-                stream.Write(Address);
-                stream.Write(balances.Values.ToList(), stream.Write);
-
-                var message = stream.GetBytes();
-
-                var hasher = HashFactory.Crypto.SHA3.CreateKeccak256();
-                var hash = hasher.ComputeBytes(message).GetBytes();
-                return new AccountHash(hash);
-            }
-        }
-
-        public void AddBalance(AccountBalance balance)
-        {
-            balances.Add(balance.Currency, balance);
-        }
-
-        public void RemoveBalance(Currency currency)
-        {
-            balances.Remove(currency);
+            return 0;
         }
     }
 

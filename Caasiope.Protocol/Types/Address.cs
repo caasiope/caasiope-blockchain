@@ -11,6 +11,7 @@ namespace Caasiope.Protocol.Types
         MultiSignatureECDSA = 0x2,
         HashLock = 0x3,
         TimeLock = 0x4,
+        VendingMachine = 0x5,
     }
 
     [DebuggerDisplay("{Encoded}")]

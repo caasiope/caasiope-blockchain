@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using Caasiope.JSON.Helpers;
 using Caasiope.Log;
 using Caasiope.Node.Connections;
 using Caasiope.P2P;
+using Caasiope.Protocol.Types;
 using Helios.Common.Concepts.Services;
 using Helios.Common.Extensions;
 using Helios.Common.Logs;
@@ -55,6 +57,7 @@ namespace Caasiope.Node.Services
                 Injector.Inject(dispatcher);
             }
 
+            LedgerService.LedgerManager.SubscribeOnNewLedger(BroadcastNewLedger);
             connection.Initialize(Logger);
             connection.OnConnected(OnSessionConnected);
         }
@@ -86,6 +89,14 @@ namespace Caasiope.Node.Services
                 Logger.Log("ConnectionService ex:", e);
             }
         }
+
+        private void BroadcastNewLedger(SignedLedger signedLedger)
+        {
+            var message = NotificationHelper.CreateSignedNewLedgerNotification(signedLedger);
+            // broadcast the hash of the new ledger with the signature.
+            BlockchainChannel.Broadcast(message);
+            Logger.Log("Broadcast Signed New Ledger");
+        } 
 
         protected override void OnStart()
         {

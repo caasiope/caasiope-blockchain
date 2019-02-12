@@ -66,7 +66,8 @@ namespace Helios.JSON
 
 		protected MessageWrapper(JsonMessage request)
 		{
-			ClientRequestID = Guid.NewGuid().ToString("N");
+            if(!(request is Notification))
+			    ClientRequestID = Guid.NewGuid().ToString("N");
 			Type = request.GetType().Name;
 			Data = request;
 		}
@@ -77,8 +78,13 @@ namespace Helios.JSON
 			ClientRequestID = crid;
 			Type = type;
 			Data = request;
-		}
-	}
+	    }
+
+	    public T GetData<T>() where T : JsonMessage
+	    {
+	        return (T)Data;
+	    }
+    }
 
     public enum ResultCode : byte
     {

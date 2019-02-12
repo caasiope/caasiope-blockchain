@@ -10,25 +10,26 @@ namespace Caasiope.Node.Managers
         public int Quorum { get; private set; }
         public int Total => validators.Count;
 
-        private Dictionary<PublicKey, Validator> validators;
+        private HashSet<PublicKey> validators;
 
         public void Initialize(List<PublicKey> list, int quorum)
         {
-            Debug.Assert(quorum > 0);
-            Debug.Assert(quorum <= list.Count); // Quorum cannot be bigger than current number of validators, right?
+            Debug.Assert(!list.GroupBy(x => x).Where(g => g.Count() > 1).Select(y => y.Key).Any(), "Cannot have duplicates in validator list"); // No duplicates
+            Debug.Assert(quorum > 0, "Quorum must be more than 0");
+            Debug.Assert(quorum <= list.Count, "Quorum must be less or equal to the number of validators");
 
-            validators = list.ToDictionary(p => p, v => new Validator(v));
+            validators = new HashSet<PublicKey>(list);
             Quorum = quorum;
         }
 
-        public IEnumerable<Validator> GetValidators()
+        public HashSet<PublicKey> GetValidators()
         {
-            return validators.Values;
+            return validators;
         }
 
         public bool IsExist(PublicKey key)
         {
-            return validators.ContainsKey(key);
+            return validators.Contains(key);
         }
     }
 }

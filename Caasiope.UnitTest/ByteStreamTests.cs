@@ -74,7 +74,7 @@ namespace Caasiope.UnitTest
             var secret = Secret.GenerateSecret();
             var declarations = new List<TxDeclaration>()
             {
-                new MultiSignature(new []{account1.Account.Address, account2.Account.Address}, 2),
+                new MultiSignature(new []{account1.Address, account2.Address}, 2),
                 new HashLock(secret.ComputeSecretHash(SecretHashType.SHA3)),
                 new TimeLock(123),
                 new SecretRevelation(secret)
@@ -104,7 +104,7 @@ namespace Caasiope.UnitTest
         {
             var account1 = PrivateKeyNotWallet.FromBase64("AKiWI3xivi2tsMz1Sh/v+0WrJaM60t/3h/qcEfu6r1pH");
             var block = Block.CreateBlock(1, new List<SignedTransaction> { CreateSignedTransaction() });
-            var merkle = new LedgerMerkleRoot(new List<Account>(), new List<TxDeclaration>(), new FakeLogger()).Hash;
+            var merkle = new LedgerMerkleRoot(new List<Account>(), new List<TxDeclaration>(), new FakeLogger(), new Hasher()).Hash;
             var ledger = new Ledger(new LedgerLight(1, DateTime.UtcNow.ToUnixTimestamp(), new LedgerHash(Hash256.Zero.Bytes), new ProtocolVersion(0x1)), block, merkle);
             var signed = new SignedLedger(ledger);
             var hash = signed.Hash;

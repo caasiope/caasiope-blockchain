@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Web;
 using Caasiope.JSON;
 using Caasiope.Node.Connections;
 using Caasiope.Node.Services;
 using Caasiope.P2P;
 using Caasiope.Protocol.Types;
 using Helios.Common.Configurations;
-using P2PConnection = Caasiope.Node.Connections.P2PConnection;
 
 namespace Caasiope.Node
 {
@@ -30,6 +33,8 @@ namespace Caasiope.Node
 
         public IDatabaseService CreateDatabaseService()
         {
+            var path = NodeConfiguration.GetDataPath();
+            AppDomain.CurrentDomain.SetData("DataDirectory", path);
             return new DatabaseService();
         }
 
@@ -38,7 +43,7 @@ namespace Caasiope.Node
             var nodes = new UrlConfiguration(NodeConfiguration.GetPath("validators.txt")).Lines;
             var quorum = int.Parse(nodes[0]);
             var validators = new List<PublicKey>();
-            for (int i = 1; i < nodes.Count; i++)
+            for (var i = 1; i < nodes.Count; i++)
             {
                 validators.Add(new PublicKey(Convert.FromBase64String(nodes[i])));
             }
@@ -61,7 +66,7 @@ namespace Caasiope.Node
 
         public IConnectionService CreateConnectionService()
         {
-	        var config = NodeBuilder.BuildConfiguration(NodeConfiguration.GetPath("node_server.txt"), NodeConfiguration.GetPath("node_id.pem"));
+	        var config = NodeBuilder.BuildConfiguration(NodeConfiguration.GetPath("node_server.txt"), NodeConfiguration.GetCertificatesPath(), "node_id.pem");
 	        var nodes = P2PServerConfiguration.ToIPEndpoints(new UrlConfiguration(NodeConfiguration.GetPath("nodes.txt")).Lines);
 	        var connection = new Connections.P2PConnection(config, nodes, 5, 20);
 
